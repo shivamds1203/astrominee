@@ -1,9 +1,15 @@
 "use client";
 
-import React, { useRef, useState, useEffect, useMemo, useCallback, memo } from "react";
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
+import React, { useRef, useMemo } from "react";
+import {
+    motion,
+    useScroll,
+    useTransform,
+    useSpring,
+    AnimatePresence
+} from "framer-motion";
 
-// ─── Planet Data ────────────────────────────────────────────────────────────────
+// --- Constants & Data ---
 const PLANETS = [
     {
         id: "sun",
@@ -23,7 +29,6 @@ const PLANETS = [
             "Strong Sun gives confidence and authority.",
             "Weak Sun may cause low self-esteem or direction issues.",
         ],
-        animType: "radiate",
     },
     {
         id: "moon",
@@ -43,7 +48,6 @@ const PLANETS = [
             "Strong Moon gives calm mind and emotional intelligence.",
             "Weak Moon may create anxiety or mood swings.",
         ],
-        animType: "breathe",
     },
     {
         id: "mars",
@@ -63,7 +67,6 @@ const PLANETS = [
             "Strong Mars gives leadership and bravery.",
             "Weak Mars may create anger or lack of motivation.",
         ],
-        animType: "pulse",
     },
     {
         id: "mercury",
@@ -83,7 +86,6 @@ const PLANETS = [
             "Strong Mercury gives sharp mind and business success.",
             "Weak Mercury may cause confusion or speech issues.",
         ],
-        animType: "orbit",
     },
     {
         id: "jupiter",
@@ -103,7 +105,6 @@ const PLANETS = [
             "Strong Jupiter gives prosperity and wisdom.",
             "Weak Jupiter may reduce guidance or growth.",
         ],
-        animType: "expand",
     },
     {
         id: "venus",
@@ -123,7 +124,6 @@ const PLANETS = [
             "Strong Venus gives charm and wealth.",
             "Weak Venus may create relationship imbalance.",
         ],
-        animType: "sparkle",
     },
     {
         id: "saturn",
@@ -143,7 +143,6 @@ const PLANETS = [
             "Strong Saturn gives stability and success after effort.",
             "Weak Saturn may cause delays or struggles.",
         ],
-        animType: "ring",
         hasRings: true,
     },
     {
@@ -164,7 +163,6 @@ const PLANETS = [
             "Strong Rahu gives global success.",
             "Weak Rahu causes confusion or instability.",
         ],
-        animType: "smoke",
     },
     {
         id: "ketu",
@@ -184,173 +182,216 @@ const PLANETS = [
             "Strong Ketu gives intuition and moksha tendencies.",
             "Weak Ketu may create confusion or isolation.",
         ],
-        animType: "dissolve",
     },
 ];
 
-// ─── Memoized star positions (never recalculate on re-render) ─────────────────
-const STAR_DATA = Array.from({ length: 50 }, (_, i) => ({
-    id: i,
-    size: Math.random() > 0.9 ? 2 : 1,
-    left: `${(Math.random() * 100).toFixed(2)}%`,
-    top: `${(Math.random() * 100).toFixed(2)}%`,
-    opacity: (Math.random() * 0.7 + 0.1).toFixed(2),
-    duration: `${(3 + Math.random() * 5).toFixed(1)}s`,
-    delay: `${(Math.random() * 3).toFixed(1)}s`,
-}));
+// --- Subcomponents ---
 
-// ─── Star Field ──────────────────────────────────────────────────────────────────
-const StarField = ({ planet }: { planet: typeof PLANETS[0] }) => {
-    return (
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
-            <div className="absolute inset-0" style={{ background: "#020408" }} />
-            <div
-                className="absolute inset-0 nava-nebula"
-                style={{
-                    background: `radial-gradient(ellipse 70% 60% at 50% 50%, ${planet.aura} 0%, transparent 70%)`,
-                    opacity: 0.3
-                }}
-            />
-            {STAR_DATA.map((s) => (
-                <div
-                    key={s.id}
-                    className="absolute rounded-full bg-white nava-twinkle"
-                    style={{
-                        width: s.size,
-                        height: s.size,
-                        left: s.left,
-                        top: s.top,
-                        opacity: 0.5,
-                    }}
-                />
-            ))}
-        </div>
+const PlanetSection = ({ planet, index, scrollYProgress, total }: any) => {
+    // Calculate relative progress for this specific planet
+    // Each planet gets a range of 1/total of the final scroll
+    const start = index / total;
+    const end = (index + 1) / total;
+
+    // Custom transform range for smooth entry and exit
+    // We want the planet to be fully active at the midpoint of its window
+    const opacity = useTransform(scrollYProgress,
+        [start - 0.05, start, end - 0.05, end],
+        [0, 1, 1, 0]
     );
-};
 
-// ─── Planet Orb ──────────────────────────────────────────────────────────────────
-const PlanetOrb = ({ planet, isActive }: { planet: typeof PLANETS[0]; isActive: boolean }) => {
+    const scale = useTransform(scrollYProgress,
+        [start - 0.08, start, end - 0.05, end + 0.02],
+        [0.7, 1, 1, 1.3]
+    );
+
+    const xOffset = useTransform(scrollYProgress,
+        [start, start + 0.02, end - 0.02, end],
+        [100, 0, 0, -100]
+    );
+
+    const rotateY = useTransform(scrollYProgress,
+        [start, end],
+        [45, -45]
+    );
+
+    // Parallax for the zodiac symbol
+    const zodiacY = useTransform(scrollYProgress, [start, end], [-50, 50]);
+    const zodiacOpacity = useTransform(scrollYProgress, [start, start + 0.02, end - 0.02, end], [0, 0.05, 0.05, 0]);
+
     return (
-        <div
-            className="flex items-center justify-center relative w-[300px] h-[300px]"
-            style={{ zIndex: 60 }}
+        <motion.div
+            style={{ opacity, scale, display: useTransform(opacity, (v) => v === 0 ? "none" : "flex") }}
+            className="absolute inset-0 z-20 flex flex-col lg:flex-row items-center justify-center gap-10 lg:gap-24 px-6 pointer-events-none"
         >
-            <div
-                className="rounded-full flex items-center justify-center"
-                style={{
-                    width: "220px",
-                    height: "220px",
-                    background: planet.bgGradient || planet.color,
-                    boxShadow: `0 0 50px ${planet.glow}`,
-                    border: "2px solid rgba(255,255,255,0.1)",
-                    zIndex: 61
-                }}
-            >
-                <span className="text-4xl font-bold text-white/20">{planet.symbol}</span>
-            </div>
-            <div
-                className="absolute font-bold pointer-events-none text-white/5"
-                style={{ fontSize: "200px", zIndex: 59 }}
+            {/* 3D Zodiac Background */}
+            <motion.div
+                style={{ y: zodiacY, opacity: zodiacOpacity }}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[40vh] font-black pointer-events-none z-0"
             >
                 {planet.zodiac}
-            </div>
-        </div>
+            </motion.div>
+
+            {/* Planet sphere */}
+            <motion.div
+                style={{ rotateY, x: xOffset }}
+                className="relative w-[280px] h-[280px] md:w-[400px] md:h-[400px] flex-shrink-0 z-10 perspective-[1000px]"
+            >
+                <div
+                    className="w-full h-full rounded-full shadow-2xl relative overflow-hidden"
+                    style={{
+                        background: planet.bgGradient,
+                        boxShadow: `0 0 80px ${planet.glow}40, inset -20px -20px 40px rgba(0,0,0,0.5), inset 10px 10px 20px rgba(255,255,255,0.2)`
+                    }}
+                >
+                    {/* Surface shine */}
+                    <div className="absolute top-[10%] left-[15%] w-[30%] h-[20%] bg-white/10 rounded-full blur-xl" />
+
+                    {/* Saturn Rings */}
+                    {planet.hasRings && (
+                        <div className="absolute inset-0 flex items-center justify-center scale-[1.4] rotateX-[75deg] pointer-events-none">
+                            <div
+                                className="w-full h-full rounded-full border-[10px] border-white/20"
+                                style={{ borderColor: `${planet.color}40`, boxShadow: `0 0 30px ${planet.color}20` }}
+                            />
+                        </div>
+                    )}
+
+                    {/* Animated Symbol */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                        <span className="text-[120px] md:text-[200px] font-bold animate-pulse">{planet.symbol}</span>
+                    </div>
+                </div>
+
+                {/* Aura Floor */}
+                <div
+                    className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[120%] h-[40px] rounded-[100%] blur-3xl"
+                    style={{ background: planet.aura }}
+                />
+            </motion.div>
+
+            {/* Info Card */}
+            <motion.div
+                style={{
+                    x: useTransform(xOffset, (v) => -Number(v)),
+                    background: 'rgba(8,12,24,0.8)',
+                    backdropFilter: 'blur(16px)'
+                }}
+                className="w-full max-w-md p-8 rounded-3xl border border-white/10 glass shadow-2xl relative z-20 pointer-events-auto overflow-hidden"
+            >
+                {/* Corner Decorative Glow */}
+                <div
+                    className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20"
+                    style={{ background: planet.color }}
+                />
+
+                <div className="relative z-10">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div
+                            className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold"
+                            style={{ background: `${planet.color}20`, color: planet.color, border: `1px solid ${planet.color}40` }}
+                        >
+                            {planet.symbol}
+                        </div>
+                        <div>
+                            <h3 className="text-3xl font-black text-white tracking-tight">{planet.name}</h3>
+                            <p className="text-sm font-bold uppercase tracking-widest opacity-60" style={{ color: planet.color }}>{planet.sanskrit}</p>
+                        </div>
+                    </div>
+
+                    <div
+                        className="inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-6"
+                        style={{ background: `${planet.color}15`, color: planet.color, border: `1px solid ${planet.color}30` }}
+                    >
+                        {planet.energy}
+                    </div>
+
+                    <div className="space-y-4">
+                        {planet.description.map((line: string, i: number) => (
+                            <div key={i} className="flex gap-3 items-start">
+                                <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: planet.color }} />
+                                <p className="text-sm text-gray-300 leading-relaxed font-medium">{line}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </motion.div>
+        </motion.div>
     );
 };
 
-// ─── Info Card ────────────────────────────────────────────────────────────────────
-const InfoCard = ({ planet }: { planet: typeof PLANETS[0] }) => (
-    <div
-        className="rounded-3xl p-8 w-full max-w-[400px] border border-white/10"
-        style={{
-            background: "rgba(10,12,25,0.98)",
-            boxShadow: `0 20px 50px rgba(0,0,0,0.5), 0 0 20px ${planet.color}20`,
-            zIndex: 60
-        }}
-    >
-        <div className="mb-6">
-            <h2 className="text-4xl font-black text-white mb-1">{planet.name}</h2>
-            <p className="text-sm font-bold uppercase tracking-widest" style={{ color: planet.color }}>{planet.sanskrit}</p>
-        </div>
-        <div className="space-y-4">
-            {planet.description.map((line, i) => (
-                <div key={i} className="flex gap-3 text-gray-300 text-sm leading-relaxed">
-                    <span className="mt-2 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: planet.color }} />
-                    <p>{line}</p>
-                </div>
-            ))}
-        </div>
-    </div>
-);
+// --- Main Layout ---
 
-// ─── Progress Dots ────────────────────────────────────────────────────────────────
-const ProgressDots = ({ active, total, onDotClick }: { active: number; total: number; onDotClick: (i: number) => void }) => (
-    <div className="fixed right-6 top-1/2 -translate-y-1/2 z-[100] flex flex-col gap-4">
-        {Array.from({ length: total }, (_, i) => (
-            <button
-                key={i}
-                onClick={() => onDotClick(i)}
-                className="w-2.5 h-2.5 rounded-full transition-all duration-300"
-                style={{
-                    background: i === active ? PLANETS[i].color : "rgba(255,255,255,0.2)",
-                    boxShadow: i === active ? `0 0 10px ${PLANETS[i].color}` : "none",
-                    transform: i === active ? "scale(1.5)" : "scale(1)"
-                }}
-            />
-        ))}
-    </div>
-);
-
-// ─── Main Component ───────────────────────────────────────────────────────────────
 export const NavagrahaScroll: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [activePlanet, setActivePlanet] = useState(0);
-
     const { scrollYProgress } = useScroll({
         target: containerRef,
-        offset: ["start start", "end end"],
+        offset: ["start start", "end end"]
     });
 
-    useMotionValueEvent(scrollYProgress, "change", (v) => {
-        const idx = Math.min(Math.floor(v * PLANETS.length), PLANETS.length - 1);
-        if (idx !== activePlanet) setActivePlanet(idx);
+    const smoothProgress = useSpring(scrollYProgress, {
+        stiffness: 100,
+        damping: 30,
+        restDelta: 0.001
     });
-
-    const scrollToPlanet = (i: number) => {
-        const container = containerRef.current;
-        if (!container) return;
-        const target = (i / PLANETS.length) * container.scrollHeight + container.offsetTop;
-        window.scrollTo({ top: target, behavior: "smooth" });
-    };
-
-    const planet = PLANETS[activePlanet];
 
     return (
-        <div ref={containerRef} className="relative" style={{ height: "1200vh" }}>
-            {/* Sticky Viewport */}
-            <div className="sticky top-0 h-screen w-full bg-black overflow-hidden" style={{ zIndex: 10 }}>
+        <div ref={containerRef} className="relative z-0" style={{ height: "1000vh" }}>
+            {/* Sticky Background & Base */}
+            <div className="sticky top-0 h-screen w-full bg-[#020408] overflow-hidden flex items-center justify-center">
 
-                {/* DEBUG BANNER - FORCING VISIBILITY */}
-                <div className="absolute top-0 left-0 w-full bg-red-600 text-white p-4 font-bold text-center z-[200]">
-                    PLANET VISIBILITY DEBUG: Rendering {planet?.name || "MISSING"}
+                {/* Dynamic Background Grid/Stars */}
+                <div className="absolute inset-0 opacity-20 pointer-events-none">
+                    <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(#ffffff20 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
                 </div>
 
-                <StarField planet={planet} />
-
-                <ProgressDots active={activePlanet} total={PLANETS.length} onDotClick={scrollToPlanet} />
-
-                {/* Content Layer */}
-                <div className="relative z-50 h-full w-full flex flex-col lg:flex-row items-center justify-center gap-12 px-6">
-                    <PlanetOrb planet={planet} isActive={true} />
-                    <InfoCard planet={planet} />
+                {/* Global Progress Indicators */}
+                <div className="fixed left-6 top-1/2 -translate-y-1/2 flex flex-col gap-6 z-50">
+                    {PLANETS.map((p, i) => {
+                        const isActive = useTransform(smoothProgress,
+                            [i / PLANETS.length, (i + 1) / PLANETS.length],
+                            [1, 0]
+                        );
+                        return (
+                            <div key={p.id} className="relative flex items-center group cursor-pointer">
+                                <motion.div
+                                    className="w-1 h-8 rounded-full bg-white/10"
+                                    style={{
+                                        background: useTransform(smoothProgress,
+                                            [(i - 0.5) / PLANETS.length, i / PLANETS.length, (i + 0.5) / PLANETS.length],
+                                            ["rgba(255,255,255,0.1)", p.color, "rgba(255,255,255,0.1)"]
+                                        )
+                                    }}
+                                />
+                                <span className="absolute left-6 text-[10px] font-bold text-white/40 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {p.name}
+                                </span>
+                            </div>
+                        );
+                    })}
                 </div>
 
-                {/* Scroll Hint */}
-                {activePlanet === 0 && (
-                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/30 text-xs tracking-widest uppercase z-50">
-                        Scroll to explore
-                    </div>
-                )}
+                {/* Planet Rendering Loop */}
+                <div className="relative w-full h-full max-w-7xl mx-auto flex items-center justify-center">
+                    {PLANETS.map((planet, index) => (
+                        <PlanetSection
+                            key={planet.id}
+                            planet={planet}
+                            index={index}
+                            scrollYProgress={smoothProgress}
+                            total={PLANETS.length}
+                        />
+                    ))}
+                </div>
+
+                {/* Bottom Page Hint */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-[10px] text-white/20 whitespace-nowrap"
+                >
+                    Explore Celestial Forces
+                </motion.div>
             </div>
         </div>
     );
