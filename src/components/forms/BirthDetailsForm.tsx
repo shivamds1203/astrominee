@@ -98,38 +98,44 @@ export default function BirthDetailsForm() {
         setLoading(true);
 
         try {
-            // Parse the dates
             const [year, month, date] = formData.dateOfBirth.split("-").map(Number);
             const [hours, minutes] = formData.timeOfBirth.split(":").map(Number);
 
-            const res = await fetch("/api/astrology", {
+            // Call FreeAstrologyAPI directly — skips Next.js server round-trip for speed
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 15000); // 15s hard timeout
+
+            const res = await fetch("https://json.freeastrologyapi.com/planets", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-api-key": "rj7tHBK4AL7XNY7CtEFsQ11Xxri3R2Hq8HZ4GVcx",
+                },
                 body: JSON.stringify({
-                    year,
-                    month,
-                    date,
-                    hours,
-                    minutes,
+                    year, month, date, hours, minutes,
                     seconds: 0,
                     latitude: parseFloat(formData.lat),
                     longitude: parseFloat(formData.lon),
-                    timezone: 5.5, // Default IST for MVP, can be calculated via tz-lookup based on lat/lon
-                })
+                    timezone: 5.5,
+                }),
+                signal: controller.signal,
             });
+            clearTimeout(timeout);
 
-            const data = await res.json();
-            if (!data.success) throw new Error(data.error);
+            if (!res.ok) throw new Error(`API Error: ${res.statusText}`);
+            const planetsData = await res.json();
 
-            // Storing response in session storage
-            sessionStorage.setItem("chartData", JSON.stringify(data.data));
+            // Store & navigate — dashboard loads instantly from sessionStorage
+            sessionStorage.setItem("chartData", JSON.stringify(planetsData));
             sessionStorage.setItem("userData", JSON.stringify(formData));
-
             router.push("/dashboard");
 
         } catch (err: any) {
-            setErrorMsg(err.message || "Something went wrong fetching chart data");
-        } finally {
+            if (err.name === "AbortError") {
+                setErrorMsg("Request timed out. Please try again.");
+            } else {
+                setErrorMsg(err.message || "Something went wrong fetching chart data");
+            }
             setLoading(false);
         }
     };

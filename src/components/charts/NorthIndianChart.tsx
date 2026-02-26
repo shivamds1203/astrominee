@@ -64,18 +64,18 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
 
     // Precise centers & sign label positions for all 12 houses in the North Indian layout
     const positions: Record<number, { cx: string; cy: string; signX: string; signY: string }> = {
-        1: { cx: "50%", cy: "22%", signX: "50%", signY: "40%" }, // Top center diamond
-        2: { cx: "25%", cy: "12%", signX: "37%", signY: "24%" }, // Top-left triangle
-        3: { cx: "12%", cy: "25%", signX: "24%", signY: "37%" }, // Left-top triangle
-        4: { cx: "25%", cy: "50%", signX: "44%", signY: "50%" }, // Left diamond
-        5: { cx: "12%", cy: "75%", signX: "24%", signY: "63%" }, // Left-bottom triangle
-        6: { cx: "25%", cy: "88%", signX: "37%", signY: "76%" }, // Bottom-left triangle
-        7: { cx: "50%", cy: "78%", signX: "50%", signY: "60%" }, // Bottom diamond
-        8: { cx: "75%", cy: "88%", signX: "63%", signY: "76%" }, // Bottom-right triangle
-        9: { cx: "88%", cy: "75%", signX: "76%", signY: "63%" }, // Right-bottom triangle
-        10: { cx: "75%", cy: "50%", signX: "56%", signY: "50%" }, // Right diamond
-        11: { cx: "88%", cy: "25%", signX: "76%", signY: "37%" }, // Right-top triangle
-        12: { cx: "75%", cy: "12%", signX: "63%", signY: "24%" }, // Top-right triangle
+        1: { cx: "50%", cy: "21%", signX: "50%", signY: "12%" }, // Top center diamond
+        2: { cx: "25%", cy: "12%", signX: "28%", signY: "17%" }, // Top-left triangle
+        3: { cx: "12%", cy: "25%", signX: "18%", signY: "28%" }, // Left-top triangle
+        4: { cx: "22%", cy: "50%", signX: "12%", signY: "50%" }, // Left diamond
+        5: { cx: "12%", cy: "75%", signX: "18%", signY: "72%" }, // Left-bottom triangle
+        6: { cx: "25%", cy: "88%", signX: "28%", signY: "83%" }, // Bottom-left triangle
+        7: { cx: "50%", cy: "79%", signX: "50%", signY: "88%" }, // Bottom diamond
+        8: { cx: "75%", cy: "88%", signX: "72%", signY: "83%" }, // Bottom-right triangle
+        9: { cx: "88%", cy: "75%", signX: "82%", signY: "72%" }, // Right-bottom triangle
+        10: { cx: "78%", cy: "50%", signX: "88%", signY: "50%" }, // Right diamond
+        11: { cx: "88%", cy: "25%", signX: "82%", signY: "28%" }, // Right-top triangle
+        12: { cx: "75%", cy: "12%", signX: "72%", signY: "17%" }, // Top-right triangle
     };
 
     const renderHouseContent = (houseNum: number) => {
