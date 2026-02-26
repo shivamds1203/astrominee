@@ -478,7 +478,6 @@ export const NavagrahaScroll: React.FC = () => {
     });
 
     useMotionValueEvent(scrollYProgress, "change", useCallback((v: number) => {
-        console.log("Navagraha Scroll Progress:", v);
         const idx = Math.min(Math.floor(v * PLANETS.length), PLANETS.length - 1);
         setActivePlanet((prev) => (prev === idx ? prev : idx));
     }, []));
