@@ -264,19 +264,30 @@ export default function BirthDetailsForm() {
                                 />
                             </div>
                             {showClock && (
-                                <div className="absolute bottom-[80px] left-0 md:left-1/2 md:-translate-x-1/2 z-50 p-6 rounded-3xl bg-[#0c1222]/95 backdrop-blur-2xl border border-white/10 shadow-[0_15px_50px_rgba(0,0,0,0.8)] flex flex-col items-center gap-5 min-w-[280px] max-h-[80vh] overflow-y-auto">
-                                    <PremiumClock
-                                        value={formData.timeOfBirth}
-                                        onChange={(ti) => setFormData({ ...formData, timeOfBirth: ti })}
-                                    />
-                                    {/* Confirm button — always visible */}
-                                    <button
-                                        type="button"
-                                        onClick={(e) => { e.stopPropagation(); setShowClock(false); }}
-                                        className="w-full bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500 hover:text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-all border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)] sticky bottom-0"
+                                <div
+                                    className="fixed inset-0 z-50 flex items-center justify-center"
+                                    onClick={() => setShowClock(false)}
+                                >
+                                    {/* Backdrop */}
+                                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                                    {/* Modal */}
+                                    <div
+                                        className="relative z-10 p-6 rounded-3xl bg-[#0c1222]/98 backdrop-blur-2xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.9)] flex flex-col items-center gap-5 w-[300px]"
+                                        onClick={(e) => e.stopPropagation()}
                                     >
-                                        Confirm Selection
-                                    </button>
+                                        <p className="text-xs font-bold tracking-[3px] uppercase text-indigo-400/70">Select Time of Birth</p>
+                                        <PremiumClock
+                                            value={formData.timeOfBirth}
+                                            onChange={(ti) => setFormData({ ...formData, timeOfBirth: ti })}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowClock(false)}
+                                            className="w-full bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all shadow-[0_0_20px_rgba(99,102,241,0.4)]"
+                                        >
+                                            ✓ Confirm Selection
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>
