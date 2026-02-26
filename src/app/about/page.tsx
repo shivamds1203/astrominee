@@ -30,7 +30,7 @@ export default function AboutPage() {
     };
 
     return (
-        <main className="min-h-screen relative overflow-hidden">
+        <main className="min-h-screen relative overflow-x-hidden">
             {/* ── Hero Header ── */}
             <section className="text-center pt-32 pb-20 px-6 relative z-10">
                 <ScrollReveal duration={0.8}>
