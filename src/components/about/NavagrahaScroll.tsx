@@ -188,120 +188,92 @@ const PLANETS = [
 // --- Subcomponents ---
 
 const PlanetSection = ({ planet, index, scrollYProgress, total }: any) => {
-    // Calculate relative progress for this specific planet
     // Each planet gets a range of 1/total of the final scroll
     const start = index / total;
     const end = (index + 1) / total;
 
-    // Custom transform range for smooth entry and exit
-    // We want the planet to be fully active at the midpoint of its window
+    // Use a simpler mapping to avoid any "none" display bugs
     const opacity = useTransform(scrollYProgress,
-        [start - 0.05, start, end - 0.05, end],
+        [start, start + 0.05, end - 0.05, end],
         [0, 1, 1, 0]
     );
 
     const scale = useTransform(scrollYProgress,
-        [start - 0.08, start, end - 0.05, end + 0.02],
-        [0.7, 1, 1, 1.3]
+        [start, start + 0.1, end - 0.1, end],
+        [0.8, 1, 1, 1.2]
     );
 
-    const xOffset = useTransform(scrollYProgress,
-        [start, start + 0.02, end - 0.02, end],
-        [100, 0, 0, -100]
-    );
-
-    const rotateY = useTransform(scrollYProgress,
-        [start, end],
-        [45, -45]
-    );
-
-    // Parallax for the zodiac symbol
-    const zodiacY = useTransform(scrollYProgress, [start, end], [-50, 50]);
-    const zodiacOpacity = useTransform(scrollYProgress, [start, start + 0.02, end - 0.02, end], [0, 0.05, 0.05, 0]);
+    const rotateY = useTransform(scrollYProgress, [start, end], [30, -30]);
 
     return (
         <motion.div
-            style={{ opacity, scale, display: useTransform(opacity, (v) => v === 0 ? "none" : "flex") }}
+            style={{ opacity, scale }}
             className="absolute inset-0 z-20 flex flex-col lg:flex-row items-center justify-center gap-10 lg:gap-24 px-6 pointer-events-none"
         >
             {/* 3D Zodiac Background */}
-            <motion.div
-                style={{ y: zodiacY, opacity: zodiacOpacity }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[40vh] font-black pointer-events-none z-0"
-            >
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[30vh] font-black pointer-events-none z-0 opacity-[0.03] text-white">
                 {planet.zodiac}
-            </motion.div>
+            </div>
 
             {/* Planet sphere */}
             <motion.div
-                style={{ rotateY, x: xOffset }}
-                className="relative w-[280px] h-[280px] md:w-[400px] md:h-[400px] flex-shrink-0 z-10 perspective-[1000px]"
+                style={{ rotateY }}
+                className="relative w-[280px] h-[280px] md:w-[400px] md:h-[400px] flex-shrink-0 z-10"
             >
                 <div
-                    className="w-full h-full rounded-full shadow-2xl relative overflow-hidden"
+                    className="w-full h-full rounded-full relative overflow-hidden ring-1 ring-white/10"
                     style={{
                         background: planet.bgGradient,
-                        boxShadow: `0 0 80px ${planet.glow}40, inset -20px -20px 40px rgba(0,0,0,0.5), inset 10px 10px 20px rgba(255,255,255,0.2)`
+                        boxShadow: `0 0 100px ${planet.glow}60, inset -20px -20px 60px rgba(0,0,0,0.7)`
                     }}
                 >
                     {/* Surface shine */}
-                    <div className="absolute top-[10%] left-[15%] w-[30%] h-[20%] bg-white/10 rounded-full blur-xl" />
+                    <div className="absolute top-[10%] left-[15%] w-[30%] h-[20%] bg-white/20 rounded-full blur-2xl" />
 
                     {/* Saturn Rings */}
                     {planet.hasRings && (
-                        <div className="absolute inset-0 flex items-center justify-center scale-[1.4] rotateX-[75deg] pointer-events-none">
+                        <div className="absolute inset-0 flex items-center justify-center scale-[1.35] rotate-[75deg] pointer-events-none">
                             <div
-                                className="w-full h-full rounded-full border-[10px] border-white/20"
-                                style={{ borderColor: `${planet.color}40`, boxShadow: `0 0 30px ${planet.color}20` }}
+                                className="w-full h-[15px] rounded-full border-2 border-white/30"
+                                style={{ background: `linear-gradient(to right, transparent, ${planet.color}40, transparent)` }}
                             />
                         </div>
                     )}
 
                     {/* Animated Symbol */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                        <span className="text-[120px] md:text-[200px] font-bold animate-pulse">{planet.symbol}</span>
+                        <span className="text-[120px] md:text-[200px] font-bold">{planet.symbol}</span>
                     </div>
                 </div>
 
                 {/* Aura Floor */}
                 <div
-                    className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[120%] h-[40px] rounded-[100%] blur-3xl"
-                    style={{ background: planet.aura }}
+                    className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-[140%] h-[60px] rounded-[100%] blur-[100px] opacity-40"
+                    style={{ background: planet.color }}
                 />
             </motion.div>
 
             {/* Info Card */}
-            <motion.div
-                style={{
-                    x: useTransform(xOffset, (v) => -Number(v)),
-                    background: 'rgba(8,12,24,0.8)',
-                    backdropFilter: 'blur(16px)'
-                }}
-                className="w-full max-w-md p-8 rounded-3xl border border-white/10 glass shadow-2xl relative z-20 pointer-events-auto overflow-hidden"
+            <div
+                className="w-full max-w-md p-8 rounded-[2.5rem] border border-white/10 bg-[#080c18]/90 backdrop-blur-3xl shadow-2xl relative z-20 pointer-events-auto"
             >
-                {/* Corner Decorative Glow */}
-                <div
-                    className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20"
-                    style={{ background: planet.color }}
-                />
-
                 <div className="relative z-10">
                     <div className="flex items-center gap-4 mb-6">
                         <div
-                            className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold"
-                            style={{ background: `${planet.color}20`, color: planet.color, border: `1px solid ${planet.color}40` }}
+                            className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl font-bold border border-white/10"
+                            style={{ background: `${planet.color}20`, color: planet.color }}
                         >
                             {planet.symbol}
                         </div>
                         <div>
-                            <h3 className="text-3xl font-black text-white tracking-tight">{planet.name}</h3>
-                            <p className="text-sm font-bold uppercase tracking-widest opacity-60" style={{ color: planet.color }}>{planet.sanskrit}</p>
+                            <h3 className="text-3xl font-black text-white tracking-tight leading-none mb-1">{planet.name}</h3>
+                            <p className="text-sm font-bold uppercase tracking-[0.2em]" style={{ color: planet.color }}>{planet.sanskrit}</p>
                         </div>
                     </div>
 
                     <div
-                        className="inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-6"
-                        style={{ background: `${planet.color}15`, color: planet.color, border: `1px solid ${planet.color}30` }}
+                        className="inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 border border-white/10"
+                        style={{ background: `${planet.color}10`, color: planet.color }}
                     >
                         {planet.energy}
                     </div>
@@ -309,13 +281,13 @@ const PlanetSection = ({ planet, index, scrollYProgress, total }: any) => {
                     <div className="space-y-4">
                         {planet.description.map((line: string, i: number) => (
                             <div key={i} className="flex gap-3 items-start">
-                                <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: planet.color }} />
+                                <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ background: planet.color }} />
                                 <p className="text-sm text-gray-300 leading-relaxed font-medium">{line}</p>
                             </div>
                         ))}
                     </div>
                 </div>
-            </motion.div>
+            </div>
         </motion.div>
     );
 };
@@ -338,7 +310,7 @@ export const NavagrahaScroll: React.FC = () => {
     return (
         <div ref={containerRef} className="relative z-0" style={{ height: "1000vh" }}>
             {/* Sticky Background & Base */}
-            <div className="sticky top-0 h-screen w-full bg-[#020408] overflow-hidden flex items-center justify-center">
+            <div className="sticky top-0 h-screen w-full bg-[#05070a] overflow-hidden flex items-center justify-center z-50">
 
                 {/* Dynamic Background Grid/Stars */}
                 <div className="absolute inset-0 opacity-20 pointer-events-none">
