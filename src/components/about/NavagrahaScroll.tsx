@@ -609,29 +609,28 @@ export const NavagrahaScroll: React.FC = () => {
 
                     {/* Planet counter */}
                     <div
-                        className="absolute top-6 left-1/2 -translate-x-1/2 z-20 text-xs font-bold tracking-[4px] uppercase"
-                        style={{ color: `${planet.color}90` }}
+                        className="absolute top-20 left-1/2 -translate-x-1/2 z-30 text-xs font-bold tracking-[4px] uppercase pointer-events-none"
+                        style={{ color: planet.color }}
                     >
                         {String(activePlanet + 1).padStart(2, "0")} / {String(PLANETS.length).padStart(2, "0")} — Navagraha
                     </div>
 
                     {/* Ghost background planets – static positions, spring transition only on change */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden" aria-hidden="true">
                         {ghostPositions.map((pos, i) => {
                             const idx = (activePlanet + i + 1) % PLANETS.length;
                             const p = PLANETS[idx];
                             return (
                                 <motion.div
-                                    key={idx}
+                                    key={`ghost-${idx}-${i}`}
                                     className="absolute rounded-full"
                                     animate={{ x: pos.x, y: pos.y, rotate: pos.rotate }}
                                     transition={{ type: "spring", stiffness: 40, damping: 28 }}
                                     style={{
-                                        width: 70,
-                                        height: 70,
+                                        width: 80,
+                                        height: 80,
                                         background: p.bgGradient,
-                                        opacity: 0.07,
-                                        // GPU layer
+                                        opacity: 0.1,
                                         transform: "translateZ(0)",
                                     }}
                                 />
@@ -640,27 +639,24 @@ export const NavagrahaScroll: React.FC = () => {
                     </div>
 
                     {/* Main content: planet + info */}
-                    <div className="relative z-10 h-full flex items-center justify-center px-4">
+                    <div className="relative z-40 h-[100vh] w-full flex items-center justify-center px-4 overflow-hidden">
                         <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-20 w-full max-w-6xl">
 
-                            {/* Planet Orb – removed rotateY from enter/exit (iOS overflow:hidden fix) */}
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={planet.id + "-orb"}
-                                    initial={{ scale: 0.85, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    exit={{ scale: 0.85, opacity: 0 }}
-                                    transition={{ type: "spring", stiffness: 120, damping: 22, duration: 0.5 }}
-                                // NO rotateY, NO perspective – both break iOS overflow:hidden on rounded elements
-                                >
-                                    <PlanetOrb planet={planet} isActive={true} />
-                                </motion.div>
-                            </AnimatePresence>
+                            {/* Planet Orb – Simplified wrapper to guarantee visibility */}
+                            <motion.div
+                                key={planet.id + "-orb"}
+                                initial={{ scale: 0.8, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                                className="flex-shrink-0"
+                            >
+                                <PlanetOrb planet={planet} isActive={true} />
+                            </motion.div>
 
                             {/* Info Card */}
-                            <AnimatePresence mode="wait">
+                            <div className="flex-shrink-0">
                                 <InfoCard key={planet.id + "-info"} planet={planet} />
-                            </AnimatePresence>
+                            </div>
                         </div>
                     </div>
 
