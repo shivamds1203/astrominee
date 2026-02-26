@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Moon, User, Menu, LogOut, ChevronDown } from "lucide-react";
+import { User, Menu, LogOut, ChevronDown } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 
@@ -12,8 +12,8 @@ export default function Navbar() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     return (
         <nav className="fixed top-0 w-full z-50 glass-panel border-b border-white/5 px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-yellow-500">
-                <Moon className="w-6 h-6" />
+            <div className="flex items-center gap-2">
+                <span className="text-2xl">🪐</span>
                 <Link href="/" className="text-xl font-bold tracking-tight text-white pr-4">
                     Astrominee
                 </Link>
