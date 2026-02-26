@@ -2,8 +2,10 @@
 
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Bot } from "lucide-react";
 import { PLANET_IN_HOUSE, PLANET_IN_NAKSHATRA, SIGN_LORDS, HOUSE_LORD_IN_HOUSE } from "@/lib/astrologyInterpretations";
 import { getNakshatraDetails } from "@/lib/astrologyMath";
+import { AIChatBox } from "@/components/predictions/AIChatBox";
 
 const PLANET_COLORS: Record<string, { from: string; to: string; glow: string; text: string }> = {
     Sun: { from: "#f97316", to: "#fbbf24", glow: "rgba(251,191,36,0.3)", text: "#fbbf24" },
@@ -27,6 +29,7 @@ const TABS = [
     { id: "planet-house", label: "Planet in House", icon: "🏠", desc: "How each planet shapes your life based on the house it occupies" },
     { id: "house-lord", label: "House Lord Placement", icon: "♛", desc: "The effect of each house's ruling planet sitting in another house" },
     { id: "nakshatra", label: "Planet in Nakshatra", icon: "⭐", desc: "The unique cosmic signature of each planet's Nakshatra placement" },
+    { id: "ai-chat", label: "Ask AI Astrologer", icon: "✨", desc: "Consult deeply with our Navagraha AI based on your unique charts" },
 ];
 
 interface Planet {
@@ -453,6 +456,19 @@ export const PredictionsSection: React.FC<Props> = ({ planetsData }) => {
                                 </motion.div>
                             );
                         })}
+                    </motion.div>
+                )}
+
+                {/* ─── AI CHAT ─── */}
+                {activeTab === "ai-chat" && (
+                    <motion.div
+                        key="ai-chat"
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.4 }}
+                    >
+                        <AIChatBox chartData={allPlanets} />
                     </motion.div>
                 )}
 
