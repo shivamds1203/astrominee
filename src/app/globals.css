@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+:root {
+  --background: #000005;
+  /* Space black */
+  --foreground: #f8f9fa;
+  --gold: #dfb34f;
+  --gold-glow: #fde08b;
+  --midnight: #0a0a1a;
+  --indigo-deep: #1e1b4b;
+  --electric-blue: #00f0ff;
+  --violet-glow: #8b5cf6;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-gold: var(--gold);
+  --color-gold-glow: var(--gold-glow);
+  --color-midnight: var(--midnight);
+  --color-indigo-deep: var(--indigo-deep);
+  --color-electric-blue: var(--electric-blue);
+  --color-violet-glow: var(--violet-glow);
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Premium Luxury Glassmorphism Utilities */
+.glass-panel {
+  background: rgba(10, 10, 26, 0.45);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+}
