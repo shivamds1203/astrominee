@@ -24,7 +24,7 @@ export default function Navbar() {
     ];
 
     return (
-        <nav className="fixed top-0 w-full z-50 glass-panel border-b border-white/5 px-6 py-4">
+        <nav className="fixed top-0 w-full z-50 bg-[#0a0a1a]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4">
             <div className="flex items-center justify-between max-w-7xl mx-auto">
                 <div className="flex items-center gap-2">
                     <span className="text-2xl">🪐</span>
@@ -87,9 +87,11 @@ export default function Navbar() {
                     )}
 
                     <button
-                        className="md:hidden text-gray-300 hover:text-white p-2 transition-colors"
+                        type="button"
+                        className="md:hidden text-gray-300 hover:text-white p-2 transition-colors relative z-50"
                         onClick={toggleMenu}
                         aria-label="Toggle Menu"
+                        aria-expanded={isMenuOpen}
                     >
                         <Menu className={`w-6 h-6 transition-transform ${isMenuOpen ? "rotate-90" : ""}`} />
                     </button>
@@ -107,7 +109,7 @@ export default function Navbar() {
                             key={link.href}
                             href={link.href}
                             onClick={closeMenu}
-                            className="text-gray-300 hover:text-yellow-500 transition-colors text-lg px-2"
+                            className="block text-gray-300 hover:text-yellow-500 transition-colors text-lg px-4 py-3 bg-white/5 rounded-lg active:bg-white/10"
                         >
                             {link.label}
                         </Link>
@@ -118,7 +120,7 @@ export default function Navbar() {
                                 <Link
                                     href="/profile"
                                     onClick={closeMenu}
-                                    className="flex items-center gap-3 px-2 py-2 text-gray-200 hover:text-indigo-400 transition-colors"
+                                    className="flex items-center gap-3 px-4 py-3 text-gray-200 hover:text-indigo-400 bg-white/5 rounded-lg active:bg-white/10 transition-colors"
                                 >
                                     <User className="w-5 h-5" />
                                     My Dashboard
@@ -128,7 +130,7 @@ export default function Navbar() {
                                         closeMenu();
                                         signOut();
                                     }}
-                                    className="flex items-center gap-3 px-2 py-2 text-red-400 hover:text-red-300 transition-colors"
+                                    className="flex w-full items-center gap-3 px-4 py-3 text-red-400 hover:text-red-300 bg-white/5 rounded-lg active:bg-white/10 transition-colors"
                                 >
                                     <LogOut className="w-5 h-5" />
                                     Sign Out
@@ -140,7 +142,7 @@ export default function Navbar() {
                                     closeMenu();
                                     setIsAuthOpen(true);
                                 }}
-                                className="flex items-center gap-3 px-2 py-2 text-gray-200 hover:text-yellow-500 transition-colors"
+                                className="flex w-full items-center gap-3 px-4 py-3 text-gray-200 hover:text-yellow-500 bg-white/5 rounded-lg active:bg-white/10 transition-colors"
                             >
                                 <User className="w-5 h-5" />
                                 Sign In

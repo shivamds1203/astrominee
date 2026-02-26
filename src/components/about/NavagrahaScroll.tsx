@@ -204,8 +204,8 @@ const StarField: React.FC<{ active: number }> = ({ active }) => {
                     background: `radial-gradient(ellipse 70% 60% at 50% 50%, ${planet.aura} 0%, transparent 70%)`,
                 }}
             />
-            {/* Static stars */}
-            {[...Array(120)].map((_, i) => (
+            {/* Static stars - Reduced count for mobile performance */}
+            {[...Array(50)].map((_, i) => (
                 <div
                     key={i}
                     className="absolute rounded-full bg-white"
@@ -215,7 +215,7 @@ const StarField: React.FC<{ active: number }> = ({ active }) => {
                         left: `${Math.random() * 100}%`,
                         top: `${Math.random() * 100}%`,
                         opacity: Math.random() * 0.8 + 0.1,
-                        animation: `twinkle ${2 + Math.random() * 4}s ease-in-out infinite`,
+                        animation: `twinkle ${3 + Math.random() * 5}s ease-in-out infinite`,
                         animationDelay: `${Math.random() * 3}s`,
                     }}
                 />
@@ -246,17 +246,16 @@ const PlanetOrb: React.FC<{ planet: typeof PLANETS[0]; isActive: boolean }> = ({
     return (
         <div className="relative flex items-center justify-center" style={{ width: 260, height: 260 }}>
             {/* Outer aura rings */}
-            {[1, 2, 3].map((r) => (
+            {[1, 2].map((r) => (
                 <motion.div
                     key={r}
-                    className="absolute rounded-full border"
-                    animate={isActive ? { scale: [1, 1.1 + r * 0.05, 1], opacity: [0.4 - r * 0.1, 0.05, 0.4 - r * 0.1] } : {}}
-                    transition={{ duration: 2.5 + r, repeat: Infinity, ease: "easeInOut", delay: r * 0.4 }}
+                    className="absolute rounded-full border border-white/5"
+                    animate={isActive ? { scale: [1, 1.1 + r * 0.05, 1], opacity: [0.3 - r * 0.1, 0.05, 0.3 - r * 0.1] } : {}}
+                    transition={{ duration: 3 + r, repeat: Infinity, ease: "easeInOut", delay: r * 0.5 }}
                     style={{
                         width: 260 + r * 44,
                         height: 260 + r * 44,
                         borderColor: planet.glow,
-                        boxShadow: `0 0 ${r * 12}px ${planet.glow}40`,
                     }}
                 />
             ))}
@@ -309,41 +308,41 @@ const PlanetOrb: React.FC<{ planet: typeof PLANETS[0]; isActive: boolean }> = ({
             ))}
 
             {/* Mars energy particles */}
-            {planet.id === "mars" && isActive && [...Array(8)].map((_, i) => (
+            {planet.id === "mars" && isActive && [...Array(4)].map((_, i) => (
                 <motion.div
                     key={i}
                     className="absolute w-1 h-1 rounded-full bg-red-400"
                     animate={{
-                        x: [0, (Math.random() - 0.5) * 200],
-                        y: [0, (Math.random() - 0.5) * 200],
+                        x: [0, (Math.random() - 0.5) * 150],
+                        y: [0, (Math.random() - 0.5) * 150],
                         opacity: [1, 0],
                         scale: [1, 0],
                     }}
-                    transition={{ duration: 1.5 + Math.random(), repeat: Infinity, delay: i * 0.2, ease: "easeOut" }}
+                    transition={{ duration: 2 + Math.random(), repeat: Infinity, delay: i * 0.3, ease: "easeOut" }}
                 />
             ))}
 
             {/* Venus sparkles */}
-            {planet.id === "venus" && isActive && [...Array(10)].map((_, i) => (
+            {planet.id === "venus" && isActive && [...Array(5)].map((_, i) => (
                 <motion.div
                     key={i}
                     className="absolute text-pink-300 text-xs font-bold"
                     style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
                     animate={{ opacity: [0, 1, 0], scale: [0.5, 1.2, 0.5], rotate: [0, 180] }}
-                    transition={{ duration: 1.5 + Math.random(), repeat: Infinity, delay: i * 0.15 }}
+                    transition={{ duration: 2 + Math.random(), repeat: Infinity, delay: i * 0.2 }}
                 >
                     ✦
                 </motion.div>
             ))}
 
             {/* Rahu smoke */}
-            {planet.id === "rahu" && isActive && [...Array(5)].map((_, i) => (
+            {planet.id === "rahu" && isActive && [...Array(3)].map((_, i) => (
                 <motion.div
                     key={i}
                     className="absolute rounded-full"
-                    style={{ background: `${planet.glow}30`, width: 80, height: 80 }}
-                    animate={{ x: (Math.random() - 0.5) * 300, y: -200, opacity: [0.4, 0], scale: [0.5, 2] }}
-                    transition={{ duration: 3, repeat: Infinity, delay: i * 0.6, ease: "easeOut" }}
+                    style={{ background: `${planet.glow}20`, width: 80, height: 80 }}
+                    animate={{ x: (Math.random() - 0.5) * 200, y: -150, opacity: [0.3, 0], scale: [0.5, 1.5] }}
+                    transition={{ duration: 4, repeat: Infinity, delay: i * 0.8, ease: "easeOut" }}
                 />
             ))}
 
@@ -363,10 +362,10 @@ const PlanetOrb: React.FC<{ planet: typeof PLANETS[0]; isActive: boolean }> = ({
                     background: planet.bgGradient,
                     boxShadow: `
                         0 0 40px ${planet.glow}80,
-                        0 0 80px ${planet.glow}40,
-                        0 0 120px ${planet.glow}20,
+                        0 0 40px ${planet.glow}60,
+                        0 0 80px ${planet.glow}20,
                         inset -20px -20px 40px rgba(0,0,0,0.5),
-                        inset 8px 8px 20px rgba(255,255,255,0.15)
+                        inset 8px 8px 15px rgba(255,255,255,0.1)
                     `,
                 }}
             >
@@ -399,16 +398,16 @@ const PlanetOrb: React.FC<{ planet: typeof PLANETS[0]; isActive: boolean }> = ({
 const InfoCard: React.FC<{ planet: typeof PLANETS[0] }> = ({ planet }) => (
     <motion.div
         key={planet.id}
-        initial={{ opacity: 0, x: 60, filter: "blur(10px)" }}
-        animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-        exit={{ opacity: 0, x: -40, filter: "blur(8px)" }}
+        initial={{ opacity: 0, x: 40 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
         transition={{ type: "spring", stiffness: 120, damping: 20 }}
         className="relative rounded-3xl p-8 max-w-[380px] w-full overflow-hidden"
         style={{
             background: "rgba(8,13,26,0.85)",
-            backdropFilter: "blur(24px)",
+            backdropFilter: "blur(12px)",
             border: `1px solid ${planet.color}40`,
-            boxShadow: `0 0 40px ${planet.aura}, inset 0 1px 0 rgba(255,255,255,0.06)`,
+            boxShadow: `0 0 20px ${planet.aura}`,
         }}
     >
         {/* Gradient corner glow */}
@@ -561,14 +560,13 @@ export const NavagrahaScroll: React.FC = () => {
                             return (
                                 <motion.div
                                     key={idx}
-                                    className="absolute rounded-full opacity-20 blur-sm"
+                                    className="absolute rounded-full opacity-[0.08]"
                                     animate={{ x: pos.x, y: pos.y, rotate: pos.rotate }}
-                                    transition={{ type: "spring", stiffness: 60, damping: 20 }}
+                                    transition={{ type: "spring", stiffness: 40, damping: 25 }}
                                     style={{
                                         width: 80,
                                         height: 80,
                                         background: p.bgGradient,
-                                        boxShadow: `0 0 20px ${p.glow}60`,
                                     }}
                                 />
                             );
@@ -583,9 +581,9 @@ export const NavagrahaScroll: React.FC = () => {
                             <AnimatePresence mode="wait">
                                 <motion.div
                                     key={planet.id + "-orb"}
-                                    initial={{ scale: 0.7, opacity: 0, rotateY: -30, filter: "blur(12px)" }}
-                                    animate={{ scale: 1, opacity: 1, rotateY: 0, filter: "blur(0px)" }}
-                                    exit={{ scale: 0.6, opacity: 0, rotateY: 30, filter: "blur(12px)" }}
+                                    initial={{ scale: 0.8, opacity: 0, rotateY: -15 }}
+                                    animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+                                    exit={{ scale: 0.8, opacity: 0, rotateY: 15 }}
                                     transition={{ type: "spring", stiffness: 100, damping: 22, duration: 0.7 }}
                                     style={{ perspective: 1000 }}
                                 >
