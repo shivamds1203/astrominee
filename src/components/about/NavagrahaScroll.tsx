@@ -586,21 +586,21 @@ export const NavagrahaScroll: React.FC = () => {
             `}</style>
 
             {/* Tall scroll container */}
-            <div ref={containerRef} style={{ height: `${PLANETS.length * 150}vh` }} className="relative overflow-visible">
+            <div ref={containerRef} style={{ height: `${PLANETS.length * 120}vh` }} className="relative">
 
-                {/* Sticky viewport */}
-                <div className="sticky top-0 h-screen overflow-hidden">
+                {/* Sticky viewport - Removed overflow-hidden to prevent clipping issues */}
+                <div className="sticky top-0 h-[100dvh] min-h-[600px] w-full z-10">
 
                     {/* Background star field */}
                     <StarField planet={planet} />
 
                     {/* Scroll progress bar */}
                     <motion.div
-                        className="fixed top-0 left-0 h-0.5 z-50 origin-left"
+                        className="fixed top-0 left-0 h-1 z-50 origin-left"
                         style={{
                             scaleX: scrollYProgress,
                             background: `linear-gradient(to right, ${planet.color}, ${planet.secondGlow})`,
-                            boxShadow: `0 0 8px ${planet.color}`,
+                            boxShadow: `0 0 10px ${planet.color}`,
                         }}
                     />
 
@@ -609,14 +609,14 @@ export const NavagrahaScroll: React.FC = () => {
 
                     {/* Planet counter */}
                     <div
-                        className="absolute top-20 left-1/2 -translate-x-1/2 z-30 text-xs font-bold tracking-[4px] uppercase pointer-events-none"
-                        style={{ color: planet.color }}
+                        className="absolute top-24 left-1/2 -translate-x-1/2 z-50 text-[10px] font-bold tracking-[6px] uppercase pointer-events-none whitespace-nowrap"
+                        style={{ color: planet.color, textShadow: `0 0 10px ${planet.color}40` }}
                     >
                         {String(activePlanet + 1).padStart(2, "0")} / {String(PLANETS.length).padStart(2, "0")} — Navagraha
                     </div>
 
-                    {/* Ghost background planets – static positions, spring transition only on change */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden" aria-hidden="true">
+                    {/* Ghost background planets */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
                         {ghostPositions.map((pos, i) => {
                             const idx = (activePlanet + i + 1) % PLANETS.length;
                             const p = PLANETS[idx];
@@ -625,35 +625,35 @@ export const NavagrahaScroll: React.FC = () => {
                                     key={`ghost-${idx}-${i}`}
                                     className="absolute rounded-full"
                                     animate={{ x: pos.x, y: pos.y, rotate: pos.rotate }}
-                                    transition={{ type: "spring", stiffness: 40, damping: 28 }}
+                                    transition={{ type: "spring", stiffness: 30, damping: 20 }}
                                     style={{
                                         width: 80,
                                         height: 80,
                                         background: p.bgGradient,
                                         opacity: 0.1,
-                                        transform: "translateZ(0)",
+                                        filter: "blur(2px)",
                                     }}
                                 />
                             );
                         })}
                     </div>
 
-                    {/* Main content: planet + info */}
-                    <div className="relative z-40 h-[100vh] w-full flex items-center justify-center px-4 overflow-hidden">
-                        <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-20 w-full max-w-6xl">
+                    {/* Main content: planet + info - Forced z-index and opacity 1 */}
+                    <div className="relative z-50 h-full w-full flex items-center justify-center px-6">
+                        <div className="flex flex-col lg:flex-row items-center justify-center gap-10 lg:gap-24 w-full max-w-7xl">
 
-                            {/* Planet Orb – Simplified wrapper to guarantee visibility */}
+                            {/* Planet Orb */}
                             <motion.div
                                 key={planet.id + "-orb"}
-                                initial={{ scale: 0.8, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                                initial={{ scale: 0.9 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: "spring", stiffness: 80, damping: 15 }}
                                 className="flex-shrink-0"
                             >
                                 <PlanetOrb planet={planet} isActive={true} />
                             </motion.div>
 
-                            {/* Info Card */}
+                            {/* Info Card - No opacity trickery, just render */}
                             <div className="flex-shrink-0">
                                 <InfoCard key={planet.id + "-info"} planet={planet} />
                             </div>

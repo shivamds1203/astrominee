@@ -79,25 +79,24 @@ export default function AboutPage() {
             </section>
 
             {/* ── Cinematic Navagraha Section ── */}
-            <section className="relative overflow-visible">
-                <div className="text-center py-16 px-6 relative z-10">
-                    <ScrollReveal>
-                        <p className="text-xs font-bold tracking-[5px] uppercase text-purple-400/60 mb-3">Scroll to Explore</p>
-                        <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight mb-4">
-                            The{" "}
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-400">
-                                9 Navagraha
-                            </span>
-                        </h2>
-                        <p className="text-gray-400 max-w-xl mx-auto text-base">
-                            Nine celestial bodies. Nine forces shaping your destiny. Scroll through each planet and discover how they influence every dimension of your life.
-                        </p>
-                    </ScrollReveal>
-                </div>
-                <div className="relative overflow-visible">
-                    <NavagrahaScroll />
-                </div>
-            </section>
+            <div className="text-center py-20 px-6 relative z-10">
+                <ScrollReveal>
+                    <p className="text-xs font-bold tracking-[5px] uppercase text-purple-400/60 mb-3">Scroll to Explore</p>
+                    <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight mb-4">
+                        The{" "}
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-400">
+                            9 Navagraha
+                        </span>
+                    </h2>
+                    <p className="text-gray-400 max-w-xl mx-auto text-base">
+                        Nine celestial bodies. Nine forces shaping your destiny. Scroll through each planet and discover how they influence every dimension of your life.
+                    </p>
+                </ScrollReveal>
+            </div>
+
+            <NavagrahaScroll />
+
+            {/* ── Bottom CTA ── */}
 
             {/* ── Bottom CTA ── */}
             <section className="text-center py-24 px-6 relative z-10">
