@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Lock, User } from "lucide-react";
+import { X, Mail, Lock, User, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { GoogleButton } from "./GoogleButton";
@@ -13,22 +13,52 @@ interface AuthModalProps {
     onClose: () => void;
 }
 
+const friendlyError = (code: string): string => {
+    const map: Record<string, string> = {
+        "auth/user-not-found": "No account found with this email.",
+        "auth/wrong-password": "Incorrect password. Please try again.",
+        "auth/email-already-in-use": "This email is already registered. Try signing in.",
+        "auth/weak-password": "Password must be at least 6 characters.",
+        "auth/invalid-email": "Please enter a valid email address.",
+        "auth/too-many-requests": "Too many attempts. Please wait and try again.",
+        "auth/popup-closed-by-user": "Google sign-in was cancelled.",
+        "auth/network-request-failed": "Network error. Check your connection.",
+        "auth/invalid-credential": "Invalid email or password.",
+    };
+    return map[code] ?? "Something went wrong. Please try again.";
+};
+
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     const [view, setView] = useState<"signIn" | "signUp">("signIn");
-    const { signInWithGoogle, loading } = useAuth();
+    const { signInWithGoogle, signInWithEmail, signUpWithEmail, loading } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [name, setName] = useState("");
+    const [error, setError] = useState("");
 
     const handleGoogleSignIn = async () => {
-        await signInWithGoogle();
-        onClose(); // Close modal on success
+        setError("");
+        try {
+            await signInWithGoogle();
+            onClose();
+        } catch (err: any) {
+            setError(friendlyError(err.code));
+        }
     };
 
-    const handleEmailAuth = (e: React.FormEvent) => {
+    const handleEmailAuth = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Since we are currently mocking auth, just act like they signed in
-        handleGoogleSignIn();
+        setError("");
+        try {
+            if (view === "signIn") {
+                await signInWithEmail(email, password);
+            } else {
+                await signUpWithEmail(email, password, name);
+            }
+            onClose();
+        } catch (err: any) {
+            setError(friendlyError(err.code));
+        }
     };
 
     return (
@@ -114,6 +144,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                                         required
                                     />
                                 </div>
+
+                                {/* Error message */}
+                                {error && (
+                                    <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                                        <span>{error}</span>
+                                    </div>
+                                )}
 
                                 <Button type="submit" className="w-full py-6 mt-2 text-base font-semibold" disabled={loading}>
                                     {loading ? "Authenticating..." : view === "signIn" ? "Sign In" : "Create Account"}

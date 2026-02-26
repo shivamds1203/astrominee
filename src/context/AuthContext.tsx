@@ -2,8 +2,18 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import {
+    GoogleAuthProvider,
+    signInWithPopup,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    updateProfile,
+    onAuthStateChanged,
+    signOut as firebaseSignOut,
+    type User as FirebaseUser,
+} from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
-// Define the shape of our user
 export interface User {
     uid: string;
     email: string | null;
@@ -15,53 +25,85 @@ interface AuthContextType {
     user: User | null;
     loading: boolean;
     signInWithGoogle: () => Promise<void>;
+    signInWithEmail: (email: string, password: string) => Promise<void>;
+    signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
     signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const toUser = (u: FirebaseUser): User => ({
+    uid: u.uid,
+    email: u.email,
+    displayName: u.displayName,
+    photoURL: u.photoURL,
+});
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
+    // Listen to Firebase auth state
     useEffect(() => {
-        // Mocking an initial auth check
-        const storedUser = localStorage.getItem("mock_auth_user");
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
+        if (!auth) {
+            // Firebase not configured — no credentials in .env.local
+            setLoading(false);
+            return;
         }
-        setLoading(false);
+        const unsub = onAuthStateChanged(auth, (firebaseUser) => {
+            setUser(firebaseUser ? toUser(firebaseUser) : null);
+            setLoading(false);
+        });
+        return unsub;
     }, []);
 
     const signInWithGoogle = async () => {
+        if (!auth) throw new Error("Firebase is not configured. Please add your Firebase credentials to .env.local");
         setLoading(true);
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            const provider = new GoogleAuthProvider();
+            const result = await signInWithPopup(auth, provider);
+            setUser(toUser(result.user));
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        const mockUser: User = {
-            uid: "mock-uid-12345",
-            email: "demo@astrominee.com",
-            displayName: "Cosmic Voyager",
-            photoURL: null,
-        };
+    const signInWithEmail = async (email: string, password: string) => {
+        if (!auth) throw new Error("Firebase is not configured. Please add your Firebase credentials to .env.local");
+        setLoading(true);
+        try {
+            const result = await signInWithEmailAndPassword(auth, email, password);
+            setUser(toUser(result.user));
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        setUser(mockUser);
-        localStorage.setItem("mock_auth_user", JSON.stringify(mockUser));
-        setLoading(false);
+    const signUpWithEmail = async (email: string, password: string, name: string) => {
+        if (!auth) throw new Error("Firebase is not configured. Please add your Firebase credentials to .env.local");
+        setLoading(true);
+        try {
+            const result = await createUserWithEmailAndPassword(auth, email, password);
+            if (name) {
+                await updateProfile(result.user, { displayName: name });
+            }
+            setUser(toUser({ ...result.user, displayName: name || result.user.displayName }));
+        } finally {
+            setLoading(false);
+        }
     };
 
     const signOut = async () => {
-        setLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 500));
+        if (!auth) return;
+        await firebaseSignOut(auth);
         setUser(null);
-        localStorage.removeItem("mock_auth_user");
-        setLoading(false);
         router.push("/");
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
+        <AuthContext.Provider value={{ user, loading, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut }}>
             {children}
         </AuthContext.Provider>
     );
@@ -69,8 +111,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
+    if (!context) throw new Error("useAuth must be used within an AuthProvider");
     return context;
 };
