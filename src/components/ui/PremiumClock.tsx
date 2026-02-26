@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 
 interface PremiumClockProps {
@@ -8,11 +8,117 @@ interface PremiumClockProps {
     onChange: (time: string) => void;
 }
 
+// ─── Drum Roll Picker ──────────────────────────────────────────────────────────
+const DrumRoll: React.FC<{
+    items: string[];
+    selected: string;
+    onSelect: (v: string) => void;
+    label: string;
+    accentColor: string;
+}> = ({ items, selected, onSelect, label, accentColor }) => {
+    const selectedIdx = items.indexOf(selected);
+    const ITEM_H = 44;
+    const VISIBLE = 5;
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const scrollToIndex = useCallback((idx: number) => {
+        const container = containerRef.current;
+        if (!container) return;
+        container.scrollTop = idx * ITEM_H;
+    }, []);
+
+    useEffect(() => {
+        scrollToIndex(selectedIdx);
+    }, [selectedIdx, scrollToIndex]);
+
+    const handleScroll = () => {
+        const container = containerRef.current;
+        if (!container) return;
+        const idx = Math.round(container.scrollTop / ITEM_H);
+        const clamped = Math.max(0, Math.min(idx, items.length - 1));
+        onSelect(items[clamped]);
+    };
+
+    return (
+        <div className="flex flex-col items-center gap-1.5">
+            <span className="text-[9px] font-bold uppercase tracking-[2.5px] text-gray-500">{label}</span>
+            <div className="relative rounded-2xl overflow-hidden"
+                style={{
+                    width: 72,
+                    height: ITEM_H * VISIBLE,
+                    background: "rgba(8,12,24,0.9)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    boxShadow: "inset 0 8px 20px rgba(0,0,0,0.3), inset 0 -8px 20px rgba(0,0,0,0.3)",
+                }}>
+
+                {/* Fade top */}
+                <div className="absolute top-0 left-0 right-0 z-20 pointer-events-none"
+                    style={{ height: ITEM_H * 2, background: "linear-gradient(to bottom, rgba(8,12,24,0.95) 0%, transparent 100%)" }} />
+
+                {/* Selection highlight */}
+                <div className="absolute z-10 left-0 right-0 pointer-events-none"
+                    style={{
+                        top: ITEM_H * 2,
+                        height: ITEM_H,
+                        background: `linear-gradient(135deg, ${accentColor}22, ${accentColor}12)`,
+                        borderTop: `1px solid ${accentColor}40`,
+                        borderBottom: `1px solid ${accentColor}40`,
+                        boxShadow: `0 0 16px ${accentColor}20`,
+                    }} />
+
+                {/* Fade bottom */}
+                <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none"
+                    style={{ height: ITEM_H * 2, background: "linear-gradient(to top, rgba(8,12,24,0.95) 0%, transparent 100%)" }} />
+
+                {/* Scrollable list */}
+                <div
+                    ref={containerRef}
+                    onScroll={handleScroll}
+                    className="h-full overflow-y-scroll no-scrollbar"
+                    style={{ scrollSnapType: "y mandatory", scrollBehavior: "smooth" }}
+                >
+                    {/* Padding top: 2 empty rows */}
+                    <div style={{ height: ITEM_H * 2 }} />
+                    {items.map((item) => {
+                        const isActive = item === selected;
+                        return (
+                            <div
+                                key={item}
+                                onClick={() => { onSelect(item); scrollToIndex(items.indexOf(item)); }}
+                                style={{ height: ITEM_H, scrollSnapAlign: "center" }}
+                                className="flex items-center justify-center cursor-pointer"
+                            >
+                                <motion.span
+                                    animate={{
+                                        scale: isActive ? 1 : 0.7,
+                                        opacity: isActive ? 1 : 0.3,
+                                    }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                                    className="font-mono font-bold select-none"
+                                    style={{
+                                        fontSize: isActive ? 26 : 18,
+                                        color: isActive ? "#fff" : "#6b7280",
+                                        textShadow: isActive ? `0 0 16px ${accentColor}` : "none",
+                                    }}
+                                >
+                                    {item}
+                                </motion.span>
+                            </div>
+                        );
+                    })}
+                    {/* Padding bottom: 2 empty rows */}
+                    <div style={{ height: ITEM_H * 2 }} />
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ─── Premium Clock ─────────────────────────────────────────────────────────────
 export const PremiumClock: React.FC<PremiumClockProps> = ({ value, onChange }) => {
-    // We will use the selected time for the clock hands and digital input
     const [currentTime, setCurrentTime] = useState<Date>(() => {
         if (value) {
-            const [h, m] = value.split(':').map(Number);
+            const [h, m] = value.split(":").map(Number);
             const d = new Date();
             d.setHours(h, m, 0, 0);
             return d;
@@ -20,122 +126,134 @@ export const PremiumClock: React.FC<PremiumClockProps> = ({ value, onChange }) =
         return new Date();
     });
 
-    // Instead of a continuously ticking real-time clock, this represents the *selected* time in the form.
-    // If we wanted a live animated clock, we'd use a setInterval. Given it's a form input picker, it mirrors the selection.
-
-    // However, the user asked for "hour, minute, and second hands should move smoothly... gentle breathing animation".
-    // If no value is provided, we can animate it as a live clock until they pick a time, OR just animate a dummy seconds hand.
-    // Let's animate the seconds hand continuously for visual flair, while hour and minute represent the selected time.
     const [secondsDeg, setSecondsDeg] = useState(currentTime.getSeconds() * 6);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setSecondsDeg(prev => prev + 6);
-        }, 1000);
+        const interval = setInterval(() => setSecondsDeg(prev => prev + 6), 1000);
         return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
         if (value) {
-            const [h, m] = value.split(':').map(Number);
+            const [h, m] = value.split(":").map(Number);
             const d = new Date();
             d.setHours(h, m, 0, 0);
             setCurrentTime(d);
         }
     }, [value]);
 
-
-
     const hours = currentTime.getHours();
     const minutes = currentTime.getMinutes();
+    const hoursDeg = (hours % 12) * 30 + (minutes / 2);
+    const minutesDeg = minutes * 6;
 
-    const hoursDeg = (hours % 12) * 30 + (minutes / 2); // 360 / 12 = 30 deg per hour
-    const minutesDeg = minutes * 6; // 360 / 60 = 6 deg per minute
+    const hourItems = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, "0"));
+    const minuteItems = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0"));
+
+    const handleHourChange = (h: string) => onChange(`${h}:${minutes.toString().padStart(2, "0")}`);
+    const handleMinuteChange = (m: string) => onChange(`${hours.toString().padStart(2, "0")}:${m}`);
 
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="flex flex-col items-center gap-6"
         >
+            {/* Analog clock face */}
             <motion.div
-                animate={{ scale: [1, 1.02, 1] }}
+                animate={{ scale: [1, 1.018, 1] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="relative w-48 h-48 rounded-full border border-white/10 bg-black/20 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] flex items-center justify-center p-2"
+                className="relative w-44 h-44 rounded-full flex items-center justify-center"
+                style={{
+                    background: "radial-gradient(circle at 35% 30%, rgba(30,20,60,0.9) 0%, rgba(8,10,24,0.95) 100%)",
+                    border: "1.5px solid rgba(99,102,241,0.3)",
+                    boxShadow: "0 0 40px rgba(99,102,241,0.15), 0 10px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
+                }}
             >
-                {/* Glowing gradient ring */}
-                <div className="absolute inset-0 rounded-full border-[1.5px] border-transparent bg-gradient-to-tr from-cyan-400 via-indigo-500 to-purple-500 [mask-image:linear-gradient(#fff_0_0)] [mask-composite:exclude] opacity-70 p-[1.5px]" style={{ WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)', WebkitMaskComposite: 'xor' }} />
+                {/* Gradient ring glow */}
+                <div className="absolute inset-0 rounded-full"
+                    style={{
+                        background: "conic-gradient(from 0deg, transparent 0%, rgba(99,102,241,0.15) 30%, rgba(139,92,246,0.2) 60%, transparent 100%)",
+                    }} />
 
-                {/* Inner glass face */}
-                <div className="w-full h-full rounded-full bg-white/5 relative flex items-center justify-center shadow-inner">
-                    {/* Tick marks */}
-                    {[...Array(12)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="absolute w-full h-full p-2"
-                            style={{ transform: `rotate(${i * 30}deg)` }}
-                        >
-                            <div className="w-1 h-2.5 bg-gray-400/50 rounded-full mx-auto" />
-                        </div>
-                    ))}
-
-                    {/* Clock Hands */}
-                    {/* Hour Hand */}
-                    <motion.div
-                        className="absolute w-[3px] h-12 bg-white rounded-full origin-bottom"
-                        style={{ bottom: '50%', left: '50%', x: '-50%' }}
-                        animate={{ rotate: hoursDeg }}
-                        transition={{ type: "spring", stiffness: 50 }}
-                    />
-
-                    {/* Minute Hand */}
-                    <motion.div
-                        className="absolute w-[2px] h-16 bg-indigo-300 rounded-full origin-bottom"
-                        style={{ bottom: '50%', left: '50%', x: '-50%' }}
-                        animate={{ rotate: minutesDeg }}
-                        transition={{ type: "spring", stiffness: 50 }}
-                    />
-
-                    {/* Second Hand (Smooth continuous fluid motion) */}
-                    <motion.div
-                        className="absolute w-[1px] h-20 bg-cyan-400 rounded-full origin-bottom shadow-[0_0_8px_rgba(34,211,238,0.8)]"
-                        style={{ bottom: '50%', left: '50%', x: '-50%' }}
-                        animate={{ rotate: secondsDeg }}
-                        transition={{ ease: "linear", duration: 1 }}
-                    />
-
-                    {/* Center Point Glow */}
-                    <div className="absolute w-3 h-3 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.8)] z-10">
-                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full m-auto mt-[3px]" />
+                {/* Tick marks */}
+                {[...Array(12)].map((_, i) => (
+                    <div key={i} className="absolute w-full h-full p-2.5" style={{ transform: `rotate(${i * 30}deg)` }}>
+                        <div className={`mx-auto rounded-full ${i % 3 === 0 ? "w-1 h-3 bg-indigo-400/70" : "w-0.5 h-2 bg-white/20"}`} />
                     </div>
-                </div>
+                ))}
+
+                {/* Hour hand */}
+                <motion.div
+                    className="absolute rounded-full origin-bottom bg-white"
+                    style={{ width: 3, height: 42, bottom: "50%", left: "50%", x: "-50%", borderRadius: 4 }}
+                    animate={{ rotate: hoursDeg }}
+                    transition={{ type: "spring", stiffness: 60, damping: 12 }}
+                />
+
+                {/* Minute hand */}
+                <motion.div
+                    className="absolute origin-bottom bg-indigo-300 rounded-full"
+                    style={{ width: 2, height: 56, bottom: "50%", left: "50%", x: "-50%" }}
+                    animate={{ rotate: minutesDeg }}
+                    transition={{ type: "spring", stiffness: 60, damping: 12 }}
+                />
+
+                {/* Second hand */}
+                <motion.div
+                    className="absolute origin-bottom rounded-full"
+                    style={{
+                        width: 1.5, height: 62, bottom: "50%", left: "50%", x: "-50%",
+                        background: "#22d3ee",
+                        boxShadow: "0 0 8px rgba(34,211,238,0.9)",
+                    }}
+                    animate={{ rotate: secondsDeg }}
+                    transition={{ ease: "linear", duration: 1 }}
+                />
+
+                {/* Center dot */}
+                <div className="absolute w-3.5 h-3.5 rounded-full z-10" style={{ background: "radial-gradient(circle, #fff 0%, #6366f1 100%)", boxShadow: "0 0 12px rgba(99,102,241,0.8)" }} />
             </motion.div>
 
-            {/* Digital Time Picker Selectors */}
-            <div className="flex gap-2 items-center bg-black/40 border border-white/10 rounded-xl px-4 py-2 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
-                <select
-                    value={hours.toString().padStart(2, '0')}
-                    onChange={(e) => onChange(`${e.target.value}:${minutes.toString().padStart(2, '0')}`)}
-                    className="bg-transparent text-white font-mono text-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 rounded p-1 appearance-none text-center hover:bg-white/5 transition-colors border-none cursor-pointer"
-                >
-                    {Array.from({ length: 24 }).map((_, i) => {
-                        const hStr = i.toString().padStart(2, '0');
-                        return <option key={hStr} value={hStr} className="bg-[#0c1222] text-white text-base font-sans">{hStr}</option>;
-                    })}
-                </select>
-                <span className="text-indigo-400 font-bold text-2xl mb-1">:</span>
-                <select
-                    value={minutes.toString().padStart(2, '0')}
-                    onChange={(e) => onChange(`${hours.toString().padStart(2, '0')}:${e.target.value}`)}
-                    className="bg-transparent text-white font-mono text-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 rounded p-1 appearance-none text-center hover:bg-white/5 transition-colors border-none cursor-pointer"
-                >
-                    {Array.from({ length: 60 }).map((_, i) => {
-                        const mStr = i.toString().padStart(2, '0');
-                        return <option key={mStr} value={mStr} className="bg-[#0c1222] text-white text-base font-sans">{mStr}</option>;
-                    })}
-                </select>
+            {/* Drum roll time pickers */}
+            <div className="flex items-center gap-3">
+                <DrumRoll
+                    items={hourItems}
+                    selected={hours.toString().padStart(2, "0")}
+                    onSelect={handleHourChange}
+                    label="Hour"
+                    accentColor="#6366f1"
+                />
+
+                {/* Colon separator */}
+                <div className="flex flex-col gap-2 pb-1">
+                    {[0, 1].map(i => (
+                        <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-indigo-400"
+                            animate={{ opacity: [1, 0.3, 1] }}
+                            transition={{ duration: 1, repeat: Infinity, delay: i * 0.5 }}
+                        />
+                    ))}
+                </div>
+
+                <DrumRoll
+                    items={minuteItems}
+                    selected={minutes.toString().padStart(2, "0")}
+                    onSelect={handleMinuteChange}
+                    label="Minute"
+                    accentColor="#8b5cf6"
+                />
             </div>
+
+            {/* Current time display */}
+            <motion.div
+                key={`${hours}:${minutes}`}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-xs font-mono text-indigo-400/60 tracking-widest"
+            >
+                {hours.toString().padStart(2, "0")}:{minutes.toString().padStart(2, "0")} {hours < 12 ? "AM" : "PM"}
+            </motion.div>
         </motion.div>
     );
 };
