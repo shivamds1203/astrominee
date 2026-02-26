@@ -42,7 +42,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             await signInWithGoogle();
             onClose();
         } catch (err: any) {
-            setError(friendlyError(err.code));
+            setError(err.code ? friendlyError(err.code) : (err.message || "Something went wrong. Please try again."));
         }
     };
 
@@ -57,7 +57,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             }
             onClose();
         } catch (err: any) {
-            setError(friendlyError(err.code));
+            setError(err.code ? friendlyError(err.code) : (err.message || "Something went wrong. Please try again."));
         }
     };
 
