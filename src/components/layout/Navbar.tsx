@@ -101,7 +101,7 @@ export default function Navbar() {
             {/* Mobile Menu Overlay */}
             <div className={`
                 md:hidden overflow-hidden transition-all duration-300 ease-in-out
-                ${isMenuOpen ? "max-h-[500px] opacity-100 mt-4" : "max-h-0 opacity-0"}
+                ${isMenuOpen ? "max-h-[500px] opacity-100 mt-4 pointer-events-auto" : "max-h-0 opacity-0 pointer-events-none"}
             `}>
                 <div className="flex flex-col gap-4 py-4 border-t border-white/10">
                     {navLinks.map((link) => (

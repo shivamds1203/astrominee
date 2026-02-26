@@ -46,8 +46,8 @@ export default function BirthDetailsForm() {
                 setShowClock(false);
             }
         };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        document.addEventListener("pointerdown", handleClickOutside);
+        return () => document.removeEventListener("pointerdown", handleClickOutside);
     }, []);
 
     // Debounced search for location
@@ -329,13 +329,18 @@ export default function BirthDetailsForm() {
                             >
                                 <ul className="max-h-60 overflow-y-auto custom-scrollbar">
                                     {locationResults.map((loc, idx) => (
-                                        <li
-                                            key={idx}
-                                            onClick={() => handleSelectLocation(loc)}
-                                            className="px-4 py-3.5 text-sm text-gray-200 hover:bg-indigo-500/20 hover:text-white cursor-pointer transition-colors border-b border-white/10 last:border-0 flex items-start gap-3 group"
-                                        >
-                                            <MapPin className="w-4 h-4 mt-0.5 text-gray-500 group-hover:text-electric-blue shrink-0 transition-colors" />
-                                            <span className="leading-snug">{loc.display_name}</span>
+                                        <li key={idx} className="border-b border-white/10 last:border-0">
+                                            <button
+                                                type="button"
+                                                onPointerDown={(e) => {
+                                                    e.preventDefault(); // Prevent input blur / mousedown from killing this
+                                                    handleSelectLocation(loc);
+                                                }}
+                                                className="w-full text-left px-4 py-3.5 text-sm text-gray-200 hover:bg-indigo-500/20 hover:text-white transition-colors flex items-start gap-3 group"
+                                            >
+                                                <MapPin className="w-4 h-4 mt-0.5 text-gray-500 group-hover:text-electric-blue shrink-0 transition-colors" />
+                                                <span className="leading-snug">{loc.display_name}</span>
+                                            </button>
                                         </li>
                                     ))}
                                 </ul>
@@ -361,7 +366,7 @@ export default function BirthDetailsForm() {
                                         value={g}
                                         checked={formData.gender === g}
                                         onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                                        className="hidden"
+                                        className="sr-only" /* hidden causes iOS tap issues on labels */
                                     />
                                     <span className="capitalize font-medium text-sm">{g}</span>
                                 </label>

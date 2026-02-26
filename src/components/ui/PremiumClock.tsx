@@ -84,7 +84,11 @@ const DrumRoll: React.FC<{
                         return (
                             <div
                                 key={item}
-                                onClick={() => { onSelect(item); scrollToIndex(items.indexOf(item)); }}
+                                onPointerDown={(e) => {
+                                    e.preventDefault();
+                                    onSelect(item);
+                                    scrollToIndex(items.indexOf(item));
+                                }}
                                 style={{ height: ITEM_H, scrollSnapAlign: "center" }}
                                 className="flex items-center justify-center cursor-pointer"
                             >

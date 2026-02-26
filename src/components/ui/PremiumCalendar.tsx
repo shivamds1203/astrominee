@@ -197,14 +197,14 @@ export const PremiumCalendar: React.FC<PremiumCalendarProps> = ({ value, onChang
 
     // Close pickers when clicking outside
     useEffect(() => {
-        const handleClick = (e: MouseEvent) => {
+        const handleClick = (e: Event) => {
             if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
                 setShowYearPicker(false);
                 setShowMonthPicker(false);
             }
         };
-        document.addEventListener("mousedown", handleClick);
-        return () => document.removeEventListener("mousedown", handleClick);
+        document.addEventListener("pointerdown", handleClick);
+        return () => document.removeEventListener("pointerdown", handleClick);
     }, []);
 
     const variants = {

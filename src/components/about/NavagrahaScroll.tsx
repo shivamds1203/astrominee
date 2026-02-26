@@ -202,6 +202,7 @@ const StarField: React.FC<{ active: number }> = ({ active }) => {
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                 style={{
                     background: `radial-gradient(ellipse 70% 60% at 50% 50%, ${planet.aura} 0%, transparent 70%)`,
+                    transform: "translateZ(0)",
                 }}
             />
             {/* Static stars - Reduced count for mobile performance */}
@@ -361,11 +362,9 @@ const PlanetOrb: React.FC<{ planet: typeof PLANETS[0]; isActive: boolean }> = ({
                     height: 220,
                     background: planet.bgGradient,
                     boxShadow: `
-                        0 0 40px ${planet.glow}80,
-                        0 0 40px ${planet.glow}60,
-                        0 0 80px ${planet.glow}20,
-                        inset -20px -20px 40px rgba(0,0,0,0.5),
-                        inset 8px 8px 15px rgba(255,255,255,0.1)
+                        0 0 20px ${planet.glow}60,
+                        inset -10px -10px 20px rgba(0,0,0,0.5),
+                        inset 4px 4px 10px rgba(255,255,255,0.1)
                     `,
                 }}
             >
@@ -374,7 +373,7 @@ const PlanetOrb: React.FC<{ planet: typeof PLANETS[0]; isActive: boolean }> = ({
                     backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 12px, rgba(255,255,255,0.08) 12px, rgba(255,255,255,0.08) 13px)`,
                 }} />
                 {/* Highlight */}
-                <div className="absolute top-4 left-6 w-16 h-10 rounded-full bg-white/20 blur-lg" />
+                <div className="absolute top-4 left-6 w-16 h-10 rounded-full bg-white/10" style={{ boxShadow: '0 0 10px rgba(255,255,255,0.2)' }} />
                 {/* Planet symbol overlay */}
                 <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-white/10 font-bold" style={{ fontSize: 80 }}>{planet.symbol}</span>
