@@ -4,6 +4,7 @@ import React from "react";
 import ZodiacWheel from "@/components/ui/ZodiacWheel";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 export default function Home() {
     return (
@@ -11,11 +12,7 @@ export default function Home() {
             {/* ── Hero ── */}
             <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-6xl gap-12">
                 <div className="flex-1 text-left z-10">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
-                    >
+                    <ScrollReveal duration={0.8} yOffset={40}>
                         <h1 className="text-5xl md:text-[5.5rem] font-bold mb-6 tracking-tighter text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] leading-[1.1]">
                             Cosmic Intelligence, <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-electric-blue via-indigo-300 to-violet-glow">
@@ -27,37 +24,39 @@ export default function Home() {
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-5">
-                            <Link href="/form" className="relative group inline-flex items-center justify-center bg-transparent">
-                                <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-electric-blue to-violet-glow rounded-full blur-[10px] opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
-                                <span className="relative z-10 bg-black/50 backdrop-blur-md border border-white/20 text-white font-medium py-4 px-10 rounded-full transition-all group-hover:bg-white/10 group-active:scale-95 text-lg shadow-[inset_0_1px_rgba(255,255,255,0.2)]">
-                                    Generate Free Chart
-                                </span>
-                            </Link>
-                            <Link href="/about" className="glass-panel text-white font-medium py-4 px-10 rounded-full transition-all hover:bg-white/5 hover:border-white/20 text-center text-lg flex items-center justify-center">
-                                How it works
-                            </Link>
+                            <motion.div whileHover={{ scale: 1.04, y: -3 }} whileTap={{ scale: 0.96 }}>
+                                <Link href="/form" className="relative group inline-flex items-center justify-center bg-transparent w-full sm:w-auto">
+                                    <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-electric-blue to-violet-glow rounded-full blur-[10px] opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+                                    <span className="relative z-10 bg-black/50 backdrop-blur-md border border-white/20 text-white font-medium py-4 px-10 rounded-full transition-all group-hover:bg-white/10 w-full text-center text-lg shadow-[inset_0_1px_rgba(255,255,255,0.2)]">
+                                        Generate Free Chart
+                                    </span>
+                                </Link>
+                            </motion.div>
+
+                            <motion.div whileHover={{ scale: 1.04, y: -3 }} whileTap={{ scale: 0.96 }}>
+                                <Link href="/about" className="glass-panel text-white font-medium py-4 px-10 rounded-full transition-all hover:bg-white/5 hover:border-white/20 text-center text-lg flex items-center justify-center w-full sm:w-auto">
+                                    How it works
+                                </Link>
+                            </motion.div>
                         </div>
 
-                        <div className="mt-14 flex flex-wrap items-center gap-6 text-sm text-indigo-200/60 font-medium">
+                        <div className="mt-14 flex flex-wrap items-center gap-6 text-sm text-indigo-200/60 font-medium tracking-wide">
                             <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-electric-blue shadow-[0_0_10px_#00f0ff]" /> Degree Precision</div>
                             <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-violet-glow shadow-[0_0_10px_#8b5cf6]" /> AI Predictions</div>
                             <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold shadow-[0_0_10px_#d4af37]" /> D1-D60 Vargas</div>
                         </div>
-                    </motion.div>
+                    </ScrollReveal>
                 </div>
 
                 <div className="flex-1 flex justify-center items-center w-full">
-                    <ZodiacWheel />
+                    <ScrollReveal delay={0.2} duration={1}>
+                        <ZodiacWheel />
+                    </ScrollReveal>
                 </div>
             </div>
 
             {/* ── Creator / Contact Section ── */}
-            <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.5 }}
-                className="w-full max-w-6xl mt-20"
-            >
+            <ScrollReveal delay={0.1} yOffset={60} className="w-full max-w-6xl mt-20">
                 {/* Decorative divider */}
                 <div className="flex items-center gap-4 mb-10">
                     <div className="flex-1 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
@@ -77,12 +76,16 @@ export default function Home() {
                     <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
                         {/* Left — identity */}
                         <div className="flex items-center gap-5 text-left">
-                            <div className="relative flex-shrink-0">
+                            <motion.div
+                                className="relative flex-shrink-0"
+                                whileHover={{ scale: 1.1, rotate: 5 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                            >
                                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-600 to-purple-700 flex items-center justify-center shadow-[0_0_24px_rgba(99,102,241,0.5)]">
                                     <span className="text-2xl text-white select-none">✦</span>
                                 </div>
                                 <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-[#080d1a] shadow-[0_0_8px_rgba(52,211,153,0.7)]" />
-                            </div>
+                            </motion.div>
                             <div>
                                 <p className="text-[11px] font-bold tracking-[3px] uppercase text-indigo-400/70 mb-1">Creator &amp; Developer</p>
                                 <h2 className="text-2xl font-bold text-white tracking-tight">Shivam Suryawanshi</h2>
@@ -94,8 +97,8 @@ export default function Home() {
                         <div className="flex flex-wrap gap-3 justify-center md:justify-end items-center">
                             <motion.a
                                 href="tel:+919049547814"
-                                whileHover={{ scale: 1.04, y: -2 }}
-                                whileTap={{ scale: 0.97 }}
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.95 }}
                                 className="flex items-center gap-2.5 px-5 py-3 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 transition-all text-white font-semibold text-sm"
                             >
                                 <span className="text-base">📞</span>
@@ -104,8 +107,8 @@ export default function Home() {
 
                             <motion.a
                                 href="mailto:shivamsuryawanshi7682@gmail.com"
-                                whileHover={{ scale: 1.04, y: -2 }}
-                                whileTap={{ scale: 0.97 }}
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.95 }}
                                 className="flex items-center gap-2.5 px-5 py-3 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 transition-all text-white font-semibold text-sm"
                             >
                                 <span className="text-base">✉️</span>
@@ -116,8 +119,8 @@ export default function Home() {
                                 href="https://www.instagram.com/_._.shivam.__/"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                whileHover={{ scale: 1.04, y: -2 }}
-                                whileTap={{ scale: 0.97 }}
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.95 }}
                                 className="relative group flex items-center gap-2.5 px-5 py-3 rounded-xl text-white font-semibold text-sm overflow-hidden"
                                 style={{ background: "linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)", border: "1px solid rgba(255,255,255,0.15)" }}
                             >
@@ -131,7 +134,7 @@ export default function Home() {
                         </div>
                     </div>
                 </div>
-            </motion.div>
+            </ScrollReveal>
         </main>
     );
 }

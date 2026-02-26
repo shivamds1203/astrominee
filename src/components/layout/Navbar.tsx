@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useMotionTemplate, useMotionValue, useSpring } from "framer-motion";
 import {
     User, LogOut, ChevronDown, Home, Telescope, Sparkles,
     Star, Info, X, LayoutDashboard
@@ -17,6 +17,44 @@ const NAV_LINKS = [
     { href: "/nakshatras", label: "Nakshatras", icon: Star, color: "#14b8a6" },
     { href: "/about", label: "About", icon: Info, color: "#f97316" },
 ];
+
+// ── Magnetic Link ────────────────────────────────────────────────────────────
+function MagneticLink({ children, href, className }: { children: React.ReactNode; href: string; className: string }) {
+    const ref = useRef<HTMLAnchorElement>(null);
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+
+    const mouseXSpring = useSpring(x, { stiffness: 150, damping: 15, mass: 0.1 });
+    const mouseYSpring = useSpring(y, { stiffness: 150, damping: 15, mass: 0.1 });
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        if (!ref.current) return;
+        const { height, width, left, top } = ref.current.getBoundingClientRect();
+        const middleX = (e.clientX - left) - width / 2;
+        const middleY = (e.clientY - top) - height / 2;
+        x.set(middleX * 0.2); // Magnetic pull strength
+        y.set(middleY * 0.2);
+    };
+
+    const handleMouseLeave = () => {
+        x.set(0);
+        y.set(0);
+    };
+
+    return (
+        <motion.div style={{ x: mouseXSpring, y: mouseYSpring }}>
+            <Link
+                ref={ref}
+                href={href}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                className={className}
+            >
+                {children}
+            </Link>
+        </motion.div>
+    );
+}
 
 // ── Hamburger / X icon ──────────────────────────────────────────────────────
 function HamburgerIcon({ open }: { open: boolean }) {
@@ -93,6 +131,16 @@ export default function Navbar() {
     const [isAuthOpen, setIsAuthOpen] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+    // Scroll progress for navbar background
+    const { scrollY } = useScroll();
+    const bgOpacity = useTransform(scrollY, [0, 80], [0, 0.75]);
+    const borderOpacity = useTransform(scrollY, [0, 80], [0, 0.06]);
+    const backdropBlur = useTransform(scrollY, [0, 80], [0, 20]);
+
+    const bgColor = useMotionTemplate`rgba(8,10,26,${bgOpacity})`;
+    const borderColor = useMotionTemplate`rgba(255,255,255,${borderOpacity})`;
+    const blurObj = useMotionTemplate`blur(${backdropBlur}px)`;
+
     const toggleMenu = () => setIsMenuOpen((v) => !v);
     const closeMenu = () => setIsMenuOpen(false);
 
@@ -105,21 +153,32 @@ export default function Navbar() {
     return (
         <>
             {/* ── Navbar bar ─────────────────────────────────────────────── */}
-            <nav className="fixed top-0 w-full z-50 px-5 py-4"
-                style={{ background: "rgba(8,10,26,0.75)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+            <motion.nav
+                className="fixed top-0 w-full z-50 px-5 py-4 border-b gpu-layer"
+                style={{
+                    background: bgColor,
+                    backdropFilter: blurObj,
+                    WebkitBackdropFilter: blurObj,
+                    borderBottomColor: borderColor
+                }}
+            >
                 <div className="flex items-center justify-between max-w-7xl mx-auto">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2" onClick={closeMenu}>
-                        <span className="text-2xl">🪐</span>
+                        <motion.span whileHover={{ scale: 1.1, rotate: 10 }} className="text-2xl origin-center inline-block">🪐</motion.span>
                         <span className="text-xl font-bold tracking-tight text-white">Astrominee</span>
                     </Link>
 
                     {/* Desktop links */}
-                    <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
+                    <div className="hidden md:flex items-center gap-2 text-sm font-medium text-gray-300">
                         {NAV_LINKS.map((link) => (
-                            <Link key={link.href} href={link.href} className="hover:text-yellow-500 transition-colors">
+                            <MagneticLink
+                                key={link.href}
+                                href={link.href}
+                                className="px-3 py-2 rounded-lg hover:text-yellow-500 hover:bg-white/5 transition-colors"
+                            >
                                 {link.label}
-                            </Link>
+                            </MagneticLink>
                         ))}
                     </div>
 
@@ -127,32 +186,46 @@ export default function Navbar() {
                     <div className="hidden md:flex items-center gap-4 relative">
                         {user ? (
                             <div className="relative">
-                                <button
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                     className="flex items-center gap-2 bg-indigo-500/10 hover:bg-indigo-500/20 px-4 py-2 rounded-full border border-indigo-500/30 transition-all font-medium text-sm text-indigo-100"
                                 >
                                     <User className="w-4 h-4" />
                                     {user.displayName?.split(" ")[0] || "Profile"}
                                     <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
-                                </button>
-                                {isDropdownOpen && (
-                                    <div className="absolute right-0 top-12 w-48 bg-[#0c1222]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden py-1 z-50">
-                                        <Link href="/profile" onClick={() => setIsDropdownOpen(false)}
-                                            className="flex items-center gap-3 px-4 py-3 text-sm text-gray-200 hover:bg-white/5 transition-colors">
-                                            <User className="w-4 h-4 text-gray-400" /> My Dashboard
-                                        </Link>
-                                        <button onClick={() => { setIsDropdownOpen(false); signOut(); }}
-                                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors border-t border-white/5 mt-1">
-                                            <LogOut className="w-4 h-4" /> Sign Out
-                                        </button>
-                                    </div>
-                                )}
+                                </motion.button>
+                                <AnimatePresence>
+                                    {isDropdownOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                                            className="absolute right-0 top-12 w-48 bg-[#0c1222]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden py-1 z-50"
+                                        >
+                                            <Link href="/profile" onClick={() => setIsDropdownOpen(false)}
+                                                className="flex items-center gap-3 px-4 py-3 text-sm text-gray-200 hover:bg-white/5 transition-colors">
+                                                <User className="w-4 h-4 text-gray-400" /> My Dashboard
+                                            </Link>
+                                            <button onClick={() => { setIsDropdownOpen(false); signOut(); }}
+                                                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors border-t border-white/5 mt-1">
+                                                <LogOut className="w-4 h-4" /> Sign Out
+                                            </button>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         ) : (
-                            <button onClick={() => setIsAuthOpen(true)}
-                                className="flex items-center gap-2 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full border border-white/10 transition-all font-medium text-sm text-gray-200">
+                            <motion.button
+                                whileHover={{ scale: 1.03 }}
+                                whileTap={{ scale: 0.97 }}
+                                onClick={() => setIsAuthOpen(true)}
+                                className="flex items-center gap-2 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full border border-white/10 transition-all font-medium text-sm text-gray-200"
+                            >
                                 <User className="w-4 h-4" /> Sign In
-                            </button>
+                            </motion.button>
                         )}
                     </div>
 
@@ -168,7 +241,7 @@ export default function Navbar() {
                         <HamburgerIcon open={isMenuOpen} />
                     </button>
                 </div>
-            </nav>
+            </motion.nav>
 
             {/* ── Mobile overlay ──────────────────────────────────────────── */}
             <AnimatePresence>

@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion, useReducedMotion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
 
 const ZODIAC_SIGNS = [
     "Aries", "Taurus", "Gemini", "Cancer",
@@ -11,28 +11,60 @@ const ZODIAC_SIGNS = [
 
 export default function ZodiacWheel() {
     const [mounted, setMounted] = useState(false);
+    const shouldReduceMotion = useReducedMotion();
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // 3D tilt effect on hover based on mouse position
+    const x = useMotionValue(0.5);
+    const y = useMotionValue(0.5);
+    const springConfig = { damping: 25, stiffness: 150 };
+    const springX = useSpring(x, springConfig);
+    const springY = useSpring(y, springConfig);
+
+    const rotateX = useTransform(springY, [0, 1], [15, -15]);
+    const rotateY = useTransform(springX, [0, 1], [-15, 15]);
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        // Calculate normalized mouse position from 0 to 1
+        x.set((e.clientX - rect.left) / rect.width);
+        y.set((e.clientY - rect.top) / rect.height);
+    };
+
+    const handleMouseLeave = () => {
+        x.set(0.5);
+        y.set(0.5);
+    };
+
     if (!mounted) return null;
 
     return (
-        <div className="relative w-[350px] h-[350px] md:w-[500px] md:h-[500px] flex items-center justify-center -z-10 mt-10 perspective-[1000px]">
+        <motion.div
+            ref={containerRef}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            style={{
+                rotateX: shouldReduceMotion ? 0 : rotateX,
+                rotateY: shouldReduceMotion ? 0 : rotateY,
+                transformStyle: "preserve-3d"
+            }}
+            className="relative w-[350px] h-[350px] md:w-[500px] md:h-[500px] flex items-center justify-center -z-10 mt-10 perspective-[1000px] gpu-layer"
+        >
             {/* Deep Cosmic Core Glow */}
             <div className="absolute inset-0 rounded-full bg-indigo-500/10 blur-[80px]" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full bg-electric-blue/10 blur-[60px]" />
 
-            {/* 3D Rotating Outer Ring (Zodiac Signs) */}
-            <motion.div
+            {/* 3D Rotating Outer Ring (Zodiac Signs) - Using CSS animations instead of Framer Motion for infinite loops */}
+            <div
                 className="absolute inset-0 rounded-full border-[2px] border-white/5 shadow-[0_0_60px_rgba(139,92,246,0.15)] preserve-3d"
-                style={{ transformStyle: 'preserve-3d' }}
-                animate={{ rotateZ: 360, rotateX: [60, 65, 60] }}
-                initial={{ rotateX: 60 }}
-                transition={{
-                    rotateZ: { duration: 150, repeat: Infinity, ease: "linear" },
-                    rotateX: { duration: 10, repeat: Infinity, ease: "easeInOut", repeatType: "mirror" }
+                style={{
+                    transform: 'rotateX(60deg)',
+                    animation: shouldReduceMotion ? 'none' : 'orbit-slow 150s linear infinite'
                 }}
             >
                 {ZODIAC_SIGNS.map((sign, index) => {
@@ -52,47 +84,51 @@ export default function ZodiacWheel() {
                         </div>
                     );
                 })}
-            </motion.div>
+            </div>
 
             {/* Orbital Rings with Planets */}
             {/* Orbit 1 */}
-            <motion.div
+            <div
                 className="absolute inset-[15%] rounded-full border border-electric-blue/20 border-dashed preserve-3d"
-                style={{ transformStyle: 'preserve-3d', rotateX: 60 }}
-                animate={{ rotateZ: -360 }}
-                transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+                style={{
+                    transform: 'rotateX(60deg)',
+                    animation: shouldReduceMotion ? 'none' : 'orbit-slow-reverse 60s linear infinite'
+                }}
             >
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.8)]" style={{ transform: 'rotateX(-60deg)' }} />
-            </motion.div>
+            </div>
 
             {/* Orbit 2 */}
-            <motion.div
+            <div
                 className="absolute inset-[30%] rounded-full border border-violet-glow/30 preserve-3d"
-                style={{ transformStyle: 'preserve-3d', rotateX: 60 }}
-                animate={{ rotateZ: 360 }}
-                transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+                style={{
+                    transform: 'rotateX(60deg)',
+                    animation: shouldReduceMotion ? 'none' : 'orbit-slow 40s linear infinite'
+                }}
             >
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3 h-3 rounded-full bg-blue-400 shadow-[0_0_15px_rgba(96,165,250,0.8)]" style={{ transform: 'rotateX(-60deg)' }} />
-            </motion.div>
+            </div>
 
             {/* Orbit 3 (Inner Fast) */}
-            <motion.div
+            <div
                 className="absolute inset-[45%] rounded-full border border-white/10 border-dotted preserve-3d"
-                style={{ transformStyle: 'preserve-3d', rotateX: 60 }}
-                animate={{ rotateZ: -360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                style={{
+                    transform: 'rotateX(60deg)',
+                    animation: shouldReduceMotion ? 'none' : 'orbit-slow-reverse 20s linear infinite'
+                }}
             >
                 <div className="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_10px_rgba(251,113,133,0.8)]" style={{ transform: 'rotateX(-60deg)' }} />
-            </motion.div>
+            </div>
 
             {/* Center Core Glowing Symbol */}
-            <motion.div
+            <div
                 className="absolute w-28 h-28 rounded-full border border-gold/30 flex items-center justify-center bg-black/60 backdrop-blur-xl z-10 shadow-[0_0_50px_rgba(212,175,55,0.25)]"
-                animate={{ scale: [1, 1.05, 1], boxShadow: ["0 0 40px rgba(212,175,55,0.2)", "0 0 60px rgba(212,175,55,0.4)", "0 0 40px rgba(212,175,55,0.2)"] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                style={{
+                    animation: shouldReduceMotion ? 'none' : 'pulse-glow 4s ease-in-out infinite'
+                }}
             >
                 <span className="text-4xl text-gold font-serif font-bold drop-shadow-[0_0_10px_rgba(212,175,55,0.8)]">ॐ</span>
-            </motion.div>
-        </div>
+            </div>
+        </motion.div>
     );
 }

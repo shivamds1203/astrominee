@@ -153,15 +153,21 @@ export default function BirthDetailsForm() {
                     >
                         {/* Cinematic Particle Gathering Effect */}
                         <div className="absolute inset-0 flex items-center justify-center mix-blend-screen">
-                            {[...Array(20)].map((_, i) => (
-                                <motion.div
-                                    key={`particle-${i}`}
-                                    initial={{ x: (Math.random() - 0.5) * 1000, y: (Math.random() - 0.5) * 1000, scale: 0, opacity: 0 }}
-                                    animate={{ x: 0, y: 0, scale: [0, Math.random() + 0.5, 0], opacity: [0, 1, 0] }}
-                                    transition={{ duration: 2 + Math.random() * 2, repeat: Infinity, ease: "easeInOut", delay: Math.random() }}
-                                    className="absolute w-2 h-2 rounded-full bg-electric-blue shadow-[0_0_15px_#00f0ff]"
-                                />
-                            ))}
+                            {[...Array(20)].map((_, i) => {
+                                // Pseudo-random but deterministic based on index for hydration safety
+                                const startX = Math.sin(i * 13) * 500;
+                                const startY = Math.cos(i * 17) * 500;
+                                const duration = 2 + (i % 3);
+                                return (
+                                    <motion.div
+                                        key={`particle-${i}`}
+                                        initial={{ x: startX, y: startY, scale: 0, opacity: 0 }}
+                                        animate={{ x: 0, y: 0, scale: [0, (i % 2) ? 1.5 : 0.8, 0], opacity: [0, 1, 0] }}
+                                        transition={{ duration, repeat: Infinity, ease: "easeInOut", delay: (i % 5) * 0.2 }}
+                                        className="absolute w-2 h-2 rounded-full bg-electric-blue shadow-[0_0_15px_#00f0ff]"
+                                    />
+                                );
+                            })}
                         </div>
 
                         {/* Spinning 3D Core */}
@@ -357,20 +363,32 @@ export default function BirthDetailsForm() {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">Gender</label>
-                        <div className="flex gap-4">
-                            {["male", "female", "other"].map((g) => (
-                                <label key={g} className="flex flex-1 items-center justify-center p-3 border border-white/10 rounded-lg cursor-pointer hover:bg-white/5 transition-colors has-[:checked]:bg-yellow-500/10 has-[:checked]:border-yellow-500/50 has-[:checked]:text-yellow-500">
-                                    <input
-                                        type="radio"
-                                        name="gender"
-                                        value={g}
-                                        checked={formData.gender === g}
-                                        onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                                        className="sr-only" /* hidden causes iOS tap issues on labels */
-                                    />
-                                    <span className="capitalize font-medium text-sm">{g}</span>
-                                </label>
-                            ))}
+                        <div className="flex gap-2 p-1 bg-white/5 border border-white/10 rounded-xl relative">
+                            {["male", "female", "other"].map((g) => {
+                                const isSelected = formData.gender === g;
+                                return (
+                                    <label key={g} className="flex-1 relative cursor-pointer text-center group">
+                                        <input
+                                            type="radio"
+                                            name="gender"
+                                            value={g}
+                                            checked={isSelected}
+                                            onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                                            className="sr-only"
+                                        />
+                                        {isSelected && (
+                                            <motion.div
+                                                layoutId="gender-pill-active"
+                                                className="absolute inset-0 bg-yellow-500/20 border border-yellow-500/50 rounded-lg shadow-[0_0_15px_rgba(234,179,8,0.2)]"
+                                                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                                            />
+                                        )}
+                                        <span className={`relative z-10 block py-2.5 text-sm font-medium capitalize transition-colors ${isSelected ? "text-yellow-400" : "text-gray-400 group-hover:text-gray-200"}`}>
+                                            {g}
+                                        </span>
+                                    </label>
+                                );
+                            })}
                         </div>
                     </div>
 

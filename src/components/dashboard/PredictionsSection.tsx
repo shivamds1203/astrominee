@@ -145,23 +145,33 @@ export const PredictionsSection: React.FC<Props> = ({ planetsData }) => {
                     {/* Planet Filter */}
                     <div className="flex flex-wrap gap-2">
                         {PLANET_NAMES.slice(0, 8).map(name => {
-                            const col = PLANET_COLORS[name];
+                            const col = PLANET_COLORS[name] || PLANET_COLORS.Sun;
+                            const isActive = planetFilter === name;
                             return (
                                 <motion.button
                                     key={name}
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.97 }}
                                     onClick={() => setPlanetFilter(name)}
-                                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${planetFilter === name
-                                        ? "text-white border-transparent shadow-lg"
-                                        : "text-gray-400 border-white/10 hover:border-white/20 bg-white/[0.02]"
+                                    className={`relative px-4 py-2 rounded-full text-xs font-semibold transition-colors border ${isActive
+                                        ? "text-white border-transparent"
+                                        : "text-gray-400 border-white/10 hover:border-white/20 bg-white/[0.02] hover:text-white"
                                         }`}
-                                    style={planetFilter === name && col ? {
-                                        background: `linear-gradient(135deg, ${col.from}, ${col.to})`,
-                                        boxShadow: `0 4px 14px ${col.glow}`,
-                                    } : {}}
                                 >
-                                    {name !== "All" && PLANET_SYMBOLS[name] ? `${PLANET_SYMBOLS[name]} ` : ""}{name}
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="filter-active-bg"
+                                            className="absolute inset-0 rounded-full z-0"
+                                            style={{
+                                                background: `linear-gradient(135deg, ${col.from}, ${col.to})`,
+                                                boxShadow: `0 4px 14px ${col.glow}`,
+                                            }}
+                                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                                        />
+                                    )}
+                                    <span className="relative z-10">
+                                        {name !== "All" && PLANET_SYMBOLS[name] ? `${PLANET_SYMBOLS[name]} ` : ""}{name}
+                                    </span>
                                 </motion.button>
                             );
                         })}
