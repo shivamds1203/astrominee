@@ -478,6 +478,7 @@ export const NavagrahaScroll: React.FC = () => {
     });
 
     useMotionValueEvent(scrollYProgress, "change", useCallback((v: number) => {
+        console.log("Navagraha Scroll Progress:", v);
         const idx = Math.min(Math.floor(v * PLANETS.length), PLANETS.length - 1);
         setActivePlanet((prev) => (prev === idx ? prev : idx));
     }, []));
@@ -586,7 +587,7 @@ export const NavagrahaScroll: React.FC = () => {
             `}</style>
 
             {/* Tall scroll container */}
-            <div ref={containerRef} style={{ height: `${PLANETS.length * 110}vh` }} className="relative">
+            <div ref={containerRef} style={{ height: `${PLANETS.length * 150}vh` }} className="relative overflow-visible">
 
                 {/* Sticky viewport */}
                 <div className="sticky top-0 h-screen overflow-hidden">

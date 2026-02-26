@@ -79,7 +79,7 @@ export default function AboutPage() {
             </section>
 
             {/* ── Cinematic Navagraha Section ── */}
-            <section>
+            <section className="relative overflow-visible">
                 <div className="text-center py-16 px-6 relative z-10">
                     <ScrollReveal>
                         <p className="text-xs font-bold tracking-[5px] uppercase text-purple-400/60 mb-3">Scroll to Explore</p>
@@ -94,7 +94,9 @@ export default function AboutPage() {
                         </p>
                     </ScrollReveal>
                 </div>
-                <NavagrahaScroll />
+                <div className="relative overflow-visible">
+                    <NavagrahaScroll />
+                </div>
             </section>
 
             {/* ── Bottom CTA ── */}
