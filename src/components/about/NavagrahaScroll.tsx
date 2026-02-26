@@ -200,20 +200,17 @@ const STAR_DATA = Array.from({ length: 50 }, (_, i) => ({
 }));
 
 // ─── Star Field ──────────────────────────────────────────────────────────────────
-// memo prevents re-render when parent re-renders due to scroll
-const StarField = memo(({ planet }: { planet: typeof PLANETS[0] }) => {
+const StarField = ({ planet }: { planet: typeof PLANETS[0] }) => {
     return (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-            {/* Deep space */}
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
             <div className="absolute inset-0" style={{ background: "#020408" }} />
-            {/* Nebula glow – CSS animation, no JS */}
             <div
                 className="absolute inset-0 nava-nebula"
                 style={{
                     background: `radial-gradient(ellipse 70% 60% at 50% 50%, ${planet.aura} 0%, transparent 70%)`,
+                    opacity: 0.3
                 }}
             />
-            {/* Static stars – positions pre-calculated, CSS animation only */}
             {STAR_DATA.map((s) => (
                 <div
                     key={s.id}
@@ -223,462 +220,138 @@ const StarField = memo(({ planet }: { planet: typeof PLANETS[0] }) => {
                         height: s.size,
                         left: s.left,
                         top: s.top,
-                        opacity: Number(s.opacity),
-                        animationDuration: s.duration,
-                        animationDelay: s.delay,
+                        opacity: 0.5,
                     }}
                 />
             ))}
         </div>
     );
-});
-StarField.displayName = "StarField";
+};
 
 // ─── Planet Orb ──────────────────────────────────────────────────────────────────
-// Heavy animations removed on mobile via CSS. rotateY removed (breaks iOS overflow:hidden).
-const PlanetOrb = memo(({ planet, isActive }: { planet: typeof PLANETS[0]; isActive: boolean }) => {
-    const rotDuration: Record<string, number> = {
-        radiate: 12, breathe: 18, pulse: 8, orbit: 6,
-        expand: 20, sparkle: 15, ring: 30, smoke: 10, dissolve: 25,
-    };
-    const duration = rotDuration[planet.animType] ?? 15;
-
+const PlanetOrb = ({ planet, isActive }: { planet: typeof PLANETS[0]; isActive: boolean }) => {
     return (
         <div
-            className="relative flex items-center justify-center"
-            style={{ width: 260, height: 260 }}
+            className="flex items-center justify-center relative w-[300px] h-[300px]"
+            style={{ zIndex: 60 }}
         >
-            {/* Outer aura ring 1 */}
-            {isActive && (
-                <>
-                    <div
-                        className="absolute rounded-full nava-ring-pulse-1"
-                        style={{
-                            width: 304,
-                            height: 304,
-                            border: `1px solid ${planet.glow}30`,
-                        }}
-                    />
-                    <div
-                        className="absolute rounded-full nava-ring-pulse-2"
-                        style={{
-                            width: 348,
-                            height: 348,
-                            border: `1px solid ${planet.glow}18`,
-                        }}
-                    />
-                </>
-            )}
-
-            {/* Saturn rings – CSS only, no framer-motion rotation */}
-            {planet.hasRings && (
-                <>
-                    <div
-                        className="absolute nava-saturn-ring-1"
-                        style={{
-                            width: 340,
-                            height: 340,
-                            borderRadius: "50%",
-                            border: `6px solid ${planet.color}60`,
-                            boxShadow: `0 0 20px ${planet.color}40`,
-                        }}
-                    />
-                    <div
-                        className="absolute nava-saturn-ring-2"
-                        style={{
-                            width: 300,
-                            height: 300,
-                            borderRadius: "50%",
-                            border: `3px solid ${planet.secondGlow}40`,
-                        }}
-                    />
-                </>
-            )}
-
-            {/* Main planet sphere – only scale/opacity animation, NO rotateY, translateZ for GPU */}
-            <motion.div
-                animate={isActive ? { scale: [1, 1.03, 1] } : { scale: 1 }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="relative rounded-full nava-planet-sphere"
+            <div
+                className="rounded-full flex items-center justify-center"
                 style={{
-                    width: 220,
-                    height: 220,
-                    // Use CSS background, not gradient on motion - more iOS compatible
-                    background: planet.bgGradient,
-                    boxShadow: `0 0 30px ${planet.glow}50, inset -10px -10px 20px rgba(0,0,0,0.4), inset 4px 4px 10px rgba(255,255,255,0.1)`,
-                    // GPU compositing hint
-                    transform: "translateZ(0)",
-                    willChange: "transform",
-                    // Explicit border-radius ensures clipping works on iOS
-                    WebkitBorderRadius: "50%",
-                    overflow: "hidden",
+                    width: "220px",
+                    height: "220px",
+                    background: planet.bgGradient || planet.color,
+                    boxShadow: `0 0 50px ${planet.glow}`,
+                    border: "2px solid rgba(255,255,255,0.1)",
+                    zIndex: 61
                 }}
             >
-                {/* Surface texture */}
-                <div
-                    className="absolute inset-0 opacity-20"
-                    style={{
-                        backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 12px, rgba(255,255,255,0.08) 12px, rgba(255,255,255,0.08) 13px)`,
-                    }}
-                />
-                {/* Highlight */}
-                <div
-                    className="absolute top-4 left-6 rounded-full"
-                    style={{ width: 64, height: 40, background: "rgba(255,255,255,0.08)" }}
-                />
-                {/* Slow CSS rotation for the symbol overlay – no framer */}
-                <div
-                    className="absolute inset-0 flex items-center justify-center"
-                    style={{ animationDuration: `${duration}s` }}
-                >
-                    <span
-                        className="font-bold nava-symbol-spin"
-                        style={{
-                            fontSize: 80,
-                            color: "rgba(255,255,255,0.10)",
-                            animationDuration: `${duration}s`,
-                        }}
-                    >
-                        {planet.symbol}
-                    </span>
-                </div>
-            </motion.div>
-
-            {/* Zodiac bg symbol – CSS animation only */}
+                <span className="text-4xl font-bold text-white/20">{planet.symbol}</span>
+            </div>
             <div
-                className="absolute font-bold pointer-events-none nava-zodiac-float"
-                style={{ fontSize: 280, lineHeight: 1, zIndex: -1, color: "rgba(255,255,255,0.04)" }}
+                className="absolute font-bold pointer-events-none text-white/5"
+                style={{ fontSize: "200px", zIndex: 59 }}
             >
                 {planet.zodiac}
             </div>
         </div>
     );
-});
-PlanetOrb.displayName = "PlanetOrb";
+};
 
 // ─── Info Card ────────────────────────────────────────────────────────────────────
-// backdropFilter removed – too expensive on mobile/iOS
-const InfoCard = memo(({ planet }: { planet: typeof PLANETS[0] }) => (
-    <motion.div
-        key={planet.id}
-        initial={{ opacity: 0, x: 30 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        transition={{ type: "spring", stiffness: 120, damping: 22 }}
-        className="relative rounded-3xl p-6 w-full overflow-hidden"
+const InfoCard = ({ planet }: { planet: typeof PLANETS[0] }) => (
+    <div
+        className="rounded-3xl p-8 w-full max-w-[400px] border border-white/10"
         style={{
-            maxWidth: 380,
-            // Solid dark bg instead of backdropFilter blur (huge mobile perf win)
-            background: "rgba(6,10,22,0.95)",
-            border: `1px solid ${planet.color}40`,
-            boxShadow: `0 0 24px ${planet.aura}`,
-            // GPU layer
-            transform: "translateZ(0)",
-            willChange: "opacity, transform",
+            background: "rgba(10,12,25,0.98)",
+            boxShadow: `0 20px 50px rgba(0,0,0,0.5), 0 0 20px ${planet.color}20`,
+            zIndex: 60
         }}
     >
-        {/* Corner glow */}
-        <div
-            className="absolute top-0 right-0 w-36 h-36 rounded-full pointer-events-none"
-            style={{ background: `radial-gradient(ellipse at top right, ${planet.aura} 0%, transparent 70%)` }}
-        />
-
-        {/* Header */}
-        <div className="mb-5">
-            <div className="flex items-center gap-3 mb-2">
-                <span className="text-3xl" aria-hidden="true">{planet.symbol}</span>
-                <div>
-                    <h2 className="text-3xl font-black text-white tracking-tight">{planet.name}</h2>
-                    <p className="text-sm font-medium" style={{ color: planet.color }}>{planet.sanskrit}</p>
-                </div>
-            </div>
-            {/* Energy pill */}
-            <div
-                className="inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-full border text-xs font-bold tracking-wide uppercase"
-                style={{ borderColor: `${planet.color}50`, color: planet.color, background: `${planet.color}15` }}
-            >
-                <span className="w-1.5 h-1.5 rounded-full nava-dot-pulse" style={{ background: planet.color }} />
-                {planet.energy}
-            </div>
+        <div className="mb-6">
+            <h2 className="text-4xl font-black text-white mb-1">{planet.name}</h2>
+            <p className="text-sm font-bold uppercase tracking-widest" style={{ color: planet.color }}>{planet.sanskrit}</p>
         </div>
-
-        {/* Divider */}
-        <div className="h-px mb-5 w-full" style={{ background: `linear-gradient(to right, ${planet.color}60, transparent)` }} />
-
-        {/* Description */}
-        <div className="space-y-3">
+        <div className="space-y-4">
             {planet.description.map((line, i) => (
-                <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: 16 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 + i * 0.07, type: "spring", stiffness: 220 }}
-                    className="flex items-start gap-3"
-                >
-                    <span
-                        className="mt-1.5 flex-shrink-0 rounded-full"
-                        style={{ width: 6, height: 6, background: planet.color, boxShadow: `0 0 6px ${planet.color}` }}
-                    />
-                    <p className="text-sm text-gray-300 leading-relaxed">{line}</p>
-                </motion.div>
+                <div key={i} className="flex gap-3 text-gray-300 text-sm leading-relaxed">
+                    <span className="mt-2 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: planet.color }} />
+                    <p>{line}</p>
+                </div>
             ))}
         </div>
-
-        {/* Bottom fade */}
-        <div
-            className="absolute bottom-0 left-0 right-0 h-8 rounded-b-3xl pointer-events-none"
-            style={{ background: `linear-gradient(to top, ${planet.color}10, transparent)` }}
-        />
-    </motion.div>
-));
-InfoCard.displayName = "InfoCard";
+    </div>
+);
 
 // ─── Progress Dots ────────────────────────────────────────────────────────────────
-const ProgressDots = memo(({ active, total, onDotClick }: { active: number; total: number; onDotClick: (i: number) => void }) => (
-    <div className="fixed right-4 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-3" role="navigation" aria-label="Planet navigation">
-        {Array.from({ length: total }, (_, i) => {
-            const p = PLANETS[i];
-            const isActive = i === active;
-            return (
-                <button
-                    key={i}
-                    onClick={() => onDotClick(i)}
-                    aria-label={p.name}
-                    aria-current={isActive ? "true" : undefined}
-                    className="relative rounded-full focus:outline-none group"
-                    style={{
-                        width: 8,
-                        height: 8,
-                        background: isActive ? p.color : "rgba(255,255,255,0.2)",
-                        boxShadow: isActive ? `0 0 10px ${p.color}` : "none",
-                        transform: isActive ? "scale(1.6)" : "scale(1)",
-                        transition: "transform 0.25s, background 0.25s, box-shadow 0.25s",
-                    }}
-                >
-                    <span className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-xs text-white whitespace-nowrap bg-black/60 px-2 py-0.5 rounded-full pointer-events-none">
-                        {p.name}
-                    </span>
-                </button>
-            );
-        })}
+const ProgressDots = ({ active, total, onDotClick }: { active: number; total: number; onDotClick: (i: number) => void }) => (
+    <div className="fixed right-6 top-1/2 -translate-y-1/2 z-[100] flex flex-col gap-4">
+        {Array.from({ length: total }, (_, i) => (
+            <button
+                key={i}
+                onClick={() => onDotClick(i)}
+                className="w-2.5 h-2.5 rounded-full transition-all duration-300"
+                style={{
+                    background: i === active ? PLANETS[i].color : "rgba(255,255,255,0.2)",
+                    boxShadow: i === active ? `0 0 10px ${PLANETS[i].color}` : "none",
+                    transform: i === active ? "scale(1.5)" : "scale(1)"
+                }}
+            />
+        ))}
     </div>
-));
-ProgressDots.displayName = "ProgressDots";
+);
 
 // ─── Main Component ───────────────────────────────────────────────────────────────
 export const NavagrahaScroll: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [activePlanet, setActivePlanet] = useState(0);
 
-    // Use useScroll + useMotionValueEvent instead of useSpring to avoid re-renders
-    // on every frame during scroll (spring was the main FPS killer)
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"],
     });
 
-    useMotionValueEvent(scrollYProgress, "change", useCallback((v: number) => {
+    useMotionValueEvent(scrollYProgress, "change", (v) => {
         const idx = Math.min(Math.floor(v * PLANETS.length), PLANETS.length - 1);
-        setActivePlanet((prev) => (prev === idx ? prev : idx));
-    }, []));
+        if (idx !== activePlanet) setActivePlanet(idx);
+    });
 
-    const scrollToPlanet = useCallback((i: number) => {
+    const scrollToPlanet = (i: number) => {
         const container = containerRef.current;
         if (!container) return;
         const target = (i / PLANETS.length) * container.scrollHeight + container.offsetTop;
         window.scrollTo({ top: target, behavior: "smooth" });
-    }, []);
+    };
 
     const planet = PLANETS[activePlanet];
 
-    // Background ghost planets – computed but not animated per-frame
-    const ghostPositions = useMemo(() => [
-        { x: -300, y: -110, rotate: -25 },
-        { x: -260, y: 110, rotate: 15 },
-        { x: 300, y: -110, rotate: 25 },
-        { x: 260, y: 110, rotate: -15 },
-    ], []);
-
     return (
-        <>
-            <style>{`
-                @keyframes nava-twinkle {
-                    0%, 100% { opacity: 0.1; transform: scale(1); }
-                    50% { opacity: 0.85; transform: scale(1.2); }
-                }
-                @keyframes nava-nebula-pulse {
-                    0%, 100% { opacity: 0.15; }
-                    50% { opacity: 0.3; }
-                }
-                @keyframes nava-ring-pulse-1 {
-                    0%, 100% { transform: scale(1) translateZ(0); opacity: 0.3; }
-                    50% { transform: scale(1.1) translateZ(0); opacity: 0.08; }
-                }
-                @keyframes nava-ring-pulse-2 {
-                    0%, 100% { transform: scale(1) translateZ(0); opacity: 0.15; }
-                    50% { transform: scale(1.15) translateZ(0); opacity: 0.04; }
-                }
-                @keyframes nava-saturn-ring-1 {
-                    from { transform: rotateX(75deg) rotateZ(0deg); }
-                    to { transform: rotateX(75deg) rotateZ(360deg); }
-                }
-                @keyframes nava-saturn-ring-2 {
-                    from { transform: rotateX(75deg) rotateZ(360deg); }
-                    to { transform: rotateX(75deg) rotateZ(0deg); }
-                }
-                @keyframes nava-symbol-spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-                @keyframes nava-zodiac-float {
-                    0%, 100% { transform: rotate(-3deg) scale(1); }
-                    50% { transform: rotate(3deg) scale(1.04); }
-                }
-                @keyframes nava-dot-pulse {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.4; }
-                }
+        <div ref={containerRef} className="relative" style={{ height: "1200vh" }}>
+            {/* Sticky Viewport */}
+            <div className="sticky top-0 h-screen w-full bg-black overflow-hidden" style={{ zIndex: 10 }}>
 
-                .nava-twinkle {
-                    animation-name: nava-twinkle;
-                    animation-timing-function: ease-in-out;
-                    animation-iteration-count: infinite;
-                }
-                .nava-nebula {
-                    animation: nava-nebula-pulse 6s ease-in-out infinite;
-                }
-                .nava-ring-pulse-1 {
-                    animation: nava-ring-pulse-1 3s ease-in-out infinite;
-                }
-                .nava-ring-pulse-2 {
-                    animation: nava-ring-pulse-2 4s ease-in-out infinite 0.5s;
-                }
-                .nava-saturn-ring-1 {
-                    animation: nava-saturn-ring-1 20s linear infinite;
-                }
-                .nava-saturn-ring-2 {
-                    animation: nava-saturn-ring-2 30s linear infinite;
-                }
-                .nava-symbol-spin {
-                    display: inline-block;
-                    animation-name: nava-symbol-spin;
-                    animation-timing-function: linear;
-                    animation-iteration-count: infinite;
-                }
-                .nava-zodiac-float {
-                    animation: nava-zodiac-float 8s ease-in-out infinite;
-                }
-                .nava-dot-pulse {
-                    display: inline-block;
-                    animation: nava-dot-pulse 2s ease-in-out infinite;
-                }
-                .nava-planet-sphere {
-                    /* Isolate stacking context on iOS so overflow:hidden clips correctly */
-                    -webkit-mask-image: -webkit-radial-gradient(white, black);
-                    isolation: isolate;
-                }
-
-                /* On mobile: reduce twinkle and nebula to ease GPU */
-                @media (max-width: 768px) {
-                    .nava-twinkle { animation-duration: 6s !important; }
-                    .nava-nebula { animation: none !important; opacity: 0.2 !important; }
-                }
-            `}</style>
-
-            {/* Tall scroll container */}
-            <div ref={containerRef} style={{ height: `${PLANETS.length * 120}vh` }} className="relative">
-
-                {/* Sticky viewport - Removed overflow-hidden to prevent clipping issues */}
-                <div className="sticky top-0 h-[100dvh] min-h-[600px] w-full z-10">
-
-                    {/* Background star field */}
-                    <StarField planet={planet} />
-
-                    {/* Scroll progress bar */}
-                    <motion.div
-                        className="fixed top-0 left-0 h-1 z-50 origin-left"
-                        style={{
-                            scaleX: scrollYProgress,
-                            background: `linear-gradient(to right, ${planet.color}, ${planet.secondGlow})`,
-                            boxShadow: `0 0 10px ${planet.color}`,
-                        }}
-                    />
-
-                    {/* Nav dots */}
-                    <ProgressDots active={activePlanet} total={PLANETS.length} onDotClick={scrollToPlanet} />
-
-                    {/* Planet counter */}
-                    <div
-                        className="absolute top-24 left-1/2 -translate-x-1/2 z-50 text-[10px] font-bold tracking-[6px] uppercase pointer-events-none whitespace-nowrap"
-                        style={{ color: planet.color, textShadow: `0 0 10px ${planet.color}40` }}
-                    >
-                        {String(activePlanet + 1).padStart(2, "0")} / {String(PLANETS.length).padStart(2, "0")} — Navagraha
-                    </div>
-
-                    {/* Ghost background planets */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
-                        {ghostPositions.map((pos, i) => {
-                            const idx = (activePlanet + i + 1) % PLANETS.length;
-                            const p = PLANETS[idx];
-                            return (
-                                <motion.div
-                                    key={`ghost-${idx}-${i}`}
-                                    className="absolute rounded-full"
-                                    animate={{ x: pos.x, y: pos.y, rotate: pos.rotate }}
-                                    transition={{ type: "spring", stiffness: 30, damping: 20 }}
-                                    style={{
-                                        width: 80,
-                                        height: 80,
-                                        background: p.bgGradient,
-                                        opacity: 0.1,
-                                        filter: "blur(2px)",
-                                    }}
-                                />
-                            );
-                        })}
-                    </div>
-
-                    {/* Main content: planet + info - Forced z-index and opacity 1 */}
-                    <div className="relative z-50 h-full w-full flex items-center justify-center px-6">
-                        <div className="flex flex-col lg:flex-row items-center justify-center gap-10 lg:gap-24 w-full max-w-7xl">
-
-                            {/* Planet Orb */}
-                            <motion.div
-                                key={planet.id + "-orb"}
-                                initial={{ scale: 0.9 }}
-                                animate={{ scale: 1 }}
-                                transition={{ type: "spring", stiffness: 80, damping: 15 }}
-                                className="flex-shrink-0"
-                            >
-                                <PlanetOrb planet={planet} isActive={true} />
-                            </motion.div>
-
-                            {/* Info Card - No opacity trickery, just render */}
-                            <div className="flex-shrink-0">
-                                <InfoCard key={planet.id + "-info"} planet={planet} />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Scroll hint (first planet only) */}
-                    {activePlanet === 0 && (
-                        <motion.div
-                            className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-xs text-white/40 uppercase tracking-widest"
-                            animate={{ y: [0, 8, 0], opacity: [0.4, 0.8, 0.4] }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                            <span>Scroll to explore</span>
-                            <svg width="16" height="24" viewBox="0 0 16 24" fill="none" aria-hidden="true">
-                                <rect x="5" y="0" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="1.5" />
-                                <circle cx="8" cy="5" r="2" fill="currentColor">
-                                    <animateTransform attributeName="transform" type="translate" values="0,0;0,5;0,0" dur="1.5s" repeatCount="indefinite" />
-                                </circle>
-                                <path d="M4 18l4 5 4-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                        </motion.div>
-                    )}
+                {/* DEBUG BANNER - FORCING VISIBILITY */}
+                <div className="absolute top-0 left-0 w-full bg-red-600 text-white p-4 font-bold text-center z-[200]">
+                    PLANET VISIBILITY DEBUG: Rendering {planet?.name || "MISSING"}
                 </div>
+
+                <StarField planet={planet} />
+
+                <ProgressDots active={activePlanet} total={PLANETS.length} onDotClick={scrollToPlanet} />
+
+                {/* Content Layer */}
+                <div className="relative z-50 h-full w-full flex flex-col lg:flex-row items-center justify-center gap-12 px-6">
+                    <PlanetOrb planet={planet} isActive={true} />
+                    <InfoCard planet={planet} />
+                </div>
+
+                {/* Scroll Hint */}
+                {activePlanet === 0 && (
+                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/30 text-xs tracking-widest uppercase z-50">
+                        Scroll to explore
+                    </div>
+                )}
             </div>
-        </>
+        </div>
     );
 };
