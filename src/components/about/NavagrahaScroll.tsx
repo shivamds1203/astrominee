@@ -205,10 +205,18 @@ const PlanetSection = ({ planet, index, scrollYProgress, total }: any) => {
 
     const rotateY = useTransform(scrollYProgress, [start, end], [30, -30]);
 
+    // Hide the element completely when not in its active range to prevent filter/composite lag
+    const visibility = useTransform(scrollYProgress, (v: number) => {
+        if (v >= start - 0.05 && v <= end + 0.05) {
+            return "visible";
+        }
+        return "hidden";
+    });
+
     return (
         <motion.div
-            style={{ opacity, scale }}
-            className="absolute inset-0 z-20 flex flex-col lg:flex-row items-center justify-center gap-10 lg:gap-24 px-6 pointer-events-none"
+            style={{ opacity, scale, visibility }}
+            className="absolute inset-0 z-20 flex flex-col lg:flex-row items-center justify-center gap-10 lg:gap-24 px-6 pointer-events-none will-change-transform"
         >
             {/* 3D Zodiac Background */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[30vh] font-black pointer-events-none z-0 opacity-[0.03] text-white">
@@ -255,7 +263,7 @@ const PlanetSection = ({ planet, index, scrollYProgress, total }: any) => {
 
             {/* Info Card */}
             <div
-                className="w-full max-w-md p-8 rounded-[2.5rem] border border-white/10 bg-[#080c18]/90 backdrop-blur-3xl shadow-2xl relative z-20 pointer-events-auto"
+                className="w-full max-w-md p-8 rounded-[2.5rem] border border-white/10 bg-[#080c18]/90 backdrop-blur-md shadow-2xl relative z-20 pointer-events-auto"
             >
                 <div className="relative z-10">
                     <div className="flex items-center gap-4 mb-6">
@@ -350,7 +358,7 @@ export const NavagrahaScroll: React.FC = () => {
                             key={planet.id}
                             planet={planet}
                             index={index}
-                            scrollYProgress={smoothProgress}
+                            scrollYProgress={scrollYProgress}
                             total={PLANETS.length}
                         />
                     ))}
