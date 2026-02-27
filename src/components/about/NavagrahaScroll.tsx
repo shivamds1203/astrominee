@@ -316,7 +316,7 @@ export const NavagrahaScroll: React.FC = () => {
     });
 
     return (
-        <div ref={containerRef} className="relative z-0" style={{ height: "1000vh" }}>
+        <div ref={containerRef} className="relative z-0" style={{ height: "2000vh" }}>
             {/* Sticky Background & Base */}
             <div className="sticky top-0 h-screen w-full bg-[#05070a] overflow-hidden flex items-center justify-center z-50">
 
