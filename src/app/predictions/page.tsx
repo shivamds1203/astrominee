@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Bot, Sparkles, Brain, AlertCircle, RefreshCw } from 'lucide-react';
 import { AIChatBox } from '@/components/predictions/AIChatBox';
-import { ScrollSection3D } from '@/components/ui/ScrollSection3D';
 
 export default function PredictionsPage() {
     const [loading, setLoading] = useState(false);
@@ -65,7 +64,7 @@ export default function PredictionsPage() {
     return (
         <main className="min-h-screen pt-28 pb-16 px-4 md:px-6 max-w-5xl mx-auto relative z-10">
             {/* ── Header Section ── */}
-            <ScrollSection3D intensity="subtle" depth={25} className="text-center mb-8">
+            <section className="text-center mb-8">
                 <div className="inline-flex items-center justify-center p-3.5 glass-panel rounded-full mb-4 border border-amber-500/30 dark:border-yellow-500/30 shadow-[0_0_20px_rgba(212,175,55,0.15)]">
                     <Bot className="w-8 h-8 text-amber-600 dark:text-yellow-400" />
                 </div>
@@ -75,10 +74,10 @@ export default function PredictionsPage() {
                 <p className="text-slate-600 dark:text-gray-400 max-w-xl mx-auto font-light leading-relaxed text-sm md:text-base">
                     Your friendly ChatGPT-style cosmic guide. Ask anything about your Vedic Kundli, planetary transits, love compatibility, career timing, and personalized remedies.
                 </p>
-            </ScrollSection3D>
+            </section>
 
             {/* ── Chatbot Container ── */}
-            <ScrollSection3D intensity="subtle" depth={30}>
+            <section>
                 <motion.div
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -118,7 +117,7 @@ export default function PredictionsPage() {
                         )}
                     </div>
                 </motion.div>
-            </ScrollSection3D>
+            </section>
         </main>
     );
 }

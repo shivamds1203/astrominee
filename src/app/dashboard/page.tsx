@@ -9,7 +9,6 @@ import { SouthIndianChart } from "@/components/charts/SouthIndianChart";
 import { generateDivisionalChart, getNakshatraDetails, calculateVimshottariDashas } from "@/lib/astrologyMath";
 import { generateAstrologyPDF } from "@/lib/generatePDF";
 import { PredictionsSection } from "@/components/dashboard/PredictionsSection";
-import { ScrollSection3D } from "@/components/ui/ScrollSection3D";
 import { VimshottariDashaTree } from "@/components/dashboard/VimshottariDashaTree";
 
 const VARGAS = [
@@ -177,9 +176,9 @@ export default function DashboardPage() {
     if (!isMounted) return null;
 
     return (
-        <main className="min-h-screen pt-28 pb-16 px-6 max-w-7xl mx-auto">
+        <main className="min-h-screen pt-28 pb-16 px-4 md:px-6 max-w-7xl mx-auto relative z-10">
             {/* ── Dashboard Header ── */}
-            <ScrollSection3D intensity="subtle" depth={20} className="mb-8">
+            <section className="mb-8">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-yellow-500 dark:from-yellow-500 dark:to-yellow-200">
@@ -217,7 +216,7 @@ export default function DashboardPage() {
                         </button>
                     </div>
                 </div>
-            </ScrollSection3D>
+            </section>
 
             {/* Control Bar: Chart Style + Quick Varga Switchers */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
@@ -258,8 +257,8 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            {/* ── Main Chart & Analysis 3D Section ── */}
-            <ScrollSection3D intensity="subtle" depth={30}>
+            {/* ── Main Chart & Analysis Section ── */}
+            <section className="mb-12">
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                     {/* Main Rashi Chart Card */}
                     <div
@@ -411,10 +410,10 @@ export default function DashboardPage() {
                         </div>
                     </div>
                 </div>
-            </ScrollSection3D>
+            </section>
 
             {/* ── Vimshottari Dasha Hierarchy (120-Year Mahadasha, Antardasha, Pratyantar) ── */}
-            <ScrollSection3D intensity="subtle" depth={25} className="mt-12">
+            <section className="mt-12">
                 {planetsData && planetsData.length > 0 && (() => {
                     const moonPlanet = planetsData.find(p => p.name === "Moon");
                     const moonFullDegree = moonPlanet?.fullDegree ?? 306.68;
@@ -422,10 +421,10 @@ export default function DashboardPage() {
                     const dashas = calculateVimshottariDashas(moonFullDegree, dob);
                     return <VimshottariDashaTree dashas={dashas} />;
                 })()}
-            </ScrollSection3D>
+            </section>
 
             {/* ── Deep Astrological Insights Section (Dynamic Vedic Interpretations) ── */}
-            <ScrollSection3D intensity="subtle" depth={25} className="mt-12">
+            <section className="mt-12">
                 <div className="glass-panel p-6 md:p-8 rounded-3xl border border-slate-200/80 dark:border-white/10 shadow-xl">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="p-3 bg-purple-500/10 rounded-2xl border border-purple-500/20">
@@ -442,9 +441,9 @@ export default function DashboardPage() {
                             const isOpen = expandedInsight === insight.id;
                             const IconComponent = insight.icon;
                             return (
-                                <motion.div
+                                <div
                                     key={insight.id}
-                                    className={`p-6 rounded-2xl border transition-all cursor-pointer ${isOpen
+                                    className={`p-6 rounded-2xl border transition-all cursor-pointer select-none ${isOpen
                                         ? "bg-white/95 dark:bg-white/[0.04] border-indigo-500/50 shadow-md"
                                         : "bg-slate-50/80 dark:bg-white/[0.01] border-slate-200/80 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10 shadow-xs"
                                         }`}
@@ -460,9 +459,9 @@ export default function DashboardPage() {
                                                 <h3 className="font-bold text-slate-900 dark:text-white text-base">{insight.title}</h3>
                                             </div>
                                         </div>
-                                        <motion.div animate={{ rotate: isOpen ? 180 : 0 }}>
-                                            <ChevronDown className="w-4 h-4 text-slate-400 dark:text-gray-400 mt-1" />
-                                        </motion.div>
+                                        <div className="text-slate-400 dark:text-gray-400 mt-1">
+                                            <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                                        </div>
                                     </div>
                                     <AnimatePresence>
                                         {isOpen && (
@@ -477,17 +476,17 @@ export default function DashboardPage() {
                                             </motion.p>
                                         )}
                                     </AnimatePresence>
-                                </motion.div>
+                                </div>
                             );
                         })}
                     </div>
                 </div>
-            </ScrollSection3D>
+            </section>
 
             {/* ── Planetary Interpretations & AI Chat Section ── */}
-            <ScrollSection3D intensity="subtle" depth={20} className="mt-12">
+            <section className="mt-12">
                 <PredictionsSection planetsData={planetsData || []} />
-            </ScrollSection3D>
+            </section>
         </main>
     );
 }

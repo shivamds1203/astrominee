@@ -19,11 +19,8 @@ export const ScrollSection3D: React.FC<ScrollSection3DProps> = ({
     children,
     className = "",
     intensity = "medium",
-    depth = 60,
-    rotateFactor = 8,
-    perspective = 1000,
-    enableParallax = true,
-    parallaxSpeed = 30,
+    enableParallax = false,
+    parallaxSpeed = 15,
     id,
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -35,22 +32,14 @@ export const ScrollSection3D: React.FC<ScrollSection3DProps> = ({
     });
 
     const smoothProgress = useSpring(scrollYProgress, {
-        stiffness: 120,
-        damping: 24,
+        stiffness: 140,
+        damping: 26,
         restDelta: 0.001,
     });
 
-    // Multipliers based on intensity
-    const intensityMultiplier = intensity === "subtle" ? 0.5 : intensity === "dramatic" ? 1.5 : 1;
-    const maxRotate = rotateFactor * intensityMultiplier;
-    const maxDepth = depth * intensityMultiplier;
-
-    // 3D scroll transforms
-    const rotateX = useTransform(smoothProgress, [0, 0.5, 1], [maxRotate, 0, -maxRotate]);
-    const scale = useTransform(smoothProgress, [0, 0.5, 1], [0.94, 1, 0.96]);
-    const opacity = useTransform(smoothProgress, [0, 0.2, 0.8, 1], [0.6, 1, 1, 0.6]);
-    const translateZ = useTransform(smoothProgress, [0, 0.5, 1], [-maxDepth, 0, -maxDepth]);
-    const yParallax = useTransform(smoothProgress, [0, 1], [parallaxSpeed, -parallaxSpeed]);
+    // Clean, GPU-accelerated 2D transforms that NEVER break pointer-events or hit testing
+    const opacity = useTransform(smoothProgress, [0, 0.15, 0.85, 1], [0.85, 1, 1, 0.85]);
+    const yParallax = useTransform(smoothProgress, [0, 1], [enableParallax ? parallaxSpeed : 0, enableParallax ? -parallaxSpeed : 0]);
 
     if (shouldReduceMotion) {
         return (
@@ -64,19 +53,14 @@ export const ScrollSection3D: React.FC<ScrollSection3DProps> = ({
         <section
             id={id}
             ref={containerRef}
-            style={{ perspective: `${perspective}px` }}
-            className={`relative preserve-3d will-change-transform ${className}`}
+            className={`relative ${className}`}
         >
             <motion.div
                 style={{
-                    rotateX,
-                    scale,
                     opacity,
-                    z: translateZ,
-                    y: enableParallax ? yParallax : 0,
-                    transformStyle: "preserve-3d",
+                    y: yParallax,
                 }}
-                className="w-full h-full will-change-transform"
+                className="w-full h-full"
             >
                 {children}
             </motion.div>
