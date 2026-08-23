@@ -30,9 +30,22 @@ const VARGAS = [
     { num: 60, name: "D60 - Shashtiamsa (All areas)" }
 ];
 
+const DEFAULT_SAMPLE_PLANETS = [
+    { id: 0, name: "Sun", fullDegree: 327.51, normDegree: 27.51, current_sign: 11, house_number: 1, isRetro: "false", nakshatra: "Purva Bhadrapada" },
+    { id: 1, name: "Moon", fullDegree: 306.68, normDegree: 6.68, current_sign: 11, house_number: 1, isRetro: "false", nakshatra: "Shatabhisha" },
+    { id: 2, name: "Mars", fullDegree: 28.45, normDegree: 28.45, current_sign: 1, house_number: 3, isRetro: "false", nakshatra: "Krittika" },
+    { id: 3, name: "Mercury", fullDegree: 310.22, normDegree: 10.22, current_sign: 11, house_number: 1, isRetro: "false", nakshatra: "Shatabhisha" },
+    { id: 4, name: "Jupiter", fullDegree: 72.84, normDegree: 12.84, current_sign: 3, house_number: 5, isRetro: "false", nakshatra: "Ardra" },
+    { id: 5, name: "Venus", fullDegree: 350.15, normDegree: 20.15, current_sign: 12, house_number: 2, isRetro: "false", nakshatra: "Revati" },
+    { id: 6, name: "Saturn", fullDegree: 45.32, normDegree: 15.32, current_sign: 2, house_number: 4, isRetro: "false", nakshatra: "Rohini" },
+    { id: 7, name: "Rahu", fullDegree: 76.24, normDegree: 16.24, current_sign: 3, house_number: 5, isRetro: "true", nakshatra: "Ardra" },
+    { id: 8, name: "Ketu", fullDegree: 256.24, normDegree: 16.24, current_sign: 9, house_number: 11, isRetro: "true", nakshatra: "Mula" },
+    { id: 9, name: "Ascendant", fullDegree: 327.51, normDegree: 27.51, current_sign: 11, house_number: 1, isRetro: "false", nakshatra: "Purva Bhadrapada" },
+];
+
 export default function DashboardPage() {
     const [chartStyle, setChartStyle] = useState<"north" | "south">("north");
-    const [planetsData, setPlanetsData] = useState<any>(null);
+    const [planetsData, setPlanetsData] = useState<any[]>(DEFAULT_SAMPLE_PLANETS);
     const [userData, setUserData] = useState<any>(null);
     const [isMounted, setIsMounted] = useState(false);
     const [selectedVarga, setSelectedVarga] = useState<number>(1);
@@ -47,7 +60,6 @@ export default function DashboardPage() {
             return;
         }
         setIsSaved(true);
-        // In real app: save to Firestore here
     };
 
     const insights = [
@@ -59,23 +71,40 @@ export default function DashboardPage() {
 
     useEffect(() => {
         setIsMounted(true);
-        // Read the passed data from session storage (populated by the Form)
-        const storedChart = sessionStorage.getItem("chartData");
-        const storedUser = sessionStorage.getItem("userData");
+        // Read data from sessionStorage (saved by BirthDetailsForm)
+        try {
+            const storedChart = sessionStorage.getItem("chartData");
+            const storedUser = sessionStorage.getItem("userData");
 
-        if (storedChart) {
-            const rawData = JSON.parse(storedChart);
-            // The API returns { output: [ { "0": {name: "Ascendant"...}, "1": {...} }, ... ] }
-            const outputArray = rawData.output || [];
-            const planetObjectMap = outputArray[0] || {};
+            if (storedChart) {
+                const rawData = JSON.parse(storedChart);
+                let planetsArray: any[] = [];
 
-            const planetsArray = Object.keys(planetObjectMap)
-                .filter(k => k !== 'debug' && k !== 'ayanamsa') // Ignore metadata
-                .map(k => planetObjectMap[k]);
+                if (Array.isArray(rawData) && rawData.length > 0) {
+                    planetsArray = rawData;
+                } else if (rawData.data && Array.isArray(rawData.data) && rawData.data.length > 0) {
+                    planetsArray = rawData.data;
+                } else if (rawData.output && Array.isArray(rawData.output) && rawData.output.length > 0) {
+                    const planetObjectMap = rawData.output[0] || {};
+                    planetsArray = Object.keys(planetObjectMap)
+                        .filter(k => k !== 'debug' && k !== 'ayanamsa')
+                        .map(k => planetObjectMap[k]);
+                } else if (typeof rawData === 'object' && rawData !== null) {
+                    planetsArray = Object.keys(rawData)
+                        .filter(k => k !== 'debug' && k !== 'ayanamsa')
+                        .map(k => rawData[k]);
+                }
 
-            setPlanetsData(planetsArray);
+                if (planetsArray.length > 0) {
+                    setPlanetsData(planetsArray);
+                }
+            }
+            if (storedUser) {
+                setUserData(JSON.parse(storedUser));
+            }
+        } catch (e) {
+            console.error("Error reading chart data:", e);
         }
-        if (storedUser) setUserData(JSON.parse(storedUser));
     }, []);
 
     if (!isMounted) return null;
@@ -87,10 +116,12 @@ export default function DashboardPage() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-yellow-500 dark:from-yellow-500 dark:to-yellow-200">
-                            {userData ? `${userData.name}'s Horoscope` : "Your Horoscope"}
+                            {userData ? `${userData.name}'s Horoscope` : "Vedic Birth Chart"}
                         </h1>
-                        {userData && (
-                            <p className="text-slate-600 dark:text-gray-400 mt-1 text-sm font-light">Born: {userData.dateOfBirth} at {userData.timeOfBirth} in {userData.placeOfBirth.split(',')[0]}</p>
+                        {userData ? (
+                            <p className="text-slate-600 dark:text-gray-400 mt-1 text-sm font-light">Born: {userData.dateOfBirth} at {userData.timeOfBirth} in {userData.placeOfBirth?.split(',')[0]}</p>
+                        ) : (
+                            <p className="text-slate-600 dark:text-gray-400 mt-1 text-sm font-light">Interactive Planetary Map & Divisional Charts (D1 - D60)</p>
                         )}
                     </div>
 
@@ -107,13 +138,13 @@ export default function DashboardPage() {
                         </button>
                         <button
                             onClick={() => navigator.clipboard.writeText(window.location.href)}
-                            className="glass-panel text-slate-800 dark:text-white hover:bg-slate-200/50 dark:hover:bg-white/10 px-4 py-2 rounded-xl flex items-center gap-2 text-sm transition-colors border border-slate-300/80 dark:border-white/10 shadow-sm"
+                            className="glass-panel text-slate-800 dark:text-white hover:bg-slate-200/50 dark:hover:bg-white/10 px-4 py-2 rounded-xl flex items-center gap-2 text-sm transition-colors border border-slate-300/80 dark:border-white/10 shadow-sm cursor-pointer"
                         >
                             <Share2 className="w-4 h-4" /> Share
                         </button>
                         <button
                             onClick={() => generateAstrologyPDF(planetsData || [], userData)}
-                            className="glass-panel text-slate-800 dark:text-white hover:bg-slate-200/50 dark:hover:bg-white/10 px-4 py-2 rounded-xl flex items-center gap-2 text-sm transition-colors border border-slate-300/80 dark:border-white/10 shadow-sm"
+                            className="glass-panel text-slate-800 dark:text-white hover:bg-slate-200/50 dark:hover:bg-white/10 px-4 py-2 rounded-xl flex items-center gap-2 text-sm transition-colors border border-slate-300/80 dark:border-white/10 shadow-sm cursor-pointer"
                         >
                             <Download className="w-4 h-4" /> PDF Report
                         </button>
@@ -121,20 +152,45 @@ export default function DashboardPage() {
                 </div>
             </ScrollSection3D>
 
-            {/* Control Bar */}
-            <div className="glass-panel p-1.5 rounded-2xl border border-slate-200/80 dark:border-white/10 mb-8 inline-flex shadow-sm">
-                <button
-                    onClick={() => setChartStyle("north")}
-                    className={`px-6 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer ${chartStyle === "north" ? "bg-amber-500/20 dark:bg-yellow-500/20 text-amber-700 dark:text-yellow-400 border border-amber-500/40 dark:border-yellow-500/50 shadow-[0_0_15px_rgba(212,175,55,0.2)]" : "text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white"}`}
-                >
-                    North Indian
-                </button>
-                <button
-                    onClick={() => setChartStyle("south")}
-                    className={`px-6 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer ${chartStyle === "south" ? "bg-amber-500/20 dark:bg-yellow-500/20 text-amber-700 dark:text-yellow-400 border border-amber-500/40 dark:border-yellow-500/50 shadow-[0_0_15px_rgba(212,175,55,0.2)]" : "text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white"}`}
-                >
-                    South Indian
-                </button>
+            {/* Control Bar: Chart Style + Quick Varga Switchers */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+                {/* Style Selector */}
+                <div className="glass-panel p-1.5 rounded-2xl border border-slate-200/80 dark:border-white/10 inline-flex shadow-sm">
+                    <button
+                        onClick={() => setChartStyle("north")}
+                        className={`px-6 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${chartStyle === "north" ? "bg-amber-500/20 dark:bg-yellow-500/20 text-amber-700 dark:text-yellow-400 border border-amber-500/40 dark:border-yellow-500/50 shadow-[0_0_15px_rgba(212,175,55,0.2)]" : "text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white"}`}
+                    >
+                        North Indian Style
+                    </button>
+                    <button
+                        onClick={() => setChartStyle("south")}
+                        className={`px-6 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${chartStyle === "south" ? "bg-amber-500/20 dark:bg-yellow-500/20 text-amber-700 dark:text-yellow-400 border border-amber-500/40 dark:border-yellow-500/50 shadow-[0_0_15px_rgba(212,175,55,0.2)]" : "text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white"}`}
+                    >
+                        South Indian Style
+                    </button>
+                </div>
+
+                {/* Quick Varga Chips */}
+                <div className="flex items-center gap-2">
+                    {[1, 9, 10].map(num => {
+                        const v = VARGAS.find(item => item.num === num);
+                        if (!v) return null;
+                        const isSelected = selectedVarga === num;
+                        return (
+                            <button
+                                key={num}
+                                onClick={() => setSelectedVarga(num)}
+                                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                                    isSelected
+                                        ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
+                                        : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-gray-400 border-slate-200 dark:border-white/10 hover:text-slate-900 dark:hover:text-white"
+                                }`}
+                            >
+                                {num === 1 ? "D1 Rashi" : num === 9 ? "D9 Navamsa" : "D10 Dashamsa"}
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* ── Main Chart & Analysis 3D Section ── */}
@@ -155,28 +211,36 @@ export default function DashboardPage() {
                             <div className="relative">
                                 <button
                                     onClick={() => setIsVargaDropdownOpen(!isVargaDropdownOpen)}
-                                    className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-300/80 dark:border-white/10 px-4 py-2 rounded-xl text-sm text-slate-800 dark:text-gray-300 transition-colors cursor-pointer"
+                                    className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-300/80 dark:border-white/10 px-4 py-2 rounded-xl text-sm font-semibold text-slate-800 dark:text-gray-300 transition-colors cursor-pointer"
                                 >
-                                    Change Chart <ChevronDown className="w-4 h-4" />
+                                    Change Chart <ChevronDown className={`w-4 h-4 transition-transform ${isVargaDropdownOpen ? "rotate-180" : ""}`} />
                                 </button>
 
                                 {isVargaDropdownOpen && (
-                                    <div className="absolute right-0 top-12 w-64 glass-strong border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl z-50 max-h-80 overflow-y-auto custom-scrollbar">
-                                        {VARGAS.map(varga => (
-                                            <button
-                                                key={varga.num}
-                                                onClick={() => { setSelectedVarga(varga.num); setIsVargaDropdownOpen(false); }}
-                                                className={`w-full text-left px-4 py-3 text-sm transition-colors border-b border-slate-100 dark:border-white/5 last:border-0 ${selectedVarga === varga.num ? 'bg-amber-500/20 dark:bg-yellow-500/20 text-amber-700 dark:text-yellow-400 font-semibold' : 'text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-white/10'}`}
-                                            >
-                                                {varga.name}
-                                            </button>
-                                        ))}
-                                    </div>
+                                    <>
+                                        <div
+                                            className="fixed inset-0 z-40"
+                                            onClick={() => setIsVargaDropdownOpen(false)}
+                                        />
+                                        <div className="absolute right-0 top-12 w-64 glass-strong border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl z-50 max-h-80 overflow-y-auto custom-scrollbar">
+                                            {VARGAS.map(varga => (
+                                                <button
+                                                    key={varga.num}
+                                                    onClick={() => { setSelectedVarga(varga.num); setIsVargaDropdownOpen(false); }}
+                                                    className={`w-full text-left px-4 py-3 text-sm transition-colors border-b border-slate-100 dark:border-white/5 last:border-0 flex items-center justify-between cursor-pointer ${selectedVarga === varga.num ? 'bg-amber-500/20 dark:bg-yellow-500/20 text-amber-700 dark:text-yellow-400 font-semibold' : 'text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-white/10'}`}
+                                                >
+                                                    <span>{varga.name}</span>
+                                                    {selectedVarga === varga.num && <Check className="w-4 h-4 text-amber-600 dark:text-yellow-400" />}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </>
                                 )}
                             </div>
                         </div>
 
                         <div className="aspect-square max-w-lg mx-auto bg-slate-950/90 dark:bg-black/60 rounded-2xl border border-slate-300/60 dark:border-white/10 flex items-center justify-center relative backdrop-blur-md overflow-hidden p-4 shadow-2xl">
+
                             {chartStyle === "north" ? (
                                 <NorthIndianChart planetsData={generateDivisionalChart(planetsData || [], selectedVarga)} />
                             ) : (

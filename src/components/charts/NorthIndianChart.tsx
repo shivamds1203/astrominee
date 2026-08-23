@@ -23,59 +23,75 @@ const PLANET_IMAGES: Record<string, string> = {
 
 // Per-planet glow color for the ring effect
 const PLANET_GLOW: Record<string, string> = {
-    Sun: "shadow-[0_0_10px_#f97316,0_0_4px_#f59e0b]",
-    Moon: "shadow-[0_0_10px_#e2e8f0,0_0_4px_#f1f5f9]",
-    Mars: "shadow-[0_0_10px_#ef4444,0_0_4px_#dc2626]",
-    Mercury: "shadow-[0_0_10px_#10b981,0_0_4px_#34d399]",
-    Jupiter: "shadow-[0_0_10px_#f59e0b,0_0_4px_#fbbf24]",
-    Venus: "shadow-[0_0_10px_#ec4899,0_0_4px_#f472b6]",
-    Saturn: "shadow-[0_0_10px_#6366f1,0_0_4px_#818cf8]",
-    Rahu: "shadow-[0_0_10px_#94a3b8,0_0_4px_#64748b]",
-    Ketu: "shadow-[0_0_10px_#d6d3d1,0_0_4px_#a8a29e]",
-    Ascendant: "shadow-[0_0_12px_#22d3ee,0_0_4px_#06b6d4]",
+    Sun: "shadow-[0_0_8px_#f97316,0_0_3px_#f59e0b]",
+    Moon: "shadow-[0_0_8px_#e2e8f0,0_0_3px_#f1f5f9]",
+    Mars: "shadow-[0_0_8px_#ef4444,0_0_3px_#dc2626]",
+    Mercury: "shadow-[0_0_8px_#10b981,0_0_3px_#34d399]",
+    Jupiter: "shadow-[0_0_8px_#f59e0b,0_0_3px_#fbbf24]",
+    Venus: "shadow-[0_0_8px_#ec4899,0_0_3px_#f472b6]",
+    Saturn: "shadow-[0_0_8px_#6366f1,0_0_3px_#818cf8]",
+    Rahu: "shadow-[0_0_8px_#94a3b8,0_0_3px_#64748b]",
+    Ketu: "shadow-[0_0_8px_#d6d3d1,0_0_3px_#a8a29e]",
+    Ascendant: "shadow-[0_0_10px_#22d3ee,0_0_3px_#06b6d4]",
+};
+
+const PLANET_SHORT: Record<string, string> = {
+    Sun: "Su",
+    Moon: "Mo",
+    Mars: "Ma",
+    Mercury: "Me",
+    Jupiter: "Ju",
+    Venus: "Ve",
+    Saturn: "Sa",
+    Rahu: "Ra",
+    Ketu: "Ke",
+    Ascendant: "Asc",
 };
 
 export const NorthIndianChart = ({ planetsData }: ChartProps) => {
     const houses: { [key: number]: Array<{ name: string; degree: string; isRetro: boolean }> } = {};
     for (let i = 1; i <= 12; i++) houses[i] = [];
 
-    const validPlanets = planetsData?.filter(p => p && p.name && p.house_number);
+    const validPlanets = planetsData?.filter(p => p && p.name && (p.house_number !== undefined || p.house !== undefined || p.current_sign !== undefined)) || [];
 
-    validPlanets?.forEach(planet => {
-        const hNum = parseInt(planet.house_number, 10);
-        const deg = planet.normDegree || 0;
+    validPlanets.forEach(planet => {
+        const hNum = parseInt(planet.house_number || planet.house || planet.current_sign || 1, 10);
+        const deg = planet.normDegree !== undefined ? planet.normDegree : ((planet.fullDegree || 0) % 30);
         const d = Math.floor(deg);
         const m = Math.floor((deg - d) * 60);
         if (houses[hNum]) {
             houses[hNum].push({
                 name: planet.name,
                 degree: `${d}°${m}'`,
-                isRetro: planet.isRetro === "true",
+                isRetro: planet.isRetro === "true" || planet.isRetro === true,
             });
         }
     });
 
-    const ascendantSign = validPlanets?.find(p => p.name === "Ascendant")?.current_sign || 1;
+    // Ascendant sign for this chart (determines Rashi in House 1)
+    const ascPlanet = validPlanets.find(p => p.name === "Ascendant");
+    const ascendantSign = ascPlanet?.current_sign ? parseInt(ascPlanet.current_sign, 10) : 1;
+
+    // In Vedic North Indian chart, houses go counter-clockwise 1 to 12.
+    // House 1 displays ascendantSign, House 2 displays (ascendantSign + 1), etc.
     const getSignNumForHouse = (houseNumber: number) => {
-        let sign = ascendantSign + (houseNumber - 1);
-        if (sign > 12) sign -= 12;
-        return sign;
+        return (((ascendantSign - 1) + (houseNumber - 1)) % 12) + 1;
     };
 
-    // Precise centers & sign label positions for all 12 houses in the North Indian layout
+    // Centers & sign label coordinates for North Indian layout
     const positions: Record<number, { cx: string; cy: string; signX: string; signY: string }> = {
-        1: { cx: "50%", cy: "21%", signX: "50%", signY: "12%" }, // Top center diamond
-        2: { cx: "25%", cy: "12%", signX: "28%", signY: "17%" }, // Top-left triangle
-        3: { cx: "12%", cy: "25%", signX: "18%", signY: "28%" }, // Left-top triangle
-        4: { cx: "22%", cy: "50%", signX: "12%", signY: "50%" }, // Left diamond
-        5: { cx: "12%", cy: "75%", signX: "18%", signY: "72%" }, // Left-bottom triangle
-        6: { cx: "25%", cy: "88%", signX: "28%", signY: "83%" }, // Bottom-left triangle
-        7: { cx: "50%", cy: "79%", signX: "50%", signY: "88%" }, // Bottom diamond
-        8: { cx: "75%", cy: "88%", signX: "72%", signY: "83%" }, // Bottom-right triangle
-        9: { cx: "88%", cy: "75%", signX: "82%", signY: "72%" }, // Right-bottom triangle
-        10: { cx: "78%", cy: "50%", signX: "88%", signY: "50%" }, // Right diamond
-        11: { cx: "88%", cy: "25%", signX: "82%", signY: "28%" }, // Right-top triangle
-        12: { cx: "75%", cy: "12%", signX: "72%", signY: "17%" }, // Top-right triangle
+        1: { cx: "50%", cy: "22%", signX: "50%", signY: "8%" },   // Top center diamond (Lagna)
+        2: { cx: "24%", cy: "11%", signX: "32%", signY: "18%" },  // Top-left triangle
+        3: { cx: "11%", cy: "24%", signX: "18%", signY: "32%" },  // Left-top triangle
+        4: { cx: "22%", cy: "50%", signX: "38%", signY: "50%" },  // Left center diamond
+        5: { cx: "11%", cy: "76%", signX: "18%", signY: "68%" },  // Left-bottom triangle
+        6: { cx: "24%", cy: "89%", signX: "32%", signY: "82%" },  // Bottom-left triangle
+        7: { cx: "50%", cy: "78%", signX: "50%", signY: "62%" },  // Bottom center diamond
+        8: { cx: "76%", cy: "89%", signX: "68%", signY: "82%" },  // Bottom-right triangle
+        9: { cx: "89%", cy: "76%", signX: "82%", signY: "68%" },  // Right-bottom triangle
+        10: { cx: "78%", cy: "50%", signX: "62%", signY: "50%" }, // Right center diamond
+        11: { cx: "89%", cy: "24%", signX: "82%", signY: "32%" }, // Right-top triangle
+        12: { cx: "76%", cy: "11%", signX: "68%", signY: "18%" }, // Top-right triangle
     };
 
     const renderHouseContent = (houseNum: number) => {
@@ -85,31 +101,38 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
 
         return (
             <React.Fragment key={houseNum}>
-                {/* Sign Number Label */}
+                {/* Rashi / Sign Number in the corner of this house */}
                 <div
                     className="absolute -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none"
                     style={{ left: pos.signX, top: pos.signY }}
                 >
-                    <span className="text-yellow-600 dark:text-yellow-400/80 text-[10px] md:text-[11px] font-bold font-mono leading-none">
+                    <span className="text-amber-500 dark:text-yellow-400 font-extrabold text-[11px] md:text-xs font-mono drop-shadow-[0_0_2px_rgba(0,0,0,0.8)]">
                         {getSignNumForHouse(houseNum)}
                     </span>
                 </div>
 
-                {/* Planet Orbs Area */}
+                {/* Planet Orbs in this house */}
                 <div
-                    className="absolute -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center justify-center"
-                    style={{ left: pos.cx, top: pos.cy, width: "44%", height: "44%" }}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center justify-center pointer-events-auto"
+                    style={{
+                        left: pos.cx,
+                        top: pos.cy,
+                        width: (houseNum === 1 || houseNum === 4 || houseNum === 7 || houseNum === 10) ? "34%" : "22%",
+                        height: (houseNum === 1 || houseNum === 4 || houseNum === 7 || houseNum === 10) ? "34%" : "22%",
+                    }}
                 >
                     {isAscendant && (
-                        <span className="text-[9px] font-extrabold tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-yellow-600 dark:from-yellow-300 dark:to-yellow-600 drop-shadow-[0_0_4px_rgba(212,175,55,0.8)] mb-1 leading-none">
+                        <span className="text-[8px] md:text-[9px] font-black tracking-widest uppercase text-amber-400 dark:text-yellow-300 drop-shadow-[0_0_6px_rgba(234,179,8,0.8)] mb-0.5 leading-none">
                             LAGNA
                         </span>
                     )}
-                    <div className="flex flex-wrap items-center justify-center gap-1.5 max-w-full">
+
+                    <div className="flex flex-wrap items-center justify-center gap-1 max-w-full">
                         {housePlanets.map((p, i) => {
                             const img = PLANET_IMAGES[p.name] ?? PLANET_IMAGES.Moon;
                             const glow = PLANET_GLOW[p.name] ?? "";
-                            const short = p.name.substring(0, 2);
+                            const short = PLANET_SHORT[p.name] ?? p.name.substring(0, 2);
+
                             return (
                                 <motion.div
                                     key={i}
@@ -117,42 +140,43 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
                                     animate={{ scale: 1, opacity: 1 }}
                                     transition={{
                                         type: "spring",
-                                        stiffness: 220,
-                                        damping: 14,
-                                        delay: houseNum * 0.04 + i * 0.1,
+                                        stiffness: 260,
+                                        damping: 16,
+                                        delay: houseNum * 0.03 + i * 0.06,
                                     }}
-                                    className="relative group cursor-pointer"
+                                    className="relative group cursor-pointer flex flex-col items-center"
                                 >
-                                    {/* Planet orb */}
+                                    {/* Planet Sphere Orb */}
                                     <div
-                                        className={`w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden relative border border-white/30 dark:border-white/20 ${glow} group-hover:scale-[1.5] transition-transform duration-300 bg-black`}
+                                        className={`w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden relative border border-white/40 dark:border-white/25 ${glow} group-hover:scale-125 transition-transform duration-200 bg-slate-950 flex-shrink-0 shadow-lg`}
                                     >
                                         <img
                                             src={img}
-                                            alt={`${p.name} planet`}
-                                            className="w-full h-full object-cover"
-                                            loading="lazy"
+                                            alt={`${p.name}`}
+                                            className="w-full h-full object-cover rounded-full"
+                                            loading="eager"
                                         />
-                                        {/* Sphere sheen */}
-                                        <div className="absolute inset-0 rounded-full shadow-[inset_-2px_-2px_5px_rgba(0,0,0,0.7),inset_1px_1px_4px_rgba(255,255,255,0.45)]" />
-                                        {/* Tiny planet label */}
-                                        <span className="absolute inset-0 flex items-center justify-center text-[7px] font-bold text-white drop-shadow-[0_0_2px_rgba(0,0,0,1)]">
-                                            {short}
-                                        </span>
+                                        {/* 3D Sheen overlay */}
+                                        <div className="absolute inset-0 rounded-full shadow-[inset_-1.5px_-1.5px_4px_rgba(0,0,0,0.8),inset_1px_1px_3px_rgba(255,255,255,0.6)] pointer-events-none" />
                                     </div>
+
+                                    {/* Text Tag (Abbreviation) */}
+                                    <span className="text-[7px] md:text-[8px] font-bold text-white leading-none mt-0.5 px-0.5 rounded bg-black/60 drop-shadow-[0_1px_2px_rgba(0,0,0,1)]">
+                                        {short}
+                                    </span>
 
                                     {/* Retrograde badge */}
                                     {p.isRetro && (
-                                        <span className="absolute -bottom-1 -right-1 z-30 text-[7px] font-bold text-rose-300 bg-rose-950/90 rounded-full w-3 h-3 flex items-center justify-center border border-rose-500/80 shadow-sm">
+                                        <span className="absolute -top-1 -right-1 z-30 text-[6.5px] font-black text-rose-200 bg-rose-700 rounded-full w-3 h-3 flex items-center justify-center border border-rose-400 shadow-sm">
                                             R
                                         </span>
                                     )}
 
-                                    {/* Hover tooltip */}
-                                    <div className="absolute bottom-[calc(100%+6px)] left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900/95 dark:bg-[#0a0f1c]/95 border border-white/10 rounded-lg px-2.5 py-1.5 flex flex-col items-center shadow-2xl z-50 min-w-max">
+                                    {/* Hover Tooltip */}
+                                    <div className="absolute bottom-[calc(100%+6px)] left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900/98 dark:bg-[#070c18]/98 border border-white/20 rounded-xl px-2.5 py-1.5 flex flex-col items-center shadow-2xl z-50 min-w-max">
                                         <span className="text-[11px] text-white font-bold">{p.name}</span>
-                                        {p.name !== "Ascendant" && (
-                                            <span className="text-[10px] text-yellow-400 font-mono">{p.degree}</span>
+                                        {p.degree && (
+                                            <span className="text-[10px] text-yellow-400 font-mono font-medium">{p.degree}</span>
                                         )}
                                     </div>
                                 </motion.div>
@@ -166,45 +190,66 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
 
     return (
         <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.94 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, type: "spring" }}
-            className="relative w-full max-w-[460px] aspect-square mx-auto bg-slate-900/90 dark:bg-[#060b18]/90 backdrop-blur-2xl border border-indigo-500/30 dark:border-indigo-500/20 rounded-2xl overflow-hidden shadow-[0_0_60px_rgba(79,70,229,0.18)]"
+            transition={{ duration: 0.5, type: "spring" }}
+            className="relative w-full max-w-[460px] aspect-square mx-auto bg-slate-900/95 dark:bg-[#060a16]/95 backdrop-blur-2xl border border-amber-500/40 dark:border-yellow-500/30 rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(234,179,8,0.12)] select-none"
         >
-            {/* Cosmic ambient glow */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.12)_0%,transparent_70%)] pointer-events-none" />
+            {/* Cosmic ambient radiance */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(234,179,8,0.08)_0%,transparent_70%)] pointer-events-none" />
 
-            {/* Glowing gold SVG grid */}
+            {/* Glowing gold North Indian Diamond SVG grid */}
             <svg
                 className="absolute inset-0 w-full h-full pointer-events-none"
                 viewBox="0 0 100 100"
                 preserveAspectRatio="none"
             >
                 <defs>
-                    <linearGradient id="gold-line" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <linearGradient id="kundli-gold" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#d4af37" stopOpacity="0.95" />
-                        <stop offset="50%" stopColor="#fde68a" stopOpacity="0.7" />
+                        <stop offset="50%" stopColor="#fef08a" stopOpacity="0.8" />
                         <stop offset="100%" stopColor="#d4af37" stopOpacity="0.95" />
                     </linearGradient>
-                    <filter id="line-glow">
-                        <feGaussianBlur stdDeviation="0.8" result="blur" />
-                        <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                    <filter id="kundli-glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="0.6" result="blur" />
+                        <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
                     </filter>
                 </defs>
 
-                {/* Outer square */}
-                <rect x="1.5" y="1.5" width="97" height="97" fill="none"
-                    stroke="url(#gold-line)" strokeWidth="0.7" filter="url(#line-glow)" />
+                {/* Outer frame */}
+                <rect
+                    x="1" y="1" width="98" height="98"
+                    fill="none"
+                    stroke="url(#kundli-gold)"
+                    strokeWidth="0.8"
+                    filter="url(#kundli-glow)"
+                />
 
-                {/* Diagonals */}
-                <line x1="1.5" y1="1.5" x2="98.5" y2="98.5"
-                    stroke="url(#gold-line)" strokeWidth="0.5" filter="url(#line-glow)" />
-                <line x1="98.5" y1="1.5" x2="1.5" y2="98.5"
-                    stroke="url(#gold-line)" strokeWidth="0.5" filter="url(#line-glow)" />
+                {/* Main diagonals (Corner to Corner) */}
+                <line
+                    x1="1" y1="1" x2="99" y2="99"
+                    stroke="url(#kundli-gold)"
+                    strokeWidth="0.6"
+                    filter="url(#kundli-glow)"
+                />
+                <line
+                    x1="99" y1="1" x2="1" y2="99"
+                    stroke="url(#kundli-gold)"
+                    strokeWidth="0.6"
+                    filter="url(#kundli-glow)"
+                />
 
-                {/* Inner diamond */}
-                <polygon points="50,1.5 98.5,50 50,98.5 1.5,50" fill="none"
-                    stroke="url(#gold-line)" strokeWidth="0.7" filter="url(#line-glow)" />
+                {/* Inner Diamond (Midpoint to Midpoint) */}
+                <polygon
+                    points="50,1 99,50 50,99 1,50"
+                    fill="none"
+                    stroke="url(#kundli-gold)"
+                    strokeWidth="0.8"
+                    filter="url(#kundli-glow)"
+                />
             </svg>
 
             {/* Render all 12 houses */}
@@ -212,4 +257,3 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
         </motion.div>
     );
 };
-
