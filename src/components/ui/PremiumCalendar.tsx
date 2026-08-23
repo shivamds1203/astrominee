@@ -32,32 +32,26 @@ const YearPicker: React.FC<{
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: -10 }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute top-0 left-0 right-0 z-50 rounded-2xl overflow-hidden"
-            style={{
-                background: "linear-gradient(135deg, rgba(10,15,28,0.98) 0%, rgba(20,10,40,0.98) 100%)",
-                backdropFilter: "blur(32px)",
-                border: "1px solid rgba(139,92,246,0.25)",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.06)",
-            }}
+            className="absolute top-0 left-0 right-0 z-50 rounded-2xl overflow-hidden bg-white/98 dark:bg-[#0c1224]/98 backdrop-blur-3xl border border-slate-200 dark:border-purple-500/30 shadow-2xl"
         >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-white/5">
                 <motion.button
                     type="button"
                     whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
                     onClick={() => setDecade(d => Math.max(d - 10, START))}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg text-purple-300 hover:bg-purple-500/20 transition-colors"
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-purple-600 dark:text-purple-300 hover:bg-purple-500/10 dark:hover:bg-purple-500/20 transition-colors cursor-pointer"
                 >
                     <ChevronLeft className="w-4 h-4" />
                 </motion.button>
-                <span className="text-sm font-bold text-white tracking-wider">
+                <span className="text-sm font-bold text-slate-900 dark:text-white tracking-wider">
                     {decade} — {decade + 11}
                 </span>
                 <motion.button
                     type="button"
                     whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
                     onClick={() => setDecade(d => Math.min(d + 10, END))}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg text-purple-300 hover:bg-purple-500/20 transition-colors"
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-purple-600 dark:text-purple-300 hover:bg-purple-500/10 dark:hover:bg-purple-500/20 transition-colors cursor-pointer"
                 >
                     <ChevronRight className="w-4 h-4" />
                 </motion.button>
@@ -77,19 +71,15 @@ const YearPicker: React.FC<{
                             whileHover={!disabled ? { scale: 1.08 } : {}}
                             whileTap={!disabled ? { scale: 0.95 } : {}}
                             onClick={() => { onSelect(y); onClose(); }}
-                            className={`py-2 rounded-xl text-sm font-semibold transition-all focus:outline-none relative overflow-hidden
-                                ${disabled ? "opacity-25 cursor-not-allowed text-gray-600" :
-                                    isSelected ? "text-white" :
-                                        isNow ? "text-indigo-300 border border-indigo-500/40" :
-                                            "text-gray-400 hover:text-white hover:bg-white/8"}`}
-                            style={isSelected ? {
-                                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                                boxShadow: "0 0 16px rgba(139,92,246,0.6)",
-                            } : {}}
+                            className={`py-2 rounded-xl text-sm font-semibold transition-all focus:outline-none relative overflow-hidden cursor-pointer
+                                ${disabled ? "opacity-25 cursor-not-allowed text-slate-400 dark:text-gray-600" :
+                                    isSelected ? "text-white bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md" :
+                                        isNow ? "text-indigo-600 dark:text-indigo-300 border border-indigo-500/40" :
+                                            "text-slate-700 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10"}`}
                         >
                             {isSelected && (
                                 <span className="absolute inset-0 rounded-xl opacity-30"
-                                    style={{ background: "radial-gradient(ellipse at top, rgba(255,255,255,0.3), transparent)" }} />
+                                    style={{ background: "radial-gradient(ellipse at top, rgba(255,255,255,0.4), transparent)" }} />
                             )}
                             {y}
                         </motion.button>
@@ -102,7 +92,7 @@ const YearPicker: React.FC<{
                 <button
                     type="button"
                     onClick={() => { onSelect(NOW_YEAR); onClose(); }}
-                    className="w-full py-1.5 text-xs font-medium text-indigo-400 hover:text-indigo-300 border border-indigo-500/20 hover:border-indigo-500/40 rounded-xl transition-all hover:bg-indigo-500/10"
+                    className="w-full py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 border border-indigo-500/20 hover:border-indigo-500/40 rounded-xl transition-all hover:bg-indigo-500/10 cursor-pointer"
                 >
                     Jump to {NOW_YEAR}
                 </button>
@@ -122,15 +112,9 @@ const MonthPicker: React.FC<{
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: -10 }}
         transition={{ type: "spring", stiffness: 260, damping: 22 }}
-        className="absolute top-0 left-0 right-0 z-50 rounded-2xl overflow-hidden"
-        style={{
-            background: "linear-gradient(135deg, rgba(10,15,28,0.98) 0%, rgba(10,20,40,0.98) 100%)",
-            backdropFilter: "blur(32px)",
-            border: "1px solid rgba(99,102,241,0.25)",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.06)",
-        }}
+        className="absolute top-0 left-0 right-0 z-50 rounded-2xl overflow-hidden bg-white/98 dark:bg-[#0c1224]/98 backdrop-blur-3xl border border-slate-200 dark:border-indigo-500/30 shadow-2xl"
     >
-        <p className="text-center text-xs font-bold tracking-[3px] uppercase text-indigo-400/60 pt-4 pb-2">Select Month</p>
+        <p className="text-center text-xs font-bold tracking-[3px] uppercase text-indigo-600 dark:text-indigo-400/70 pt-4 pb-2">Select Month</p>
         <div className="grid grid-cols-3 gap-2 p-3">
             {MONTHS_SHORT.map((m, i) => {
                 const isSelected = i === month;
@@ -140,12 +124,8 @@ const MonthPicker: React.FC<{
                         type="button"
                         whileHover={{ scale: 1.07 }} whileTap={{ scale: 0.95 }}
                         onClick={() => { onSelect(i); onClose(); }}
-                        className={`py-2.5 rounded-xl text-sm font-semibold transition-all focus:outline-none
-                            ${isSelected ? "text-white" : "text-gray-400 hover:text-white hover:bg-white/8"}`}
-                        style={isSelected ? {
-                            background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                            boxShadow: "0 0 16px rgba(99,102,241,0.5)",
-                        } : {}}
+                        className={`py-2.5 rounded-xl text-sm font-semibold transition-all focus:outline-none cursor-pointer
+                            ${isSelected ? "text-white bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md" : "text-slate-700 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10"}`}
                     >
                         {m}
                     </motion.button>
@@ -154,6 +134,7 @@ const MonthPicker: React.FC<{
         </div>
     </motion.div>
 );
+
 
 // ─── Main Calendar ─────────────────────────────────────────────────────────────
 export const PremiumCalendar: React.FC<PremiumCalendarProps> = ({ value, onChange }) => {
@@ -299,7 +280,7 @@ export const PremiumCalendar: React.FC<PremiumCalendarProps> = ({ value, onChang
                 {/* Days of Week */}
                 <div className="grid grid-cols-7 gap-1 mb-2 text-center relative z-10">
                     {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(d => (
-                        <div key={d} className="text-[10px] font-bold text-indigo-400/50 uppercase tracking-wider py-1">{d}</div>
+                        <div key={d} className="text-[10px] font-bold text-slate-500 dark:text-indigo-400/60 uppercase tracking-wider py-1">{d}</div>
                     ))}
                 </div>
 
@@ -326,14 +307,10 @@ export const PremiumCalendar: React.FC<PremiumCalendarProps> = ({ value, onChang
                                         key={day} type="button"
                                         onClick={() => handleDateClick(day)}
                                         whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
-                                        className={`h-8 w-full flex items-center justify-center rounded-xl text-sm font-medium transition-all focus:outline-none
-                                            ${selF ? "text-white" :
-                                                todayF ? "text-indigo-400 border border-indigo-500/40" :
-                                                    "text-gray-400 hover:text-white hover:bg-white/8"}`}
-                                        style={selF ? {
-                                            background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                                            boxShadow: "0 0 14px rgba(139,92,246,0.5)",
-                                        } : {}}
+                                        className={`h-8 w-full flex items-center justify-center rounded-xl text-sm font-medium transition-all focus:outline-none cursor-pointer
+                                            ${selF ? "text-white bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md" :
+                                                todayF ? "text-indigo-600 dark:text-indigo-400 border border-indigo-500/40" :
+                                                    "text-slate-700 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/8"}`}
                                     >
                                         {day}
                                     </motion.button>

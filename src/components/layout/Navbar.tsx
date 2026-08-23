@@ -306,39 +306,33 @@ export default function Navbar() {
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: "100%", opacity: 0 }}
                             transition={{ type: "spring", stiffness: 320, damping: 34 }}
-                            className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
+                            className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/95 dark:bg-[#070916]/98 backdrop-blur-2xl border-t border-slate-200 dark:border-white/10 rounded-t-[28px] shadow-2xl transition-colors duration-300"
                             style={{
-                                background: "rgba(7,9,22,0.97)",
-                                backdropFilter: "blur(32px)",
-                                WebkitBackdropFilter: "blur(32px)",
-                                borderTop: "1px solid rgba(255,255,255,0.08)",
-                                borderRadius: "28px 28px 0 0",
                                 paddingBottom: "env(safe-area-inset-bottom, 24px)",
                             }}
                         >
                             {/* Drag pill */}
                             <div className="flex justify-center pt-3 pb-1">
-                                <div className="w-9 h-1 rounded-full bg-white/15" />
+                                <div className="w-9 h-1 rounded-full bg-slate-300 dark:bg-white/20" />
                             </div>
 
                             {/* Header row */}
                             <div className="flex items-center justify-between px-5 pt-3 pb-4">
                                 <div>
-                                    <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/35">Navigation</p>
-                                    <p className="text-lg font-bold text-white mt-0.5">Astrominee</p>
+                                    <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-slate-500 dark:text-white/40">Navigation</p>
+                                    <p className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">Astrominee</p>
                                 </div>
                                 <button
                                     onClick={closeMenu}
-                                    className="w-9 h-9 flex items-center justify-center rounded-full"
-                                    style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.10)" }}
+                                    className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white/80 hover:bg-slate-200 dark:hover:bg-white/20 transition-colors cursor-pointer"
                                     aria-label="Close menu"
                                 >
-                                    <X size={16} className="text-white/70" />
+                                    <X size={16} />
                                 </button>
                             </div>
 
                             {/* Separator */}
-                            <div className="mx-5 h-px bg-white/[0.06] mb-2" />
+                            <div className="mx-5 h-px bg-slate-200/80 dark:bg-white/[0.06] mb-2" />
 
                             {/* Nav links */}
                             <div className="px-3 pb-2">
@@ -356,7 +350,7 @@ export default function Navbar() {
                             </div>
 
                             {/* Separator */}
-                            <div className="mx-5 h-px bg-white/[0.06] mt-1 mb-3" />
+                            <div className="mx-5 h-px bg-slate-200/80 dark:bg-white/[0.06] mt-1 mb-3" />
 
                             {/* Auth section */}
                             <div className="px-3 pb-5">
@@ -368,23 +362,23 @@ export default function Navbar() {
                                         className="flex flex-col gap-2"
                                     >
                                         <Link href="/profile" onClick={closeMenu}
-                                            className="flex items-center gap-4 px-4 py-3.5 rounded-2xl active:scale-[0.97] transition-all"
+                                            className="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-slate-100 dark:hover:bg-white/5 active:scale-[0.97] transition-all"
                                             style={{ WebkitTapHighlightColor: "transparent" }}>
                                             <div className="flex items-center justify-center rounded-xl flex-shrink-0"
                                                 style={{ width: 42, height: 42, background: "#6366f118", border: "1px solid #6366f135", boxShadow: "0 0 12px #6366f120" }}>
                                                 <LayoutDashboard size={18} style={{ color: "#6366f1" }} />
                                             </div>
-                                            <span className="text-[15px] font-semibold text-white/90">My Dashboard</span>
-                                            <span className="ml-auto text-white/20 text-lg leading-none">›</span>
+                                            <span className="text-[15px] font-semibold text-slate-800 dark:text-white/90">My Dashboard</span>
+                                            <span className="ml-auto text-slate-400 dark:text-white/20 text-lg leading-none">›</span>
                                         </Link>
                                         <button onClick={() => { closeMenu(); signOut(); }}
-                                            className="flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full active:scale-[0.97] transition-all"
+                                            className="flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full hover:bg-rose-50 dark:hover:bg-white/5 active:scale-[0.97] transition-all cursor-pointer"
                                             style={{ WebkitTapHighlightColor: "transparent" }}>
                                             <div className="flex items-center justify-center rounded-xl flex-shrink-0"
                                                 style={{ width: 42, height: 42, background: "#ef444418", border: "1px solid #ef444435", boxShadow: "0 0 12px #ef444420" }}>
                                                 <LogOut size={18} style={{ color: "#ef4444" }} />
                                             </div>
-                                            <span className="text-[15px] font-semibold text-red-400">Sign Out</span>
+                                            <span className="text-[15px] font-semibold text-rose-600 dark:text-red-400">Sign Out</span>
                                         </button>
                                     </motion.div>
                                 ) : (
@@ -395,15 +389,15 @@ export default function Navbar() {
                                     >
                                         <button
                                             onClick={() => { closeMenu(); setIsAuthOpen(true); }}
-                                            className="flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full active:scale-[0.97] transition-all"
+                                            className="flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full hover:bg-slate-100 dark:hover:bg-white/5 active:scale-[0.97] transition-all cursor-pointer"
                                             style={{ WebkitTapHighlightColor: "transparent" }}
                                         >
                                             <div className="flex items-center justify-center rounded-xl flex-shrink-0"
                                                 style={{ width: 42, height: 42, background: "#f59e0b18", border: "1px solid #f59e0b35", boxShadow: "0 0 12px #f59e0b20" }}>
                                                 <User size={18} style={{ color: "#f59e0b" }} />
                                             </div>
-                                            <span className="text-[15px] font-semibold text-white/90">Sign In</span>
-                                            <span className="ml-auto text-white/20 text-lg leading-none">›</span>
+                                            <span className="text-[15px] font-semibold text-slate-800 dark:text-white/90">Sign In</span>
+                                            <span className="ml-auto text-slate-400 dark:text-white/20 text-lg leading-none">›</span>
                                         </button>
                                     </motion.div>
                                 )}

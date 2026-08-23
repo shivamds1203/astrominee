@@ -41,22 +41,23 @@ const DrumRoll: React.FC<{
 
     return (
         <div className="flex flex-col items-center gap-1.5">
-            <span className="text-[9px] font-bold uppercase tracking-[2.5px] text-gray-500">{label}</span>
-            <div className="relative rounded-2xl overflow-hidden"
+            <span className="text-[9px] font-bold uppercase tracking-[2.5px] text-slate-500 dark:text-gray-400">{label}</span>
+            <div
+                className="relative rounded-2xl overflow-hidden bg-slate-100/90 dark:bg-[#080c18]/90 border border-slate-200 dark:border-white/10 shadow-inner"
                 style={{
                     width: 72,
                     height: ITEM_H * VISIBLE,
-                    background: "rgba(8,12,24,0.9)",
-                    border: "1px solid rgba(255,255,255,0.07)",
-                    boxShadow: "inset 0 8px 20px rgba(0,0,0,0.3), inset 0 -8px 20px rgba(0,0,0,0.3)",
-                }}>
-
+                }}
+            >
                 {/* Fade top */}
-                <div className="absolute top-0 left-0 right-0 z-20 pointer-events-none"
-                    style={{ height: ITEM_H * 2, background: "linear-gradient(to bottom, rgba(8,12,24,0.95) 0%, transparent 100%)" }} />
+                <div
+                    className="absolute top-0 left-0 right-0 z-20 pointer-events-none bg-gradient-to-b from-slate-100 dark:from-[#080c18] to-transparent"
+                    style={{ height: ITEM_H * 2 }}
+                />
 
                 {/* Selection highlight */}
-                <div className="absolute z-10 left-0 right-0 pointer-events-none"
+                <div
+                    className="absolute z-10 left-0 right-0 pointer-events-none"
                     style={{
                         top: ITEM_H * 2,
                         height: ITEM_H,
@@ -64,11 +65,14 @@ const DrumRoll: React.FC<{
                         borderTop: `1px solid ${accentColor}40`,
                         borderBottom: `1px solid ${accentColor}40`,
                         boxShadow: `0 0 16px ${accentColor}20`,
-                    }} />
+                    }}
+                />
 
                 {/* Fade bottom */}
-                <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none"
-                    style={{ height: ITEM_H * 2, background: "linear-gradient(to top, rgba(8,12,24,0.95) 0%, transparent 100%)" }} />
+                <div
+                    className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none bg-gradient-to-t from-slate-100 dark:from-[#080c18] to-transparent"
+                    style={{ height: ITEM_H * 2 }}
+                />
 
                 {/* Scrollable list */}
                 <div
@@ -95,13 +99,16 @@ const DrumRoll: React.FC<{
                                 <motion.span
                                     animate={{
                                         scale: isActive ? 1 : 0.7,
-                                        opacity: isActive ? 1 : 0.3,
+                                        opacity: isActive ? 1 : 0.35,
                                     }}
                                     transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                                    className="font-mono font-bold select-none"
+                                    className={`font-mono font-bold select-none transition-colors ${
+                                        isActive
+                                            ? "text-slate-900 dark:text-white"
+                                            : "text-slate-400 dark:text-gray-500"
+                                    }`}
                                     style={{
                                         fontSize: isActive ? 26 : 18,
-                                        color: isActive ? "#fff" : "#6b7280",
                                         textShadow: isActive ? `0 0 16px ${accentColor}` : "none",
                                     }}
                                 >
@@ -168,38 +175,35 @@ export const PremiumClock: React.FC<PremiumClockProps> = ({ value, onChange }) =
             <motion.div
                 animate={{ scale: [1, 1.018, 1] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="relative w-44 h-44 rounded-full flex items-center justify-center"
-                style={{
-                    background: "radial-gradient(circle at 35% 30%, rgba(30,20,60,0.9) 0%, rgba(8,10,24,0.95) 100%)",
-                    border: "1.5px solid rgba(99,102,241,0.3)",
-                    boxShadow: "0 0 40px rgba(99,102,241,0.15), 0 10px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
-                }}
+                className="relative w-44 h-44 rounded-full flex items-center justify-center bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-[#1e143c] dark:to-[#080a18] border border-indigo-200 dark:border-indigo-500/30 shadow-2xl transition-colors duration-300"
             >
                 {/* Gradient ring glow */}
-                <div className="absolute inset-0 rounded-full"
+                <div
+                    className="absolute inset-0 rounded-full"
                     style={{
                         background: "conic-gradient(from 0deg, transparent 0%, rgba(99,102,241,0.15) 30%, rgba(139,92,246,0.2) 60%, transparent 100%)",
-                    }} />
+                    }}
+                />
 
                 {/* Tick marks */}
                 {[...Array(12)].map((_, i) => (
                     <div key={i} className="absolute w-full h-full p-2.5" style={{ transform: `rotate(${i * 30}deg)` }}>
-                        <div className={`mx-auto rounded-full ${i % 3 === 0 ? "w-1 h-3 bg-indigo-400/70" : "w-0.5 h-2 bg-white/20"}`} />
+                        <div className={`mx-auto rounded-full ${i % 3 === 0 ? "w-1 h-3 bg-indigo-600 dark:bg-indigo-400/80" : "w-0.5 h-2 bg-slate-300 dark:bg-white/20"}`} />
                     </div>
                 ))}
 
                 {/* Hour hand */}
                 <motion.div
-                    className="absolute rounded-full origin-bottom bg-white"
-                    style={{ width: 3, height: 42, bottom: "50%", left: "50%", x: "-50%", borderRadius: 4 }}
+                    className="absolute rounded-full origin-bottom bg-slate-800 dark:bg-white"
+                    style={{ width: 3.5, height: 42, bottom: "50%", left: "50%", x: "-50%", borderRadius: 4 }}
                     animate={{ rotate: hoursDeg }}
                     transition={{ type: "spring", stiffness: 60, damping: 12 }}
                 />
 
                 {/* Minute hand */}
                 <motion.div
-                    className="absolute origin-bottom bg-indigo-300 rounded-full"
-                    style={{ width: 2, height: 56, bottom: "50%", left: "50%", x: "-50%" }}
+                    className="absolute origin-bottom bg-indigo-600 dark:bg-indigo-300 rounded-full"
+                    style={{ width: 2.5, height: 56, bottom: "50%", left: "50%", x: "-50%" }}
                     animate={{ rotate: minutesDeg }}
                     transition={{ type: "spring", stiffness: 60, damping: 12 }}
                 />
@@ -209,15 +213,15 @@ export const PremiumClock: React.FC<PremiumClockProps> = ({ value, onChange }) =
                     className="absolute origin-bottom rounded-full"
                     style={{
                         width: 1.5, height: 62, bottom: "50%", left: "50%", x: "-50%",
-                        background: "#22d3ee",
-                        boxShadow: "0 0 8px rgba(34,211,238,0.9)",
+                        background: "#06b6d4",
+                        boxShadow: "0 0 8px rgba(6,182,212,0.8)",
                     }}
                     animate={{ rotate: secondsDeg }}
                     transition={{ ease: "linear", duration: 1 }}
                 />
 
                 {/* Center dot */}
-                <div className="absolute w-3.5 h-3.5 rounded-full z-10" style={{ background: "radial-gradient(circle, #fff 0%, #6366f1 100%)", boxShadow: "0 0 12px rgba(99,102,241,0.8)" }} />
+                <div className="absolute w-3.5 h-3.5 rounded-full z-10 bg-indigo-600 dark:bg-white shadow-md" />
             </motion.div>
 
             {/* Drum roll time pickers */}
@@ -233,7 +237,7 @@ export const PremiumClock: React.FC<PremiumClockProps> = ({ value, onChange }) =
                 {/* Colon separator */}
                 <div className="flex flex-col gap-2 pb-1">
                     {[0, 1].map(i => (
-                        <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-indigo-400"
+                        <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"
                             animate={{ opacity: [1, 0.3, 1] }}
                             transition={{ duration: 1, repeat: Infinity, delay: i * 0.5 }}
                         />
@@ -254,7 +258,7 @@ export const PremiumClock: React.FC<PremiumClockProps> = ({ value, onChange }) =
                 key={`${hours}:${minutes}`}
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-xs font-mono text-indigo-400/60 tracking-widest"
+                className="text-xs font-mono font-semibold text-indigo-600 dark:text-indigo-400/80 tracking-widest"
             >
                 {hours.toString().padStart(2, "0")}:{minutes.toString().padStart(2, "0")} {hours < 12 ? "AM" : "PM"}
             </motion.div>
