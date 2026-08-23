@@ -2,14 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Download, Share2, ChevronDown, ChevronRight, Sparkles, BookmarkPlus, Check } from "lucide-react";
+import { Download, Share2, ChevronDown, ChevronRight, Sparkles, BookmarkPlus, Check, Clock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { NorthIndianChart } from "@/components/charts/NorthIndianChart";
 import { SouthIndianChart } from "@/components/charts/SouthIndianChart";
-import { generateDivisionalChart, getNakshatraDetails } from "@/lib/astrologyMath";
+import { generateDivisionalChart, getNakshatraDetails, calculateVimshottariDashas } from "@/lib/astrologyMath";
 import { generateAstrologyPDF } from "@/lib/generatePDF";
 import { PredictionsSection } from "@/components/dashboard/PredictionsSection";
 import { ScrollSection3D } from "@/components/ui/ScrollSection3D";
+import { VimshottariDashaTree } from "@/components/dashboard/VimshottariDashaTree";
 
 const VARGAS = [
     { num: 1, name: "D1 - Rashi (Birth)" },
@@ -239,7 +240,7 @@ export default function DashboardPage() {
                             </div>
                         </div>
 
-                        <div className="aspect-square max-w-lg mx-auto bg-slate-950/90 dark:bg-black/60 rounded-2xl border border-slate-300/60 dark:border-white/10 flex items-center justify-center relative backdrop-blur-md overflow-hidden p-4 shadow-2xl">
+                        <div className="aspect-square max-w-lg mx-auto bg-amber-50/50 dark:bg-black/60 rounded-3xl border border-amber-200/80 dark:border-white/10 flex items-center justify-center relative backdrop-blur-md overflow-hidden p-3 md:p-4 shadow-xl dark:shadow-2xl transition-colors duration-300">
 
                             {chartStyle === "north" ? (
                                 <NorthIndianChart planetsData={generateDivisionalChart(planetsData || [], selectedVarga)} />
@@ -256,7 +257,7 @@ export default function DashboardPage() {
                     <div
                         className="glass-panel p-6 md:p-8 rounded-3xl border border-slate-200/80 dark:border-white/10 flex flex-col gap-6"
                     >
-                        <div className="flex-1 min-h-[400px]">
+                        <div className="flex-1 min-h-[360px]">
                             <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 to-purple-600 dark:from-electric-blue dark:to-violet-glow mb-4 flex items-center gap-2">
                                 Analytical Data <span className="text-xs text-indigo-600 dark:text-indigo-400 font-normal px-2.5 py-1 bg-indigo-500/10 rounded-full border border-indigo-500/20">Precision</span>
                             </h3>
@@ -326,20 +327,21 @@ export default function DashboardPage() {
                             </div>
                         </div>
 
-                        <div className="mt-auto">
-                            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Current Dasha Period</h3>
-                            <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-900/40 dark:to-purple-900/40 border border-indigo-500/30">
-                                <div className="flex justify-between items-end mb-2">
-                                    <span className="text-xl font-bold text-indigo-700 dark:text-indigo-300">Jupiter (Guru)</span>
-                                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-gray-400">Mahadasha</span>
-                                </div>
-                                <div className="w-full bg-slate-200 dark:bg-black/50 rounded-full h-2 mb-2 overflow-hidden">
-                                    <div className="bg-indigo-500 h-2 rounded-full" style={{ width: '45%' }}></div>
-                                </div>
-                                <p className="text-xs text-slate-500 dark:text-gray-400 text-right">Active through 2034</p>
-                            </div>
+                        {/* Expandable Vimshottari Dasha Hierarchy */}
+                        <div className="mt-2 pt-6 border-t border-slate-200/80 dark:border-white/10">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-amber-600 dark:text-yellow-400" />
+                                Vimshottari Dasha Periods
+                            </h3>
+                            {(() => {
+                                const moonPlanet = planetsData?.find((p: any) => p.name === "Moon");
+                                const moonDegree = moonPlanet?.fullDegree !== undefined ? moonPlanet.fullDegree : 306.68;
+                                const calculatedDashas = calculateVimshottariDashas(moonDegree, userData?.dateOfBirth);
+                                return <VimshottariDashaTree dashas={calculatedDashas} />;
+                            })()}
                         </div>
                     </div>
+
 
                     {/* Expandable AI Insights Panel */}
                     <div

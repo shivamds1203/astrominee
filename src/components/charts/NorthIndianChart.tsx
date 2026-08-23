@@ -24,15 +24,15 @@ const PLANET_IMAGES: Record<string, string> = {
 // Per-planet glow color for the ring effect
 const PLANET_GLOW: Record<string, string> = {
     Sun: "shadow-[0_0_8px_#f97316,0_0_3px_#f59e0b]",
-    Moon: "shadow-[0_0_8px_#e2e8f0,0_0_3px_#f1f5f9]",
+    Moon: "shadow-[0_0_8px_#94a3b8,0_0_3px_#cbd5e1] dark:shadow-[0_0_8px_#e2e8f0,0_0_3px_#f1f5f9]",
     Mars: "shadow-[0_0_8px_#ef4444,0_0_3px_#dc2626]",
     Mercury: "shadow-[0_0_8px_#10b981,0_0_3px_#34d399]",
     Jupiter: "shadow-[0_0_8px_#f59e0b,0_0_3px_#fbbf24]",
     Venus: "shadow-[0_0_8px_#ec4899,0_0_3px_#f472b6]",
     Saturn: "shadow-[0_0_8px_#6366f1,0_0_3px_#818cf8]",
-    Rahu: "shadow-[0_0_8px_#94a3b8,0_0_3px_#64748b]",
-    Ketu: "shadow-[0_0_8px_#d6d3d1,0_0_3px_#a8a29e]",
-    Ascendant: "shadow-[0_0_10px_#22d3ee,0_0_3px_#06b6d4]",
+    Rahu: "shadow-[0_0_8px_#64748b,0_0_3px_#475569] dark:shadow-[0_0_8px_#94a3b8,0_0_3px_#64748b]",
+    Ketu: "shadow-[0_0_8px_#78716c,0_0_3px_#57534e] dark:shadow-[0_0_8px_#d6d3d1,0_0_3px_#a8a29e]",
+    Ascendant: "shadow-[0_0_10px_#06b6d4,0_0_3px_#0891b2] dark:shadow-[0_0_10px_#22d3ee,0_0_3px_#06b6d4]",
 };
 
 const PLANET_SHORT: Record<string, string> = {
@@ -73,7 +73,6 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
     const ascendantSign = ascPlanet?.current_sign ? parseInt(ascPlanet.current_sign, 10) : 1;
 
     // In Vedic North Indian chart, houses go counter-clockwise 1 to 12.
-    // House 1 displays ascendantSign, House 2 displays (ascendantSign + 1), etc.
     const getSignNumForHouse = (houseNumber: number) => {
         return (((ascendantSign - 1) + (houseNumber - 1)) % 12) + 1;
     };
@@ -101,17 +100,17 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
 
         return (
             <React.Fragment key={houseNum}>
-                {/* Rashi / Sign Number in the corner of this house */}
+                {/* Rashi / Sign Number */}
                 <div
                     className="absolute -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none"
                     style={{ left: pos.signX, top: pos.signY }}
                 >
-                    <span className="text-amber-500 dark:text-yellow-400 font-extrabold text-[11px] md:text-xs font-mono drop-shadow-[0_0_2px_rgba(0,0,0,0.8)]">
+                    <span className="text-amber-800 dark:text-yellow-400 font-black text-[11px] md:text-xs font-mono drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] dark:drop-shadow-[0_0_2px_rgba(0,0,0,0.8)]">
                         {getSignNumForHouse(houseNum)}
                     </span>
                 </div>
 
-                {/* Planet Orbs in this house */}
+                {/* Planet Orbs */}
                 <div
                     className="absolute -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center justify-center pointer-events-auto"
                     style={{
@@ -122,7 +121,7 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
                     }}
                 >
                     {isAscendant && (
-                        <span className="text-[8px] md:text-[9px] font-black tracking-widest uppercase text-amber-400 dark:text-yellow-300 drop-shadow-[0_0_6px_rgba(234,179,8,0.8)] mb-0.5 leading-none">
+                        <span className="text-[8px] md:text-[9px] font-black tracking-widest uppercase text-amber-700 dark:text-yellow-300 drop-shadow-sm dark:drop-shadow-[0_0_6px_rgba(234,179,8,0.8)] mb-0.5 leading-none">
                             LAGNA
                         </span>
                     )}
@@ -148,7 +147,7 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
                                 >
                                     {/* Planet Sphere Orb */}
                                     <div
-                                        className={`w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden relative border border-white/40 dark:border-white/25 ${glow} group-hover:scale-125 transition-transform duration-200 bg-slate-950 flex-shrink-0 shadow-lg`}
+                                        className={`w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden relative border border-amber-300/80 dark:border-white/25 ${glow} group-hover:scale-125 transition-transform duration-200 bg-slate-900 flex-shrink-0 shadow-md`}
                                     >
                                         <img
                                             src={img}
@@ -157,24 +156,24 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
                                             loading="eager"
                                         />
                                         {/* 3D Sheen overlay */}
-                                        <div className="absolute inset-0 rounded-full shadow-[inset_-1.5px_-1.5px_4px_rgba(0,0,0,0.8),inset_1px_1px_3px_rgba(255,255,255,0.6)] pointer-events-none" />
+                                        <div className="absolute inset-0 rounded-full shadow-[inset_-1.5px_-1.5px_4px_rgba(0,0,0,0.7),inset_1px_1px_3px_rgba(255,255,255,0.6)] pointer-events-none" />
                                     </div>
 
                                     {/* Text Tag (Abbreviation) */}
-                                    <span className="text-[7px] md:text-[8px] font-bold text-white leading-none mt-0.5 px-0.5 rounded bg-black/60 drop-shadow-[0_1px_2px_rgba(0,0,0,1)]">
+                                    <span className="text-[7.5px] md:text-[8.5px] font-bold text-slate-800 dark:text-white leading-none mt-0.5 px-1 py-0.2 rounded bg-white/90 dark:bg-black/70 border border-slate-200/80 dark:border-white/10 shadow-xs">
                                         {short}
                                     </span>
 
                                     {/* Retrograde badge */}
                                     {p.isRetro && (
-                                        <span className="absolute -top-1 -right-1 z-30 text-[6.5px] font-black text-rose-200 bg-rose-700 rounded-full w-3 h-3 flex items-center justify-center border border-rose-400 shadow-sm">
+                                        <span className="absolute -top-1 -right-1 z-30 text-[6.5px] font-black text-white bg-rose-600 dark:bg-rose-700 rounded-full w-3 h-3 flex items-center justify-center border border-rose-300 dark:border-rose-400 shadow-xs">
                                             R
                                         </span>
                                     )}
 
                                     {/* Hover Tooltip */}
-                                    <div className="absolute bottom-[calc(100%+6px)] left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900/98 dark:bg-[#070c18]/98 border border-white/20 rounded-xl px-2.5 py-1.5 flex flex-col items-center shadow-2xl z-50 min-w-max">
-                                        <span className="text-[11px] text-white font-bold">{p.name}</span>
+                                    <div className="absolute bottom-[calc(100%+6px)] left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900/98 dark:bg-[#070c18]/98 text-white border border-white/20 rounded-xl px-2.5 py-1.5 flex flex-col items-center shadow-2xl z-50 min-w-max">
+                                        <span className="text-[11px] font-bold">{p.name}</span>
                                         {p.degree && (
                                             <span className="text-[10px] text-yellow-400 font-mono font-medium">{p.degree}</span>
                                         )}
@@ -193,10 +192,10 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
             initial={{ opacity: 0, scale: 0.94 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, type: "spring" }}
-            className="relative w-full max-w-[460px] aspect-square mx-auto bg-slate-900/95 dark:bg-[#060a16]/95 backdrop-blur-2xl border border-amber-500/40 dark:border-yellow-500/30 rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(234,179,8,0.12)] select-none"
+            className="relative w-full max-w-[460px] aspect-square mx-auto bg-gradient-to-br from-amber-50/95 via-orange-50/80 to-amber-100/90 dark:from-[#060a16]/95 dark:via-[#080d1e]/95 dark:to-[#060a16]/95 backdrop-blur-2xl border border-amber-300/90 dark:border-yellow-500/30 rounded-2xl overflow-hidden shadow-xl dark:shadow-[0_0_50px_rgba(234,179,8,0.12)] select-none transition-colors duration-300"
         >
-            {/* Cosmic ambient radiance */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(234,179,8,0.08)_0%,transparent_70%)] pointer-events-none" />
+            {/* Ambient radiance */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(245,158,11,0.06)_0%,transparent_70%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(234,179,8,0.08)_0%,transparent_70%)] pointer-events-none" />
 
             {/* Glowing gold North Indian Diamond SVG grid */}
             <svg
@@ -205,13 +204,22 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
                 preserveAspectRatio="none"
             >
                 <defs>
-                    <linearGradient id="kundli-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+                    {/* Light theme gold lines */}
+                    <linearGradient id="kundli-light" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#b45309" stopOpacity="0.95" />
+                        <stop offset="50%" stopColor="#d97706" stopOpacity="0.85" />
+                        <stop offset="100%" stopColor="#b45309" stopOpacity="0.95" />
+                    </linearGradient>
+
+                    {/* Dark theme neon gold lines */}
+                    <linearGradient id="kundli-dark" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#d4af37" stopOpacity="0.95" />
                         <stop offset="50%" stopColor="#fef08a" stopOpacity="0.8" />
                         <stop offset="100%" stopColor="#d4af37" stopOpacity="0.95" />
                     </linearGradient>
+
                     <filter id="kundli-glow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="0.6" result="blur" />
+                        <feGaussianBlur stdDeviation="0.5" result="blur" />
                         <feMerge>
                             <feMergeNode in="blur" />
                             <feMergeNode in="SourceGraphic" />
@@ -223,31 +231,31 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
                 <rect
                     x="1" y="1" width="98" height="98"
                     fill="none"
-                    stroke="url(#kundli-gold)"
-                    strokeWidth="0.8"
+                    className="stroke-[url(#kundli-light)] dark:stroke-[url(#kundli-dark)]"
+                    strokeWidth="0.85"
                     filter="url(#kundli-glow)"
                 />
 
-                {/* Main diagonals (Corner to Corner) */}
+                {/* Main diagonals */}
                 <line
                     x1="1" y1="1" x2="99" y2="99"
-                    stroke="url(#kundli-gold)"
-                    strokeWidth="0.6"
+                    className="stroke-[url(#kundli-light)] dark:stroke-[url(#kundli-dark)]"
+                    strokeWidth="0.65"
                     filter="url(#kundli-glow)"
                 />
                 <line
                     x1="99" y1="1" x2="1" y2="99"
-                    stroke="url(#kundli-gold)"
-                    strokeWidth="0.6"
+                    className="stroke-[url(#kundli-light)] dark:stroke-[url(#kundli-dark)]"
+                    strokeWidth="0.65"
                     filter="url(#kundli-glow)"
                 />
 
-                {/* Inner Diamond (Midpoint to Midpoint) */}
+                {/* Inner Diamond */}
                 <polygon
                     points="50,1 99,50 50,99 1,50"
                     fill="none"
-                    stroke="url(#kundli-gold)"
-                    strokeWidth="0.8"
+                    className="stroke-[url(#kundli-light)] dark:stroke-[url(#kundli-dark)]"
+                    strokeWidth="0.85"
                     filter="url(#kundli-glow)"
                 />
             </svg>
