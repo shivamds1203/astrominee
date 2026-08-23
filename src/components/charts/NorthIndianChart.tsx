@@ -68,29 +68,20 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
         }
     });
 
-    // Ascendant sign for this chart (determines Rashi in House 1)
-    const ascPlanet = validPlanets.find(p => p.name === "Ascendant");
-    const ascendantSign = ascPlanet?.current_sign ? parseInt(ascPlanet.current_sign, 10) : 1;
-
-    // In Vedic North Indian chart, houses go counter-clockwise 1 to 12.
-    const getSignNumForHouse = (houseNumber: number) => {
-        return (((ascendantSign - 1) + (houseNumber - 1)) % 12) + 1;
-    };
-
-    // Refined non-overlapping coordinates for North Indian layout
-    const positions: Record<number, { cx: string; cy: string; signX: string; signY: string }> = {
-        1: { cx: "50%", cy: "27%", signX: "50%", signY: "7%" },   // Top center diamond (Lagna) - sign at apex, planets below
-        2: { cx: "22%", cy: "15%", signX: "40%", signY: "8%" },   // Top-left triangle - sign at inner corner, planets left
-        3: { cx: "15%", cy: "22%", signX: "8%", signY: "40%" },   // Left-top triangle - sign at inner corner, planets top
-        4: { cx: "27%", cy: "50%", signX: "9%", signY: "50%" },   // Left center diamond - sign at outer apex, planets inner
-        5: { cx: "15%", cy: "78%", signX: "8%", signY: "60%" },   // Left-bottom triangle
-        6: { cx: "22%", cy: "85%", signX: "40%", signY: "92%" },  // Bottom-left triangle
-        7: { cx: "50%", cy: "73%", signX: "50%", signY: "93%" },  // Bottom center diamond - sign at bottom apex, planets above
-        8: { cx: "78%", cy: "85%", signX: "60%", signY: "92%" },  // Bottom-right triangle
-        9: { cx: "85%", cy: "78%", signX: "92%", signY: "60%" },  // Right-bottom triangle
-        10: { cx: "73%", cy: "50%", signX: "91%", signY: "50%" }, // Right center diamond - sign at right apex, planets inner
-        11: { cx: "85%", cy: "22%", signX: "92%", signY: "40%" }, // Right-top triangle
-        12: { cx: "78%", cy: "15%", signX: "60%", signY: "8%" },  // Top-right triangle
+    // Centers for North Indian layout houses
+    const positions: Record<number, { cx: string; cy: string }> = {
+        1: { cx: "50%", cy: "25%" },   // Top center diamond (Lagna)
+        2: { cx: "25%", cy: "14%" },   // Top-left triangle
+        3: { cx: "14%", cy: "25%" },   // Left-top triangle
+        4: { cx: "25%", cy: "50%" },   // Left center diamond
+        5: { cx: "14%", cy: "75%" },   // Left-bottom triangle
+        6: { cx: "25%", cy: "86%" },   // Bottom-left triangle
+        7: { cx: "50%", cy: "75%" },   // Bottom center diamond
+        8: { cx: "75%", cy: "86%" },   // Bottom-right triangle
+        9: { cx: "86%", cy: "75%" },   // Right-bottom triangle
+        10: { cx: "75%", cy: "50%" },  // Right center diamond
+        11: { cx: "86%", cy: "25%" },  // Right-top triangle
+        12: { cx: "75%", cy: "14%" },  // Top-right triangle
     };
 
     const renderHouseContent = (houseNum: number) => {
@@ -99,91 +90,79 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
         const housePlanets = houses[houseNum] || [];
 
         return (
-            <React.Fragment key={houseNum}>
-                {/* Rashi / Sign Number (positioned away from planet clusters) */}
-                <div
-                    className="absolute -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none"
-                    style={{ left: pos.signX, top: pos.signY }}
-                >
-                    <span className="text-amber-700 dark:text-yellow-400 font-black text-xs md:text-sm font-mono drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)] dark:drop-shadow-[0_0_3px_rgba(0,0,0,0.9)]">
-                        {getSignNumForHouse(houseNum)}
+            <div
+                key={houseNum}
+                className="absolute -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center justify-center pointer-events-auto"
+                style={{
+                    left: pos.cx,
+                    top: pos.cy,
+                    width: (houseNum === 1 || houseNum === 4 || houseNum === 7 || houseNum === 10) ? "34%" : "24%",
+                    height: (houseNum === 1 || houseNum === 4 || houseNum === 7 || houseNum === 10) ? "34%" : "24%",
+                }}
+            >
+                {isAscendant && (
+                    <span className="text-[8px] md:text-[9.5px] font-black tracking-widest uppercase text-amber-700 dark:text-yellow-300 drop-shadow-sm dark:drop-shadow-[0_0_6px_rgba(234,179,8,0.8)] mb-1 leading-none">
+                        LAGNA
                     </span>
-                </div>
+                )}
 
-                {/* Planet Orbs */}
-                <div
-                    className="absolute -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center justify-center pointer-events-auto"
-                    style={{
-                        left: pos.cx,
-                        top: pos.cy,
-                        width: (houseNum === 1 || houseNum === 4 || houseNum === 7 || houseNum === 10) ? "32%" : "22%",
-                        height: (houseNum === 1 || houseNum === 4 || houseNum === 7 || houseNum === 10) ? "32%" : "22%",
-                    }}
-                >
-                    {isAscendant && (
-                        <span className="text-[7.5px] md:text-[8.5px] font-black tracking-widest uppercase text-amber-700 dark:text-yellow-300 drop-shadow-sm dark:drop-shadow-[0_0_6px_rgba(234,179,8,0.8)] mb-0.5 leading-none">
-                            LAGNA
-                        </span>
-                    )}
+                <div className="flex flex-wrap items-center justify-center gap-1.5 max-w-full">
+                    {housePlanets.map((p, i) => {
+                        const img = PLANET_IMAGES[p.name] ?? PLANET_IMAGES.Moon;
+                        const glow = PLANET_GLOW[p.name] ?? "";
+                        const short = PLANET_SHORT[p.name] ?? p.name.substring(0, 2);
 
-                    <div className="flex flex-wrap items-center justify-center gap-1 max-w-full">
-                        {housePlanets.map((p, i) => {
-                            const img = PLANET_IMAGES[p.name] ?? PLANET_IMAGES.Moon;
-                            const glow = PLANET_GLOW[p.name] ?? "";
-                            const short = PLANET_SHORT[p.name] ?? p.name.substring(0, 2);
-
-                            return (
-                                <motion.div
-                                    key={i}
-                                    initial={{ scale: 0, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    transition={{
-                                        type: "spring",
-                                        stiffness: 260,
-                                        damping: 16,
-                                        delay: houseNum * 0.02 + i * 0.05,
-                                    }}
-                                    className="relative group cursor-pointer flex flex-col items-center"
+                        return (
+                            <motion.div
+                                key={i}
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{
+                                    type: "spring",
+                                    stiffness: 260,
+                                    damping: 16,
+                                    delay: houseNum * 0.02 + i * 0.05,
+                                }}
+                                className="relative group cursor-pointer flex flex-col items-center"
+                            >
+                                {/* Planet Sphere Orb */}
+                                <div
+                                    className={`w-5.5 h-5.5 md:w-6.5 md:h-6.5 rounded-full overflow-hidden relative border border-amber-300/80 dark:border-white/25 ${glow} group-hover:scale-125 transition-transform duration-200 bg-slate-900 flex-shrink-0 shadow-md`}
                                 >
-                                    {/* Planet Sphere Orb */}
-                                    <div
-                                        className={`w-5 h-5 md:w-5.5 md:h-5.5 rounded-full overflow-hidden relative border border-amber-300/80 dark:border-white/25 ${glow} group-hover:scale-125 transition-transform duration-200 bg-slate-900 flex-shrink-0 shadow-md`}
-                                    >
-                                        <img
-                                            src={img}
-                                            alt={`${p.name}`}
-                                            className="w-full h-full object-cover rounded-full"
-                                            loading="eager"
-                                        />
-                                        {/* 3D Sheen overlay */}
-                                        <div className="absolute inset-0 rounded-full shadow-[inset_-1.5px_-1.5px_4px_rgba(0,0,0,0.7),inset_1px_1px_3px_rgba(255,255,255,0.6)] pointer-events-none" />
-                                    </div>
+                                    <img
+                                        src={img}
+                                        alt={`${p.name}`}
+                                        className="w-full h-full object-cover rounded-full"
+                                        loading="eager"
+                                    />
+                                    {/* 3D Sheen overlay */}
+                                    <div className="absolute inset-0 rounded-full shadow-[inset_-1.5px_-1.5px_4px_rgba(0,0,0,0.7),inset_1px_1px_3px_rgba(255,255,255,0.6)] pointer-events-none" />
+                                </div>
 
-                                    {/* Text Tag (Abbreviation) */}
-                                    <span className="text-[7px] md:text-[8px] font-bold text-slate-800 dark:text-white leading-none mt-0.5 px-0.5 py-0.2 rounded bg-white/90 dark:bg-black/70 border border-slate-200/80 dark:border-white/10 shadow-xs">
-                                        {short}
+                                {/* Text Tag (Abbreviation) */}
+                                <span className="text-[7.5px] md:text-[8.5px] font-bold text-slate-800 dark:text-white leading-none mt-0.5 px-0.5 py-0.2 rounded bg-white/90 dark:bg-black/70 border border-slate-200/80 dark:border-white/10 shadow-xs">
+                                    {short}
+                                </span>
+
+                                {/* Retrograde badge */}
+                                {p.isRetro && (
+                                    <span className="absolute -top-1 -right-1 z-30 text-[6px] font-black text-white bg-rose-600 dark:bg-rose-700 rounded-full w-2.5 h-2.5 flex items-center justify-center border border-rose-300 dark:border-rose-400 shadow-xs">
+                                        R
                                     </span>
+                                )}
 
-                                    {/* Retrograde badge */}
-                                    {p.isRetro && (
-                                        <span className="absolute -top-1 -right-1 z-30 text-[6px] font-black text-white bg-rose-600 dark:bg-rose-700 rounded-full w-2.5 h-2.5 flex items-center justify-center border border-rose-300 dark:border-rose-400 shadow-xs">
-                                            R
-                                        </span>
+                                {/* Hover Tooltip */}
+                                <div className="absolute bottom-[calc(100%+6px)] left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900/98 dark:bg-[#070c18]/98 text-white border border-white/20 rounded-xl px-2.5 py-1.5 flex flex-col items-center shadow-2xl z-50 min-w-max">
+                                    <span className="text-[11px] font-bold">{p.name}</span>
+                                    {p.degree && (
+                                        <span className="text-[10px] text-yellow-400 font-mono font-medium">{p.degree}</span>
                                     )}
-
-                                    {/* Hover Tooltip */}
-                                    <div className="absolute bottom-[calc(100%+6px)] left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900/98 dark:bg-[#070c18]/98 text-white border border-white/20 rounded-xl px-2.5 py-1.5 flex flex-col items-center shadow-2xl z-50 min-w-max">
-                                        <span className="text-[11px] font-bold">{p.name}</span>
-                                        {p.degree && (
-                                            <span className="text-[10px] text-yellow-400 font-mono font-medium">{p.degree}</span>
-                                        )}
-                                    </div>
-                                </motion.div>
-                            );
-                        })}
-                    </div>
+                                </div>
+                            </motion.div>
+                        );
+                    })}
                 </div>
-            </React.Fragment>
+            </div>
         );
     };
 
