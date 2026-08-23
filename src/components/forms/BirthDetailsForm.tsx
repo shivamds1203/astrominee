@@ -276,17 +276,17 @@ export default function BirthDetailsForm() {
                             </div>
                             {showClock && (
                                 <div
-                                    className="fixed inset-0 z-50 flex items-center justify-center"
+                                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
                                     onClick={() => setShowClock(false)}
                                 >
                                     {/* Backdrop */}
                                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
                                     {/* Modal */}
                                     <div
-                                        className="relative z-10 p-6 rounded-3xl glass-strong border border-slate-200 dark:border-white/10 shadow-2xl flex flex-col items-center gap-5 w-[300px]"
+                                        className="relative z-10 p-5 md:p-6 rounded-3xl bg-white/98 dark:bg-[#0c1224]/98 backdrop-blur-3xl border border-slate-200 dark:border-white/10 shadow-2xl flex flex-col items-center gap-4 w-full max-w-[360px] max-h-[90vh] overflow-y-auto no-scrollbar"
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        <p className="text-xs font-bold tracking-[3px] uppercase text-indigo-600 dark:text-indigo-400/70">Select Time of Birth</p>
+                                        <p className="text-xs font-bold tracking-[3px] uppercase text-indigo-600 dark:text-indigo-400/80">Select Time of Birth</p>
                                         <PremiumClock
                                             value={formData.timeOfBirth}
                                             onChange={(ti) => setFormData({ ...formData, timeOfBirth: ti })}
@@ -294,7 +294,7 @@ export default function BirthDetailsForm() {
                                         <button
                                             type="button"
                                             onClick={() => setShowClock(false)}
-                                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all shadow-[0_0_20px_rgba(99,102,241,0.4)] cursor-pointer"
+                                            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-4 py-3 rounded-xl text-sm font-bold transition-all shadow-[0_4px_14px_rgba(99,102,241,0.4)] cursor-pointer"
                                         >
                                             ✓ Confirm Selection
                                         </button>
