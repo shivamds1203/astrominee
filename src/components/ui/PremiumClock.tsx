@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
+import { Clock, Sun, Moon } from "lucide-react";
 
 interface PremiumClockProps {
-    value: string; // HH:mm
+    value: string; // HH:mm (24h)
     onChange: (time: string) => void;
 }
 
-// ─── Drum Roll Picker ──────────────────────────────────────────────────────────
+// ─── Smooth Drum Roll Picker ──────────────────────────────────────────────────
 const DrumRoll: React.FC<{
     items: string[];
     selected: string;
@@ -16,108 +17,120 @@ const DrumRoll: React.FC<{
     label: string;
     accentColor: string;
 }> = ({ items, selected, onSelect, label, accentColor }) => {
-    const selectedIdx = items.indexOf(selected);
-    const ITEM_H = 44;
+    const ITEM_H = 46;
     const VISIBLE = 5;
     const containerRef = useRef<HTMLDivElement>(null);
+    const isUserScrollingRef = useRef(false);
+    const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const scrollToIndex = useCallback((idx: number) => {
+    const scrollToIndex = useCallback((idx: number, smooth = true) => {
         const container = containerRef.current;
         if (!container) return;
-        container.scrollTop = idx * ITEM_H;
+        container.scrollTo({
+            top: idx * ITEM_H,
+            behavior: smooth ? "smooth" : "auto",
+        });
     }, []);
 
+    // Sync only when not actively scrolling by user
     useEffect(() => {
-        scrollToIndex(selectedIdx);
-    }, [selectedIdx, scrollToIndex]);
+        if (!isUserScrollingRef.current) {
+            const idx = items.indexOf(selected);
+            if (idx !== -1) {
+                scrollToIndex(idx, true);
+            }
+        }
+    }, [selected, items, scrollToIndex]);
 
     const handleScroll = () => {
-        const container = containerRef.current;
-        if (!container) return;
-        const idx = Math.round(container.scrollTop / ITEM_H);
-        const clamped = Math.max(0, Math.min(idx, items.length - 1));
-        onSelect(items[clamped]);
+        isUserScrollingRef.current = true;
+        if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+
+        scrollTimeoutRef.current = setTimeout(() => {
+            isUserScrollingRef.current = false;
+            const container = containerRef.current;
+            if (!container) return;
+            const idx = Math.round(container.scrollTop / ITEM_H);
+            const clamped = Math.max(0, Math.min(idx, items.length - 1));
+            onSelect(items[clamped]);
+            scrollToIndex(clamped, true);
+        }, 120);
+    };
+
+    const handleItemClick = (item: string, idx: number) => {
+        onSelect(item);
+        scrollToIndex(idx, true);
     };
 
     return (
-        <div className="flex flex-col items-center gap-1.5">
-            <span className="text-[9px] font-bold uppercase tracking-[2.5px] text-slate-500 dark:text-gray-400">{label}</span>
+        <div className="flex flex-col items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-[2px] text-slate-500 dark:text-gray-400">
+                {label}
+            </span>
             <div
-                className="relative rounded-2xl overflow-hidden bg-slate-100/90 dark:bg-[#080c18]/90 border border-slate-200 dark:border-white/10 shadow-inner"
+                className="relative rounded-2xl overflow-hidden bg-slate-100/90 dark:bg-[#080c18]/90 border border-slate-300/80 dark:border-white/10 shadow-inner select-none"
                 style={{
-                    width: 72,
+                    width: 78,
                     height: ITEM_H * VISIBLE,
                 }}
             >
                 {/* Fade top */}
                 <div
                     className="absolute top-0 left-0 right-0 z-20 pointer-events-none bg-gradient-to-b from-slate-100 dark:from-[#080c18] to-transparent"
-                    style={{ height: ITEM_H * 2 }}
+                    style={{ height: ITEM_H * 1.8 }}
                 />
 
-                {/* Selection highlight */}
+                {/* Selection highlight frame */}
                 <div
-                    className="absolute z-10 left-0 right-0 pointer-events-none"
+                    className="absolute z-10 left-1 right-1 pointer-events-none rounded-xl"
                     style={{
                         top: ITEM_H * 2,
                         height: ITEM_H,
-                        background: `linear-gradient(135deg, ${accentColor}22, ${accentColor}12)`,
-                        borderTop: `1px solid ${accentColor}40`,
-                        borderBottom: `1px solid ${accentColor}40`,
-                        boxShadow: `0 0 16px ${accentColor}20`,
+                        background: `linear-gradient(135deg, ${accentColor}25, ${accentColor}10)`,
+                        border: `1.5px solid ${accentColor}60`,
+                        boxShadow: `0 0 20px ${accentColor}25`,
                     }}
                 />
 
                 {/* Fade bottom */}
                 <div
                     className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none bg-gradient-to-t from-slate-100 dark:from-[#080c18] to-transparent"
-                    style={{ height: ITEM_H * 2 }}
+                    style={{ height: ITEM_H * 1.8 }}
                 />
 
                 {/* Scrollable list */}
                 <div
                     ref={containerRef}
                     onScroll={handleScroll}
-                    className="h-full overflow-y-scroll no-scrollbar"
-                    style={{ scrollSnapType: "y mandatory", scrollBehavior: "smooth" }}
+                    className="h-full overflow-y-auto no-scrollbar touch-pan-y"
+                    style={{ scrollSnapType: "y mandatory" }}
                 >
-                    {/* Padding top: 2 empty rows */}
+                    {/* Top padding spacer */}
                     <div style={{ height: ITEM_H * 2 }} />
-                    {items.map((item) => {
+
+                    {items.map((item, idx) => {
                         const isActive = item === selected;
                         return (
                             <div
                                 key={item}
-                                onPointerDown={(e) => {
-                                    e.preventDefault();
-                                    onSelect(item);
-                                    scrollToIndex(items.indexOf(item));
-                                }}
+                                onClick={() => handleItemClick(item, idx)}
                                 style={{ height: ITEM_H, scrollSnapAlign: "center" }}
-                                className="flex items-center justify-center cursor-pointer"
+                                className="flex items-center justify-center cursor-pointer transition-transform"
                             >
-                                <motion.span
-                                    animate={{
-                                        scale: isActive ? 1 : 0.7,
-                                        opacity: isActive ? 1 : 0.35,
-                                    }}
-                                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                                    className={`font-mono font-bold select-none transition-colors ${
+                                <span
+                                    className={`font-mono transition-all duration-150 ${
                                         isActive
-                                            ? "text-slate-900 dark:text-white"
-                                            : "text-slate-400 dark:text-gray-500"
+                                            ? "text-2xl font-black text-slate-900 dark:text-white scale-110"
+                                            : "text-sm text-slate-400 dark:text-gray-500 font-medium hover:text-slate-700 dark:hover:text-gray-300"
                                     }`}
-                                    style={{
-                                        fontSize: isActive ? 26 : 18,
-                                        textShadow: isActive ? `0 0 16px ${accentColor}` : "none",
-                                    }}
                                 >
                                     {item}
-                                </motion.span>
+                                </span>
                             </div>
                         );
                     })}
-                    {/* Padding bottom: 2 empty rows */}
+
+                    {/* Bottom padding spacer */}
                     <div style={{ height: ITEM_H * 2 }} />
                 </div>
             </div>
@@ -125,143 +138,166 @@ const DrumRoll: React.FC<{
     );
 };
 
-// ─── Premium Clock ─────────────────────────────────────────────────────────────
-export const PremiumClock: React.FC<PremiumClockProps> = ({ value, onChange }) => {
-    const [currentTime, setCurrentTime] = useState<Date>(() => {
-        if (value) {
-            const [h, m] = value.split(":").map(Number);
-            const d = new Date();
-            d.setHours(h, m, 0, 0);
-            return d;
-        }
-        return new Date();
-    });
-
-    const [secondsDeg, setSecondsDeg] = useState(currentTime.getSeconds() * 6);
-
-    useEffect(() => {
-        const interval = setInterval(() => setSecondsDeg(prev => prev + 6), 1000);
-        return () => clearInterval(interval);
-    }, []);
-
-    useEffect(() => {
-        if (value) {
-            const [h, m] = value.split(":").map(Number);
-            const d = new Date();
-            d.setHours(h, m, 0, 0);
-            setCurrentTime(d);
-        }
-    }, [value]);
-
-    const hours = currentTime.getHours();
-    const minutes = currentTime.getMinutes();
-    const hoursDeg = (hours % 12) * 30 + (minutes / 2);
-    const minutesDeg = minutes * 6;
-
-    const hourItems = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, "0"));
-    const minuteItems = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0"));
-
-    const handleHourChange = (h: string) => onChange(`${h}:${minutes.toString().padStart(2, "0")}`);
-    const handleMinuteChange = (m: string) => onChange(`${hours.toString().padStart(2, "0")}:${m}`);
+// ─── Analog Clock Display ─────────────────────────────────────────────────────
+const AnalogClock: React.FC<{ hour: number; minute: number }> = ({ hour, minute }) => {
+    const minuteDeg = (minute / 60) * 360;
+    const hourDeg = ((hour % 12) / 12) * 360 + (minute / 60) * 30;
 
     return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="flex flex-col items-center gap-6"
-        >
-            {/* Analog clock face */}
-            <motion.div
-                animate={{ scale: [1, 1.018, 1] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="relative w-44 h-44 rounded-full flex items-center justify-center bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-[#1e143c] dark:to-[#080a18] border border-indigo-200 dark:border-indigo-500/30 shadow-2xl transition-colors duration-300"
-            >
-                {/* Gradient ring glow */}
-                <div
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                        background: "conic-gradient(from 0deg, transparent 0%, rgba(99,102,241,0.15) 30%, rgba(139,92,246,0.2) 60%, transparent 100%)",
-                    }}
-                />
-
-                {/* Tick marks */}
-                {[...Array(12)].map((_, i) => (
-                    <div key={i} className="absolute w-full h-full p-2.5" style={{ transform: `rotate(${i * 30}deg)` }}>
-                        <div className={`mx-auto rounded-full ${i % 3 === 0 ? "w-1 h-3 bg-indigo-600 dark:bg-indigo-400/80" : "w-0.5 h-2 bg-slate-300 dark:bg-white/20"}`} />
+        <div className="relative w-36 h-36 md:w-44 md:h-44 rounded-full mx-auto p-2 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-amber-500/10 dark:from-white/5 dark:to-white/[0.02] border border-slate-300/80 dark:border-white/10 shadow-lg flex items-center justify-center">
+            {/* Clock Face Inner */}
+            <div className="relative w-full h-full rounded-full bg-white dark:bg-[#060a16] shadow-inner flex items-center justify-center border border-slate-200 dark:border-white/5">
+                {/* 12-Hour Tick Marks */}
+                {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+                    <div
+                        key={deg}
+                        className="absolute w-full h-full flex justify-center pointer-events-none"
+                        style={{ transform: `rotate(${deg}deg)` }}
+                    >
+                        <div
+                            className={`rounded-full ${
+                                deg % 90 === 0
+                                    ? "w-1 h-3 bg-indigo-500 dark:bg-indigo-400 mt-1"
+                                    : "w-0.5 h-1.5 bg-slate-300 dark:bg-gray-700 mt-1.5"
+                            }`}
+                        />
                     </div>
                 ))}
 
-                {/* Hour hand */}
-                <motion.div
-                    className="absolute rounded-full origin-bottom bg-slate-800 dark:bg-white"
-                    style={{ width: 3.5, height: 42, bottom: "50%", left: "50%", x: "-50%", borderRadius: 4 }}
-                    animate={{ rotate: hoursDeg }}
-                    transition={{ type: "spring", stiffness: 60, damping: 12 }}
-                />
-
-                {/* Minute hand */}
-                <motion.div
-                    className="absolute origin-bottom bg-indigo-600 dark:bg-indigo-300 rounded-full"
-                    style={{ width: 2.5, height: 56, bottom: "50%", left: "50%", x: "-50%" }}
-                    animate={{ rotate: minutesDeg }}
-                    transition={{ type: "spring", stiffness: 60, damping: 12 }}
-                />
-
-                {/* Second hand */}
-                <motion.div
-                    className="absolute origin-bottom rounded-full"
+                {/* Hour Hand */}
+                <div
+                    className="absolute w-1.5 h-10 bg-slate-800 dark:bg-white rounded-full origin-bottom shadow-sm z-10 transition-transform duration-300"
                     style={{
-                        width: 1.5, height: 62, bottom: "50%", left: "50%", x: "-50%",
-                        background: "#06b6d4",
-                        boxShadow: "0 0 8px rgba(6,182,212,0.8)",
+                        transform: `translateY(-50%) rotate(${hourDeg}deg)`,
+                        bottom: "50%",
                     }}
-                    animate={{ rotate: secondsDeg }}
-                    transition={{ ease: "linear", duration: 1 }}
                 />
 
-                {/* Center dot */}
-                <div className="absolute w-3.5 h-3.5 rounded-full z-10 bg-indigo-600 dark:bg-white shadow-md" />
-            </motion.div>
+                {/* Minute Hand */}
+                <div
+                    className="absolute w-1 h-14 bg-gradient-to-t from-indigo-600 to-purple-500 rounded-full origin-bottom shadow-md z-20 transition-transform duration-300"
+                    style={{
+                        transform: `translateY(-50%) rotate(${minuteDeg}deg)`,
+                        bottom: "50%",
+                    }}
+                />
 
-            {/* Drum roll time pickers */}
-            <div className="flex items-center gap-3">
+                {/* Center Pivot */}
+                <div className="w-3.5 h-3.5 rounded-full bg-amber-500 border-2 border-white dark:border-black shadow-md z-30" />
+            </div>
+        </div>
+    );
+};
+
+// ─── Main Premium Clock Component ─────────────────────────────────────────────
+const HOURS_12 = Array.from({ length: 12 }, (_, i) => String(i === 0 ? 12 : i).padStart(2, "0"));
+const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
+
+const QUICK_PRESETS = [
+    { label: "Dawn", time: "06:00" },
+    { label: "Morning", time: "09:30" },
+    { label: "Noon", time: "12:00" },
+    { label: "Afternoon", time: "15:30" },
+    { label: "Sunset", time: "18:00" },
+    { label: "Night", time: "21:30" },
+];
+
+export const PremiumClock: React.FC<PremiumClockProps> = ({ value, onChange }) => {
+    // Parse HH:mm
+    const [h24Str, mStr] = (value || "09:30").split(":");
+    const rawH24 = parseInt(h24Str || "9", 10);
+    const minuteVal = parseInt(mStr || "30", 10);
+
+    const isPM = rawH24 >= 12;
+    const h12 = rawH24 % 12 === 0 ? 12 : rawH24 % 12;
+    const hourStr12 = String(h12).padStart(2, "0");
+    const minuteStr = String(minuteVal).padStart(2, "0");
+
+    const updateTime = (newH12: number, newMin: number, newIsPM: boolean) => {
+        let finalH24 = newH12 % 12;
+        if (newIsPM) finalH24 += 12;
+        const timeStr = `${String(finalH24).padStart(2, "0")}:${String(newMin).padStart(2, "0")}`;
+        onChange(timeStr);
+    };
+
+    return (
+        <div className="flex flex-col gap-5 select-none">
+            {/* Analog Clock Face */}
+            <AnalogClock hour={rawH24} minute={minuteVal} />
+
+            {/* Time Controls Row */}
+            <div className="flex items-center justify-center gap-4">
+                {/* Hours Drum */}
                 <DrumRoll
-                    items={hourItems}
-                    selected={hours.toString().padStart(2, "0")}
-                    onSelect={handleHourChange}
+                    items={HOURS_12}
+                    selected={hourStr12}
+                    onSelect={(h) => updateTime(parseInt(h, 10), minuteVal, isPM)}
                     label="Hour"
                     accentColor="#6366f1"
                 />
 
-                {/* Colon separator */}
-                <div className="flex flex-col gap-2 pb-1">
-                    {[0, 1].map(i => (
-                        <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"
-                            animate={{ opacity: [1, 0.3, 1] }}
-                            transition={{ duration: 1, repeat: Infinity, delay: i * 0.5 }}
-                        />
-                    ))}
-                </div>
+                <span className="text-2xl font-bold text-slate-400 dark:text-gray-600 mt-5">:</span>
 
+                {/* Minutes Drum */}
                 <DrumRoll
-                    items={minuteItems}
-                    selected={minutes.toString().padStart(2, "0")}
-                    onSelect={handleMinuteChange}
+                    items={MINUTES}
+                    selected={minuteStr}
+                    onSelect={(m) => updateTime(h12, parseInt(m, 10), isPM)}
                     label="Minute"
                     accentColor="#8b5cf6"
                 />
+
+                {/* AM / PM Toggle Column */}
+                <div className="flex flex-col items-center gap-2 mt-4">
+                    <span className="text-[10px] font-bold uppercase tracking-[2px] text-slate-500 dark:text-gray-400">
+                        Period
+                    </span>
+                    <div className="flex flex-col gap-1.5 p-1 rounded-2xl bg-slate-100 dark:bg-[#080c18] border border-slate-300/80 dark:border-white/10">
+                        <button
+                            type="button"
+                            onClick={() => updateTime(h12, minuteVal, false)}
+                            className={`px-3 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                                !isPM
+                                    ? "bg-amber-500 text-slate-950 shadow-md font-extrabold"
+                                    : "text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                        >
+                            <Sun className="w-3.5 h-3.5" /> AM
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => updateTime(h12, minuteVal, true)}
+                            className={`px-3 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                                isPM
+                                    ? "bg-indigo-600 text-white shadow-md font-extrabold"
+                                    : "text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                        >
+                            <Moon className="w-3.5 h-3.5" /> PM
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            {/* Current time display */}
-            <motion.div
-                key={`${hours}:${minutes}`}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-xs font-mono font-semibold text-indigo-600 dark:text-indigo-400/80 tracking-widest"
-            >
-                {hours.toString().padStart(2, "0")}:{minutes.toString().padStart(2, "0")} {hours < 12 ? "AM" : "PM"}
-            </motion.div>
-        </motion.div>
+            {/* Quick Presets Chips */}
+            <div className="pt-2 border-t border-slate-200/80 dark:border-white/5">
+                <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                    {QUICK_PRESETS.map((preset) => (
+                        <button
+                            key={preset.label}
+                            type="button"
+                            onClick={() => onChange(preset.time)}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                                value === preset.time
+                                    ? "bg-indigo-600 text-white font-bold shadow-xs"
+                                    : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-gray-400 hover:bg-slate-200 dark:hover:bg-white/10"
+                            }`}
+                        >
+                            {preset.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
     );
 };
