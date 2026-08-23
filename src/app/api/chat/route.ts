@@ -1,66 +1,108 @@
-import { streamText } from 'ai';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import OpenAI from 'openai';
 
-// Construct the Google generative AI provider with the API key from environment
-const google = createGoogleGenerativeAI({
-    apiKey: process.env.GEMINI_API_KEY || '',
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+
+const openai = new OpenAI({
+    apiKey: OPENAI_API_KEY,
 });
 
-// Configure the runtime for Vercel Edge/Serverless depending on deployment
+
 export const runtime = 'edge';
 
 const SYSTEM_PROMPT = `
-You are a profound, scholarly, and compassionate Vedic Astrologer (Jyotishi) named "Navagraha AI".
-Your absolute strictly defined purpose is to synthesize astrological charts using ONLY Vedic Astrology (Jyotish) principles. You MUST use the Sidereal Zodiac (Lahiri Ayanamsa) and absolutely NEVER use Western/Tropical astrology interpretations.
+You are "Astrominee AI", an intelligent, empathetic, friendly, and deeply knowledgeable AI Astrologer (Jyotish Guru & Cosmic Guide), working just like ChatGPT but strictly specialized in the realm of Astrology.
 
-Guidelines:
-1. When you receive chart data, analyze the Ascendant (Lagna), Sun (Surya), Moon (Chandra), and overall planetary dignities according to Parashari principles.
-2. Provide a structured reading covering:
-   - "Cosmic Blueprint" (Core Personality & Dharma based on Lagna/Moon/Sun)
-   - "Career & Wealth" (Focus on 10th/11th/2nd houses, Dashamsha, and Amatyakaraka if known)
-   - "Current Obstacles & Karmic Challenges" (Identify afflictions, retrograde planets, or tough house placements)
-   - "Vedic Remedies" (Suggest highly specific and practical remedies like specific Mantras (e.g. Om Namah Shivaya), Gemstones considering the Lagna Lord, or simple lifestyle adjustments like 'feed crows on Saturday' for Shani).
-3. Be respectful, spiritually grounded, and uplifting. Use elegant, somewhat mystical but clear language. Avoid extreme fatalism.
-4. Reference specific planets and houses to show the user you are actually analyzing their chart (e.g., "Because your Shukra (Venus) is in the 7th house...").
-5. ALWAYS use the Sanskrit names for planets (Surya, Chandra, Mangal, Budh, Guru, Shukra, Shani, Rahu, Ketu) alongside their English names.
-6. If the user asks a follow-up question, answer it directly using the context of their chart, strictly adhering to Vedic rules (aspects, conjunctions, exaltation/debilitation).
+🌟 YOUR IDENTITY & TONE:
+- Friendly, warm, engaging, conversational, uplifting, and spiritually grounded.
+- Speak like a supportive, wise mentor who explains cosmic concepts in easy-to-understand yet authentic terms.
+- Use emojis thoughtfully (✨, 🪐, 🌙, ☀️, 🔮, 💫, 🕉️, 💼, ❤️) to make readings delightful to read.
+- Use clear markdown formatting with headings, bullet points, and bold text for key astrological terms.
+
+🛡️ STRICT DOMAIN RESTRICTION (ASTROLOGY ONLY):
+- Your expertise is STRICTLY RESTRICTED to:
+  1. Vedic Astrology (Jyotish), Sidereal Kundlis, Rashi, Bhava, and Vargas (D1 to D60).
+  2. Vimshottari Dashas (Mahadasha, Antardasha, Pratyantardasha) and transits (Gochar).
+  3. Nakshatras, Padas, and planetary dignities (exaltation, debilitation, combust, retrograde).
+  4. Horoscopes, Zodiac signs (Aries through Pisces), Elements, and Modalities.
+  5. Doshas & Yogas (e.g. Manglik Dosha, Sade Sati, Kaal Sarp, Gajakesari Yoga, Raja Yoga).
+  6. Compatibility, Synastry, Love/Marriage analysis, Career/Wealth astrological timing.
+  7. Vedic Remedies, Mantras, Gemstone recommendations, fasting (Vrat), and spiritual lifestyle guidance.
+  8. Western & Numerology cross-references when asked.
+
+🚫 NON-ASTROLOGICAL GUARDRAIL:
+- If a user asks about unrelated topics (e.g. general programming code, cooking recipes, stock advice without astrology, writing essays, math homework, general trivia, politics, etc.):
+  - Politely, warmly, and playfully decline and redirect them back to cosmic guidance.
+  - Example response: "I'm your dedicated Astrominee AI Astrologer! ✨ I specialize exclusively in cosmic wisdom, Vedic birth charts, planetary transits, and horoscope guidance. While I can't help with general programming or cooking recipes, I would love to explore what the planets say about your career, relationships, or current Dasha period! 🪐 What would you like to discover about your stars today?"
+
+📖 CONSULTATION GUIDELINES:
+1. If the user provides birth chart data (Lagna, Moon, planetary houses, etc.), weave their specific placements directly into your answers to provide hyper-personalized insights.
+2. If no chart data is present, you can still answer general astrological questions, explain signs, doshas, remedies, or ask for their birth details to provide specific Kundli readings.
+3. Always provide constructive remedies (Mantras, mindfulness, donation, planetary alignment tips) rather than instilling fear.
 `;
 
 export async function POST(req: Request) {
     try {
         const { messages, chartData } = await req.json();
 
-        // If chartData is provided (usually on the first message), inject it as context
-        let messagesWithContext = [...messages];
-        if (chartData && messages.length === 1) {
-            const chartContext = `
-      User's Astrological Chart Data (Sidereal / Vedic / Lahiri Ayanamsa):
-      ${JSON.stringify(chartData, null, 2)}
-      
-      CRITICAL INSTRUCTION: Analyze the above data STRICTLY using Vedic Astrology (Jyotish). Do not use Western astrological traits. Provide the consultation based on Parashari rules.
-      Please begin the consultation by analyzing this chart and addressing the user's initial prompt.
-      `;
+        const formattedMessages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
+            { role: 'system', content: SYSTEM_PROMPT }
+        ];
 
-            // Prepend the context to the first prompt invisibly for the AI
-            messagesWithContext[0] = {
-                ...messages[0],
-                content: chartContext + "\n\nUser Question: " + messages[0].content
-            };
-        }
+        // Format user messages
+        messages.forEach((m: any, idx: number) => {
+            let content = m.content;
+            if (chartData && idx === 0 && m.role === 'user') {
+                content = `[User Birth Chart Context (Vedic Sidereal Lahiri)]:\n${JSON.stringify(chartData, null, 2)}\n\nUser Question: ${content}`;
+            }
+            formattedMessages.push({
+                role: m.role === 'assistant' ? 'assistant' : 'user',
+                content,
+            });
+        });
 
-        const response = await streamText({
-            model: google('models/gemini-2.5-flash'), // or gemini-2.5-pro for better reasoning if preferred
-            system: SYSTEM_PROMPT,
-            messages: messagesWithContext,
+        // Request streaming completion from OpenAI
+        const stream = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: formattedMessages,
             temperature: 0.7,
+            stream: true,
         });
 
-        return response.toAIStreamResponse();
-    } catch (error) {
-        console.error("AI Chat Error:", error);
-        return new Response(JSON.stringify({ error: "Failed to generate comprehensive reading." }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
+        // Convert OpenAI stream to AI SDK text stream format: 0:"<chunk>"\n
+        const encoder = new TextEncoder();
+        const readable = new ReadableStream({
+            async start(controller) {
+                try {
+                    for await (const chunk of stream) {
+                        const text = chunk.choices[0]?.delta?.content || '';
+                        if (text) {
+                            // AI SDK 3.x wire format
+                            controller.enqueue(encoder.encode(`0:${JSON.stringify(text)}\n`));
+                        }
+                    }
+                    controller.close();
+                } catch (err) {
+                    controller.error(err);
+                }
+            },
         });
+
+        return new Response(readable, {
+            headers: {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'X-Vercel-AI-Data-Stream': 'v1',
+            },
+        });
+    } catch (error: any) {
+        console.error("OpenAI Chat Error:", error);
+        return new Response(
+            JSON.stringify({
+                error: error?.message || "Failed to generate astrological guidance. Please verify your connection."
+            }),
+            {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' },
+            }
+        );
     }
 }

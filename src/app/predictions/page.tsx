@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Bot, Sparkles, Brain, AlertCircle } from 'lucide-react';
+import { Bot, Sparkles, Brain, AlertCircle, RefreshCw } from 'lucide-react';
 import { AIChatBox } from '@/components/predictions/AIChatBox';
 import { ScrollSection3D } from '@/components/ui/ScrollSection3D';
 
@@ -11,7 +11,20 @@ export default function PredictionsPage() {
     const [chartData, setChartData] = useState<any>(null);
     const [error, setError] = useState("");
 
-    const loadChartData = async () => {
+    // Automatically hydrate chartData from sessionStorage if user already submitted birth details
+    useEffect(() => {
+        try {
+            const savedChart = sessionStorage.getItem("astrologyChartData");
+            if (savedChart) {
+                const parsed = JSON.parse(savedChart);
+                setChartData(parsed);
+            }
+        } catch (e) {
+            console.error("Failed to load saved birth chart from session:", e);
+        }
+    }, []);
+
+    const loadSampleChartData = async () => {
         setLoading(true);
         setError("");
         try {
@@ -19,11 +32,11 @@ export default function PredictionsPage() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    year: 1995,
-                    month: 8,
-                    date: 15,
-                    hours: 14,
-                    minutes: 30,
+                    year: 2002,
+                    month: 3,
+                    date: 12,
+                    hours: 9,
+                    minutes: 35,
                     seconds: 0,
                     latitude: 28.6139,
                     longitude: 77.2090,
@@ -31,7 +44,7 @@ export default function PredictionsPage() {
                 })
             });
 
-            if (!response.ok) throw new Error("Failed to calculate chart data");
+            if (!response.ok) throw new Error("Failed to calculate astrological chart");
 
             const data = await response.json();
             if (data.success && data.data) {
@@ -47,69 +60,62 @@ export default function PredictionsPage() {
     };
 
     return (
-        <main className="min-h-screen pt-28 pb-16 px-6 max-w-4xl mx-auto relative z-10">
-            {/* ── Header 3D Section ── */}
-            <ScrollSection3D intensity="subtle" depth={25} className="text-center mb-10">
+        <main className="min-h-screen pt-28 pb-16 px-4 md:px-6 max-w-5xl mx-auto relative z-10">
+            {/* ── Header Section ── */}
+            <ScrollSection3D intensity="subtle" depth={25} className="text-center mb-8">
                 <div className="inline-flex items-center justify-center p-3.5 glass-panel rounded-full mb-4 border border-amber-500/30 dark:border-yellow-500/30 shadow-[0_0_20px_rgba(212,175,55,0.15)]">
-                    <Bot className="w-8 h-8 text-amber-600 dark:text-yellow-500" />
+                    <Bot className="w-8 h-8 text-amber-600 dark:text-yellow-400" />
                 </div>
-                <h1 className="text-4xl md:text-5xl font-black mb-4 text-slate-900 dark:text-white tracking-tight">AI Astrologer</h1>
-                <p className="text-slate-600 dark:text-gray-400 max-w-lg mx-auto font-light leading-relaxed">
-                    Get personalized insights based on your unique planetary configuration using our advanced AI model.
+                <h1 className="text-3xl md:text-5xl font-black mb-3 text-slate-900 dark:text-white tracking-tight">
+                    Astrominee AI Astrologer
+                </h1>
+                <p className="text-slate-600 dark:text-gray-400 max-w-xl mx-auto font-light leading-relaxed text-sm md:text-base">
+                    Your friendly ChatGPT-style cosmic guide. Ask anything about your Vedic Kundli, planetary transits, love compatibility, career timing, and personalized remedies.
                 </p>
             </ScrollSection3D>
 
-            {/* ── Consultation 3D Section ── */}
+            {/* ── Chatbot Container ── */}
             <ScrollSection3D intensity="subtle" depth={30}>
-                {!chartData ? (
-                    <div className="glass-panel p-8 md:p-12 rounded-3xl border border-slate-200/80 dark:border-white/10 relative overflow-hidden min-h-[400px] flex flex-col items-center justify-center text-center shadow-xl">
-                        {!loading ? (
-                            <div className="space-y-6">
-                                <Brain className="w-16 h-16 text-slate-400 dark:text-gray-600 mx-auto" />
-                                <p className="text-slate-600 dark:text-gray-400 max-w-sm mx-auto font-light">
-                                    To consult with the Navagraha AI, we first need to cast your Vedic birth chart.
-                                </p>
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4 }}
+                >
+                    <AIChatBox chartData={chartData} />
 
-                                {error && (
-                                    <div className="text-rose-600 dark:text-red-400 bg-rose-500/10 border border-rose-500/20 px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm mt-4">
-                                        <AlertCircle className="w-4 h-4" /> {error}
-                                    </div>
-                                )}
+                    {/* Chart Context Status Bar */}
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 px-3 py-2 rounded-2xl bg-amber-50/60 dark:bg-white/[0.02] border border-amber-200/60 dark:border-white/5 text-xs text-slate-600 dark:text-gray-400">
+                        <div className="flex items-center gap-2">
+                            <span className={`w-2 h-2 rounded-full ${chartData ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'}`} />
+                            <span>
+                                {chartData
+                                    ? "Kundli Chart Data Linked (Personalized Sidereal Reading Active)"
+                                    : "General Astrological Mode Active"}
+                            </span>
+                        </div>
 
-                                <button
-                                    onClick={loadChartData}
-                                    className="bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-slate-950 font-bold py-3.5 px-8 rounded-full transition-all flex items-center gap-2 mx-auto shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_30px_rgba(212,175,55,0.5)] active:scale-95 cursor-pointer"
-                                >
-                                    <Sparkles className="w-4 h-4" /> Cast Chart &amp; Start Reading
-                                </button>
-                            </div>
+                        {!chartData ? (
+                            <button
+                                type="button"
+                                onClick={loadSampleChartData}
+                                disabled={loading}
+                                className="text-amber-700 dark:text-yellow-400 hover:underline font-semibold flex items-center gap-1 cursor-pointer"
+                            >
+                                <Sparkles className="w-3.5 h-3.5" />
+                                {loading ? "Aligning planetary chart..." : "Attach Sample Birth Chart"}
+                            </button>
                         ) : (
-                            <div className="space-y-4">
-                                <div className="w-12 h-12 border-4 border-amber-500/30 dark:border-yellow-500/30 border-t-amber-600 dark:border-t-yellow-500 rounded-full animate-spin mx-auto" />
-                                <p className="text-amber-700 dark:text-yellow-500 text-sm animate-pulse font-medium">Aligning the Nakshatras...</p>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setChartData(null)}
+                                className="text-slate-500 hover:text-slate-800 dark:text-gray-400 dark:hover:text-white flex items-center gap-1 cursor-pointer"
+                            >
+                                <RefreshCw className="w-3 h-3" /> Detach Chart
+                            </button>
                         )}
                     </div>
-                ) : (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.4 }}
-                    >
-                        <AIChatBox chartData={chartData} />
-
-                        <div className="text-center mt-6">
-                            <button
-                                onClick={() => setChartData(null)}
-                                className="text-sm text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-white transition-colors cursor-pointer"
-                            >
-                                Start Over
-                            </button>
-                        </div>
-                    </motion.div>
-                )}
+                </motion.div>
             </ScrollSection3D>
         </main>
     );
 }
-
