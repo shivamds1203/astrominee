@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Download, Share2, ChevronDown, ChevronRight, Sparkles, BookmarkPlus, Check, Clock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Download, Share2, ChevronDown, Sparkles, BookmarkPlus, Check } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { NorthIndianChart } from "@/components/charts/NorthIndianChart";
 import { SouthIndianChart } from "@/components/charts/SouthIndianChart";
@@ -108,6 +108,11 @@ export default function DashboardPage() {
         }
     }, []);
 
+    // Dynamically calculate divisional chart data whenever selectedVarga or planetsData changes
+    const activeChartPlanets = React.useMemo(() => {
+        return generateDivisionalChart(planetsData || [], selectedVarga);
+    }, [planetsData, selectedVarga]);
+
     if (!isMounted) return null;
 
     return (
@@ -181,10 +186,10 @@ export default function DashboardPage() {
                             <button
                                 key={num}
                                 onClick={() => setSelectedVarga(num)}
-                                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
                                     isSelected
-                                        ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
-                                        : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-gray-400 border-slate-200 dark:border-white/10 hover:text-slate-900 dark:hover:text-white"
+                                        ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-md scale-102"
+                                        : "bg-white/80 dark:bg-white/5 text-slate-700 dark:text-gray-300 border-slate-300/80 dark:border-white/10 hover:text-slate-900 dark:hover:text-white"
                                 }`}
                             >
                                 {num === 1 ? "D1 Rashi" : num === 9 ? "D9 Navamsa" : "D10 Dashamsa"}
@@ -197,56 +202,87 @@ export default function DashboardPage() {
             {/* ── Main Chart & Analysis 3D Section ── */}
             <ScrollSection3D intensity="subtle" depth={30}>
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {/* Main Rashi Chart */}
+                    {/* Main Rashi Chart Card */}
                     <div
-                        className="glass-panel p-6 md:p-8 rounded-3xl border border-amber-500/20 dark:border-yellow-500/20 shadow-[0_0_30px_rgba(212,175,55,0.08)] col-span-1 xl:col-span-2 relative overflow-hidden"
+                        className="glass-panel p-6 md:p-8 rounded-3xl border border-amber-500/20 dark:border-yellow-500/20 shadow-[0_0_30px_rgba(212,175,55,0.08)] col-span-1 xl:col-span-2 relative"
                     >
-                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none text-slate-800 dark:text-white">
-                            <span className="text-8xl font-serif">ॐ</span>
+                        {/* Subtle background motif */}
+                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none text-slate-800 dark:text-white overflow-hidden rounded-3xl">
+                            <span className="text-8xl font-serif select-none">ॐ</span>
                         </div>
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-amber-600 dark:text-yellow-500 flex items-center gap-2">
-                                {VARGAS.find(v => v.num === selectedVarga)?.name}
-                            </h2>
 
+                        {/* Chart Header Bar with Dropdown */}
+                        <div className="flex justify-between items-center mb-6 relative z-30">
+                            <div>
+                                <span className="text-[10px] font-mono uppercase tracking-widest text-amber-700 dark:text-yellow-500/80 font-bold block mb-0.5">Active Kundli</span>
+                                <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    {VARGAS.find(v => v.num === selectedVarga)?.name}
+                                </h2>
+                            </div>
+
+                            {/* Change Chart Dropdown Menu */}
                             <div className="relative">
                                 <button
-                                    onClick={() => setIsVargaDropdownOpen(!isVargaDropdownOpen)}
-                                    className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-300/80 dark:border-white/10 px-4 py-2 rounded-xl text-sm font-semibold text-slate-800 dark:text-gray-300 transition-colors cursor-pointer"
+                                    type="button"
+                                    onClick={() => setIsVargaDropdownOpen(prev => !prev)}
+                                    className="flex items-center gap-2 bg-white/90 dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/15 border border-slate-300 dark:border-white/20 px-4 py-2 rounded-xl text-sm font-bold text-slate-800 dark:text-white transition-colors cursor-pointer shadow-sm"
                                 >
                                     Change Chart <ChevronDown className={`w-4 h-4 transition-transform ${isVargaDropdownOpen ? "rotate-180" : ""}`} />
                                 </button>
 
-                                {isVargaDropdownOpen && (
-                                    <>
-                                        <div
-                                            className="fixed inset-0 z-40"
-                                            onClick={() => setIsVargaDropdownOpen(false)}
-                                        />
-                                        <div className="absolute right-0 top-12 w-64 glass-strong border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl z-50 max-h-80 overflow-y-auto custom-scrollbar">
-                                            {VARGAS.map(varga => (
-                                                <button
-                                                    key={varga.num}
-                                                    onClick={() => { setSelectedVarga(varga.num); setIsVargaDropdownOpen(false); }}
-                                                    className={`w-full text-left px-4 py-3 text-sm transition-colors border-b border-slate-100 dark:border-white/5 last:border-0 flex items-center justify-between cursor-pointer ${selectedVarga === varga.num ? 'bg-amber-500/20 dark:bg-yellow-500/20 text-amber-700 dark:text-yellow-400 font-semibold' : 'text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-white/10'}`}
-                                                >
-                                                    <span>{varga.name}</span>
-                                                    {selectedVarga === varga.num && <Check className="w-4 h-4 text-amber-600 dark:text-yellow-400" />}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
+                                <AnimatePresence>
+                                    {isVargaDropdownOpen && (
+                                        <>
+                                            <div
+                                                className="fixed inset-0 z-40"
+                                                onClick={() => setIsVargaDropdownOpen(false)}
+                                            />
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.95, y: 5 }}
+                                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                exit={{ opacity: 0, scale: 0.95, y: 5 }}
+                                                transition={{ duration: 0.15 }}
+                                                className="absolute right-0 top-12 w-64 bg-white/98 dark:bg-[#0c1224]/98 backdrop-blur-3xl border border-slate-200 dark:border-white/15 rounded-2xl overflow-hidden shadow-2xl z-50 max-h-80 overflow-y-auto custom-scrollbar"
+                                            >
+                                                <div className="p-2 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/[0.02]">
+                                                    <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 dark:text-gray-400 px-2">Select Divisional Chart</span>
+                                                </div>
+                                                {VARGAS.map(varga => (
+                                                    <button
+                                                        key={varga.num}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSelectedVarga(varga.num);
+                                                            setIsVargaDropdownOpen(false);
+                                                        }}
+                                                        className={`w-full text-left px-4 py-3 text-sm transition-colors border-b border-slate-100 dark:border-white/5 last:border-0 flex items-center justify-between cursor-pointer ${
+                                                            selectedVarga === varga.num
+                                                                ? 'bg-amber-500/20 dark:bg-yellow-500/20 text-amber-800 dark:text-yellow-400 font-bold'
+                                                                : 'text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-white/10'
+                                                        }`}
+                                                    >
+                                                        <span>{varga.name}</span>
+                                                        {selectedVarga === varga.num && <Check className="w-4 h-4 text-amber-600 dark:text-yellow-400" />}
+                                                    </button>
+                                                ))}
+                                            </motion.div>
+                                        </>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         </div>
 
+                        {/* Chart Render Canvas */}
                         <div className="aspect-square max-w-lg mx-auto bg-amber-50/50 dark:bg-black/60 rounded-3xl border border-amber-200/80 dark:border-white/10 flex items-center justify-center relative backdrop-blur-md overflow-hidden p-3 md:p-4 shadow-xl dark:shadow-2xl transition-colors duration-300">
-
                             {chartStyle === "north" ? (
-                                <NorthIndianChart planetsData={generateDivisionalChart(planetsData || [], selectedVarga)} />
+                                <NorthIndianChart
+                                    key={`north-${selectedVarga}-${planetsData?.length}`}
+                                    planetsData={activeChartPlanets}
+                                />
                             ) : (
                                 <SouthIndianChart
-                                    planetsData={generateDivisionalChart(planetsData || [], selectedVarga)}
+                                    key={`south-${selectedVarga}-${planetsData?.length}`}
+                                    planetsData={activeChartPlanets}
                                     userData={userData}
                                 />
                             )}
@@ -258,9 +294,15 @@ export default function DashboardPage() {
                         className="glass-panel p-6 md:p-8 rounded-3xl border border-slate-200/80 dark:border-white/10 flex flex-col gap-6"
                     >
                         <div className="flex-1 min-h-[360px]">
-                            <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 to-purple-600 dark:from-electric-blue dark:to-violet-glow mb-4 flex items-center gap-2">
-                                Analytical Data <span className="text-xs text-indigo-600 dark:text-indigo-400 font-normal px-2.5 py-1 bg-indigo-500/10 rounded-full border border-indigo-500/20">Precision</span>
-                            </h3>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 to-purple-600 dark:from-electric-blue dark:to-violet-glow flex items-center gap-2">
+                                    Analytical Data
+                                </h3>
+                                <span className="text-xs text-indigo-600 dark:text-indigo-400 font-bold px-2.5 py-1 bg-indigo-500/10 rounded-full border border-indigo-500/20">
+                                    {VARGAS.find(v => v.num === selectedVarga)?.name.split('-')[0].trim()}
+                                </span>
+                            </div>
+
                             <div className="w-full overflow-x-auto rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-100/50 dark:bg-black/40 shadow-inner">
                                 <table className="w-full text-left border-collapse">
                                     <thead>
@@ -273,52 +315,36 @@ export default function DashboardPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {planetsData && planetsData.length > 0 ? generateDivisionalChart(planetsData, selectedVarga).map((planet: any, idx: number) => {
+                                        {activeChartPlanets && activeChartPlanets.length > 0 ? activeChartPlanets.map((planet: any, idx: number) => {
                                             const ZODIAC = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
                                             const signName = planet.current_sign ? ZODIAC[planet.current_sign - 1] : "Unknown";
 
                                             const deg = planet.normDegree || 0;
                                             const d = Math.floor(deg);
                                             const m = Math.floor((deg - d) * 60);
-                                            const nakshatra = getNakshatraDetails(planet.fullDegree);
+                                            const nk = planet.nakshatra ? (typeof planet.nakshatra === 'object' ? planet.nakshatra.name : planet.nakshatra) : getNakshatraDetails(planet.fullDegree).name;
 
                                             return (
-                                                <tr key={planet.name} className="border-b border-slate-200/60 dark:border-white/5 hover:bg-slate-200/40 dark:hover:bg-white/[0.03] transition-colors group relative">
-                                                    <td className="py-3 px-4">
-                                                        <div className="flex items-center gap-2 relative z-10">
-                                                            <span className={`w-2 h-2 rounded-full ${planet.name === 'Ascendant' ? 'bg-cyan-500 dark:bg-electric-blue shadow-[0_0_8px_#00f0ff]' : 'bg-amber-500 dark:bg-gold shadow-[0_0_8px_#d4af37]'}`} />
-                                                            <span className="text-slate-900 dark:text-gray-200 font-medium group-hover:text-indigo-600 dark:group-hover:text-white transition-colors">
-                                                                {planet.name} {planet.isRetro === "true" && <span className="text-rose-500 dark:text-rose-400 text-xs ml-1 font-bold">(R)</span>}
-                                                            </span>
-                                                        </div>
+                                                <tr
+                                                    key={idx}
+                                                    className="border-b border-slate-200/60 dark:border-white/5 last:border-0 hover:bg-slate-200/40 dark:hover:bg-white/[0.02] transition-colors"
+                                                >
+                                                    <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                                                        <span>{planet.name}</span>
+                                                        {planet.isRetro === "true" && (
+                                                            <span className="text-[10px] text-rose-500 font-bold px-1.5 py-0.5 bg-rose-500/10 rounded">℞</span>
+                                                        )}
                                                     </td>
-                                                    <td className="py-3 px-4">
-                                                        <span className="text-slate-600 dark:text-gray-400 font-mono text-sm group-hover:text-cyan-600 dark:group-hover:text-electric-blue transition-colors relative z-10 font-semibold">
-                                                            {d}° {m}'
-                                                        </span>
-                                                    </td>
-                                                    <td className="py-3 px-4 relative z-10">
-                                                        <span className="text-slate-700 dark:text-indigo-200/80 text-sm">
-                                                            {signName}
-                                                        </span>
-                                                    </td>
-                                                    <td className="py-3 px-4 relative z-10">
-                                                        <div className="flex flex-col">
-                                                            <span className="text-slate-800 dark:text-gray-200 text-sm font-medium">{nakshatra.name}</span>
-                                                            <span className="text-slate-500 dark:text-gray-500 text-xs uppercase tracking-wider">Pada {nakshatra.pada}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="py-3 px-4 text-right relative z-10">
-                                                        <span className="text-amber-600 dark:text-yellow-500/80 font-bold">
-                                                            {planet.house_number || 1}
-                                                        </span>
-                                                    </td>
+                                                    <td className="py-3 px-4 font-mono text-slate-600 dark:text-gray-400 text-sm">{`${d}° ${m}'`}</td>
+                                                    <td className="py-3 px-4 text-amber-700 dark:text-yellow-400 font-medium text-sm">{signName}</td>
+                                                    <td className="py-3 px-4 text-slate-600 dark:text-gray-400 text-sm">{nk}</td>
+                                                    <td className="py-3 px-4 text-right font-bold text-indigo-600 dark:text-cyan-400 text-sm">{planet.house_number || 1}</td>
                                                 </tr>
                                             );
                                         }) : (
                                             <tr>
-                                                <td colSpan={5} className="text-center py-10 text-slate-500 dark:text-gray-500 text-sm italic">
-                                                    Complete the birth details form to see precise planetary data.
+                                                <td colSpan={5} className="text-center py-6 text-slate-500 dark:text-gray-500 text-sm">
+                                                    No planetary data available
                                                 </td>
                                             </tr>
                                         )}
@@ -326,76 +352,74 @@ export default function DashboardPage() {
                                 </table>
                             </div>
                         </div>
-
-                        {/* Expandable Vimshottari Dasha Hierarchy */}
-                        <div className="mt-2 pt-6 border-t border-slate-200/80 dark:border-white/10">
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-amber-600 dark:text-yellow-400" />
-                                Vimshottari Dasha Periods
-                            </h3>
-                            {(() => {
-                                const moonPlanet = planetsData?.find((p: any) => p.name === "Moon");
-                                const moonDegree = moonPlanet?.fullDegree !== undefined ? moonPlanet.fullDegree : 306.68;
-                                const calculatedDashas = calculateVimshottariDashas(moonDegree, userData?.dateOfBirth);
-                                return <VimshottariDashaTree dashas={calculatedDashas} />;
-                            })()}
-                        </div>
-                    </div>
-
-
-                    {/* Expandable AI Insights Panel */}
-                    <div
-                        className="col-span-1 lg:col-span-2 xl:col-span-3 mt-4"
-                    >
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
-                                <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                            </div>
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">AI Cosmic Insights</h2>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {insights.map((insight) => (
-                                <div
-                                    key={insight.id}
-                                    className={`glass-panel rounded-2xl border transition-all duration-300 overflow-hidden ${expandedInsight === insight.id ? 'border-cyan-500/40 dark:border-electric-blue/40 shadow-xl' : 'border-slate-200/80 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20 cursor-pointer'}`}
-                                >
-                                    <button
-                                        onClick={() => setExpandedInsight(expandedInsight === insight.id ? null : insight.id)}
-                                        className="w-full text-left p-5 flex items-center justify-between cursor-pointer"
-                                    >
-                                        <h3 className={`font-semibold text-lg transition-colors ${expandedInsight === insight.id ? 'text-cyan-600 dark:text-electric-blue' : 'text-slate-800 dark:text-gray-200'}`}>
-                                            {insight.title}
-                                        </h3>
-                                        <motion.div animate={{ rotate: expandedInsight === insight.id ? 90 : 0 }}>
-                                            <ChevronRight className={`w-5 h-5 ${expandedInsight === insight.id ? 'text-cyan-600 dark:text-electric-blue' : 'text-slate-400 dark:text-gray-500'}`} />
-                                        </motion.div>
-                                    </button>
-
-                                    <motion.div
-                                        initial={false}
-                                        animate={{ height: expandedInsight === insight.id ? "auto" : 0, opacity: expandedInsight === insight.id ? 1 : 0 }}
-                                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                                        className="overflow-hidden"
-                                    >
-                                        <div className="p-5 pt-0 text-slate-600 dark:text-indigo-100/80 font-light leading-relaxed border-t border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
-                                            <p>{insight.content}</p>
-                                        </div>
-                                    </motion.div>
-                                </div>
-                            ))}
-                        </div>
                     </div>
                 </div>
             </ScrollSection3D>
 
-            {/* ── Detailed Predictions Section ── */}
-            {planetsData && planetsData.length > 0 && (
-                <ScrollSection3D intensity="subtle" depth={20} className="mt-12">
-                    <PredictionsSection planetsData={planetsData} />
-                </ScrollSection3D>
-            )}
+            {/* ── Vimshottari Dasha Hierarchy (120-Year Mahadasha, Antardasha, Pratyantar) ── */}
+            <ScrollSection3D intensity="subtle" depth={25} className="mt-12">
+                {planetsData && planetsData.length > 0 && (() => {
+                    const moonPlanet = planetsData.find(p => p.name === "Moon");
+                    const moonFullDegree = moonPlanet?.fullDegree ?? 306.68;
+                    const dob = userData?.dateOfBirth || "1995-08-15";
+                    const dashas = calculateVimshottariDashas(moonFullDegree, dob);
+                    return <VimshottariDashaTree dashas={dashas} />;
+                })()}
+            </ScrollSection3D>
+
+            {/* ── Deep Astrological Insights Section ── */}
+            <ScrollSection3D intensity="subtle" depth={25} className="mt-12">
+                <div className="glass-panel p-6 md:p-8 rounded-3xl border border-slate-200/80 dark:border-white/10 shadow-xl">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-3 bg-purple-500/10 rounded-2xl border border-purple-500/20">
+                            <Sparkles className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Cosmic Synthesis & Planetary Guidance</h2>
+                            <p className="text-sm text-slate-500 dark:text-gray-400">Core life dimensions calculated from your planetary geometry.</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {insights.map((insight) => {
+                            const isOpen = expandedInsight === insight.id;
+                            return (
+                                <motion.div
+                                    key={insight.id}
+                                    className={`p-6 rounded-2xl border transition-all cursor-pointer ${isOpen
+                                        ? "bg-slate-100/90 dark:bg-white/[0.04] border-indigo-500/40 shadow-md"
+                                        : "bg-slate-50 dark:bg-white/[0.01] border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10"
+                                        }`}
+                                    onClick={() => setExpandedInsight(isOpen ? null : insight.id)}
+                                >
+                                    <div className="flex justify-between items-center">
+                                        <h3 className="font-semibold text-slate-900 dark:text-white text-base">{insight.title}</h3>
+                                        <ChevronDown className={`w-4 h-4 text-slate-400 dark:text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                                    </div>
+                                    <AnimatePresence>
+                                        {isOpen && (
+                                            <motion.p
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: "auto", opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.3 }}
+                                                className="text-sm text-slate-600 dark:text-gray-300 mt-4 leading-relaxed font-light"
+                                            >
+                                                {insight.content}
+                                            </motion.p>
+                                        )}
+                                    </AnimatePresence>
+                                </motion.div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </ScrollSection3D>
+
+            {/* ── Planetary Interpretations & AI Chat Section ── */}
+            <ScrollSection3D intensity="subtle" depth={20} className="mt-12">
+                <PredictionsSection planetsData={planetsData || []} />
+            </ScrollSection3D>
         </main>
     );
 }
-
