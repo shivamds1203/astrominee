@@ -21,20 +21,20 @@ export default function StarBackground() {
     }, []);
 
     return (
-        <div className="fixed inset-0 overflow-hidden pointer-events-none -z-20 bg-black">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-[#050510] to-[#050510]" />
+        <div className="fixed inset-0 overflow-hidden pointer-events-none -z-20 bg-slate-50 dark:bg-[#000005] transition-colors duration-500">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-200/40 via-slate-100 to-slate-50 dark:from-indigo-900/20 dark:via-[#050510] dark:to-[#000005]" />
 
             {/* Stars */}
             {stars.map((star) => (
                 <div
                     key={star.id}
-                    className="absolute rounded-full bg-white gpu-layer"
+                    className="absolute rounded-full bg-indigo-500/40 dark:bg-white gpu-layer"
                     style={{
                         top: star.top,
                         left: star.left,
                         width: star.size,
                         height: star.size,
-                        opacity: 0.1,
+                        opacity: 0.15,
                         animation: shouldReduceMotion
                             ? "none"
                             : `star-twinkle ${star.duration}s ease-in-out infinite ${star.delay}s`,
@@ -42,15 +42,15 @@ export default function StarBackground() {
                 />
             ))}
 
-            {/* Floating Glowing Planets / Orbs using CSS animation instead of Framer Motion for better idle performance */}
+            {/* Floating Glowing Planets / Orbs */}
             <div
-                className="absolute top-[20%] left-[10%] w-64 h-64 rounded-full bg-indigo-600/10 blur-[100px] gpu-layer"
+                className="absolute top-[20%] left-[10%] w-64 h-64 rounded-full bg-indigo-500/10 dark:bg-indigo-600/10 blur-[100px] gpu-layer"
                 style={{
                     animation: shouldReduceMotion ? "none" : "float-gentle 20s ease-in-out infinite"
                 }}
             />
             <div
-                className="absolute bottom-[20%] right-[10%] w-80 h-80 rounded-full bg-yellow-600/10 blur-[120px] gpu-layer"
+                className="absolute bottom-[20%] right-[10%] w-80 h-80 rounded-full bg-amber-500/10 dark:bg-yellow-600/10 blur-[120px] gpu-layer"
                 style={{
                     animation: shouldReduceMotion ? "none" : "float-gentle 25s ease-in-out infinite reverse"
                 }}

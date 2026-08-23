@@ -101,29 +101,32 @@ export default function BirthDetailsForm() {
             const [year, month, date] = formData.dateOfBirth.split("-").map(Number);
             const [hours, minutes] = formData.timeOfBirth.split(":").map(Number);
 
-            // Call FreeAstrologyAPI directly — skips Next.js server round-trip for speed
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 15000); // 15s hard timeout
-
-            const res = await fetch("https://json.freeastrologyapi.com/planets", {
+            // Call our own secure backend endpoint
+            const res = await fetch("/api/astrology", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-api-key": "rj7tHBK4AL7XNY7CtEFsQ11Xxri3R2Hq8HZ4GVcx",
                 },
                 body: JSON.stringify({
-                    year, month, date, hours, minutes,
+                    year,
+                    month,
+                    date,
+                    hours,
+                    minutes,
                     seconds: 0,
                     latitude: parseFloat(formData.lat),
                     longitude: parseFloat(formData.lon),
                     timezone: 5.5,
                 }),
-                signal: controller.signal,
             });
-            clearTimeout(timeout);
 
-            if (!res.ok) throw new Error(`API Error: ${res.statusText}`);
-            const planetsData = await res.json();
+            const result = await res.json();
+
+            if (!res.ok || !result.success || !result.data) {
+                throw new Error(result.error || "Failed to calculate birth chart coordinates.");
+            }
+
+            const planetsData = result.data;
 
             // Store & navigate — dashboard loads instantly from sessionStorage
             sessionStorage.setItem("chartData", JSON.stringify(planetsData));
@@ -131,11 +134,7 @@ export default function BirthDetailsForm() {
             router.push("/dashboard");
 
         } catch (err: any) {
-            if (err.name === "AbortError") {
-                setErrorMsg("Request timed out. Please try again.");
-            } else {
-                setErrorMsg(err.message || "Something went wrong fetching chart data");
-            }
+            setErrorMsg(err.message || "Something went wrong fetching chart data. Please try again.");
             setLoading(false);
         }
     };
@@ -211,25 +210,25 @@ export default function BirthDetailsForm() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
                 onSubmit={handleSubmit}
-                className="glass-panel p-8 md:p-10 rounded-2xl w-full max-w-lg mx-auto relative overflow-hidden"
+                className="glass-panel p-8 md:p-10 rounded-3xl w-full max-w-lg mx-auto relative overflow-hidden border border-slate-200/80 dark:border-white/10 shadow-2xl"
             >
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600" />
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600" />
 
                 <div className="mb-8 text-center">
-                    <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-yellow-200">
+                    <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-yellow-500 dark:from-yellow-500 dark:to-yellow-200">
                         Cosmic Coordinates
                     </h2>
-                    <p className="text-gray-400 mt-2 text-sm">Enter your precise birth details to calculate your astrological chart.</p>
-                    {errorMsg && <p className="text-red-500 text-sm mt-3 bg-red-500/10 py-2 rounded border border-red-500/20">{errorMsg}</p>}
+                    <p className="text-slate-600 dark:text-gray-400 mt-2 text-sm font-light">Enter your precise birth details to calculate your astrological chart.</p>
+                    {errorMsg && <p className="text-rose-600 dark:text-red-400 text-sm mt-3 bg-rose-500/10 py-2 px-3 rounded-xl border border-rose-500/20">{errorMsg}</p>}
                 </div>
 
                 <div className="space-y-5">
                     <div className="relative">
-                        <User className="absolute left-3 top-9 w-5 h-5 text-gray-500 z-10" />
+                        <User className="absolute left-3.5 top-10 w-5 h-5 text-slate-400 dark:text-gray-500 z-10" />
                         <Input
                             label="Full Name"
                             placeholder="e.g. John Doe"
-                            className="pl-10"
+                            className="pl-11"
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             required
@@ -239,12 +238,12 @@ export default function BirthDetailsForm() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         {/* Custom Calendar Popover */}
                         <div className="relative group" ref={calendarRef}>
-                            <Calendar className="absolute left-3 top-[34px] w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors z-10 pointer-events-none" />
+                            <Calendar className="absolute left-3.5 top-[38px] w-5 h-5 text-slate-400 dark:text-gray-400 group-hover:text-amber-500 transition-colors z-10 pointer-events-none" />
                             <div onClick={() => { setShowCalendar(true); setShowClock(false); }}>
                                 <Input
                                     type="text"
                                     label="Date of Birth"
-                                    className="pl-10 cursor-pointer"
+                                    className="pl-11 cursor-pointer"
                                     value={formData.dateOfBirth}
                                     placeholder="Select Date"
                                     readOnly
@@ -252,7 +251,7 @@ export default function BirthDetailsForm() {
                                 />
                             </div>
                             {showCalendar && (
-                                <div className="absolute top-[80px] left-0 md:left-auto md:w-[350px] z-50">
+                                <div className="absolute top-[84px] left-0 md:left-auto md:w-[350px] z-50">
                                     <PremiumCalendar
                                         value={formData.dateOfBirth}
                                         onChange={(dt) => { setFormData({ ...formData, dateOfBirth: dt }); setShowCalendar(false); }}
@@ -263,12 +262,12 @@ export default function BirthDetailsForm() {
 
                         {/* Custom Clock Popover */}
                         <div className="relative group" ref={clockRef}>
-                            <Clock className="absolute left-3 top-[34px] w-5 h-5 text-gray-400 group-hover:text-yellow-500 transition-colors z-10 pointer-events-none" />
+                            <Clock className="absolute left-3.5 top-[38px] w-5 h-5 text-slate-400 dark:text-gray-400 group-hover:text-amber-500 transition-colors z-10 pointer-events-none" />
                             <div onClick={() => { setShowClock(true); setShowCalendar(false); }}>
                                 <Input
                                     type="text"
                                     label="Time of Birth (24hr)"
-                                    className="pl-10 cursor-pointer"
+                                    className="pl-11 cursor-pointer"
                                     value={formData.timeOfBirth}
                                     placeholder="Select Time"
                                     readOnly
@@ -284,10 +283,10 @@ export default function BirthDetailsForm() {
                                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
                                     {/* Modal */}
                                     <div
-                                        className="relative z-10 p-6 rounded-3xl bg-[#0c1222]/98 backdrop-blur-2xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.9)] flex flex-col items-center gap-5 w-[300px]"
+                                        className="relative z-10 p-6 rounded-3xl glass-strong border border-slate-200 dark:border-white/10 shadow-2xl flex flex-col items-center gap-5 w-[300px]"
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        <p className="text-xs font-bold tracking-[3px] uppercase text-indigo-400/70">Select Time of Birth</p>
+                                        <p className="text-xs font-bold tracking-[3px] uppercase text-indigo-600 dark:text-indigo-400/70">Select Time of Birth</p>
                                         <PremiumClock
                                             value={formData.timeOfBirth}
                                             onChange={(ti) => setFormData({ ...formData, timeOfBirth: ti })}
@@ -295,7 +294,7 @@ export default function BirthDetailsForm() {
                                         <button
                                             type="button"
                                             onClick={() => setShowClock(false)}
-                                            className="w-full bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all shadow-[0_0_20px_rgba(99,102,241,0.4)]"
+                                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all shadow-[0_0_20px_rgba(99,102,241,0.4)] cursor-pointer"
                                         >
                                             ✓ Confirm Selection
                                         </button>
@@ -306,11 +305,11 @@ export default function BirthDetailsForm() {
                     </div>
 
                     <div className="relative" ref={dropdownRef}>
-                        <MapPin className="absolute left-3 top-9 w-5 h-5 text-gray-500 z-10" />
+                        <MapPin className="absolute left-3.5 top-10 w-5 h-5 text-slate-400 dark:text-gray-500 z-10" />
                         <Input
                             label="Place of Birth"
                             placeholder="City, State, Country"
-                            className="pl-10 relative"
+                            className="pl-11 relative"
                             value={formData.placeOfBirth}
                             onChange={(e) => {
                                 setFormData({ ...formData, placeOfBirth: e.target.value });
@@ -323,7 +322,7 @@ export default function BirthDetailsForm() {
                             autoComplete="off"
                         />
                         {isSearching && (
-                            <div className="absolute right-3 top-9 w-4 h-4 border-2 border-yellow-500/30 border-t-yellow-500 rounded-full animate-spin" />
+                            <div className="absolute right-3.5 top-10 w-4 h-4 border-2 border-amber-500/30 border-t-amber-600 rounded-full animate-spin" />
                         )}
 
                         {/* Autocomplete Dropdown */}
@@ -331,20 +330,20 @@ export default function BirthDetailsForm() {
                             <motion.div
                                 initial={{ opacity: 0, y: -5 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="absolute top-20 left-0 w-full bg-[#0c1222]/95 backdrop-blur-2xl border border-white/20 rounded-xl overflow-hidden z-20 shadow-[0_15px_40px_rgba(0,0,0,0.8)]"
+                                className="absolute top-22 left-0 w-full glass-strong border border-slate-200 dark:border-white/20 rounded-2xl overflow-hidden z-20 shadow-2xl"
                             >
                                 <ul className="max-h-60 overflow-y-auto custom-scrollbar">
                                     {locationResults.map((loc, idx) => (
-                                        <li key={idx} className="border-b border-white/10 last:border-0">
+                                        <li key={idx} className="border-b border-slate-100 dark:border-white/10 last:border-0">
                                             <button
                                                 type="button"
                                                 onPointerDown={(e) => {
-                                                    e.preventDefault(); // Prevent input blur / mousedown from killing this
+                                                    e.preventDefault();
                                                     handleSelectLocation(loc);
                                                 }}
-                                                className="w-full text-left px-4 py-3.5 text-sm text-gray-200 hover:bg-indigo-500/20 hover:text-white transition-colors flex items-start gap-3 group"
+                                                className="w-full text-left px-4 py-3.5 text-sm text-slate-700 dark:text-gray-200 hover:bg-indigo-500/10 dark:hover:bg-indigo-500/20 hover:text-slate-900 dark:hover:text-white transition-colors flex items-start gap-3 group cursor-pointer"
                                             >
-                                                <MapPin className="w-4 h-4 mt-0.5 text-gray-500 group-hover:text-electric-blue shrink-0 transition-colors" />
+                                                <MapPin className="w-4 h-4 mt-0.5 text-slate-400 dark:text-gray-500 group-hover:text-cyan-600 dark:group-hover:text-electric-blue shrink-0 transition-colors" />
                                                 <span className="leading-snug">{loc.display_name}</span>
                                             </button>
                                         </li>
@@ -354,16 +353,16 @@ export default function BirthDetailsForm() {
                         )}
 
                         <div className="flex justify-between items-center mt-1 pl-1">
-                            <p className="text-xs text-yellow-600">Uses OpenStreetMap for lat/lon lookup.</p>
+                            <p className="text-xs text-amber-700 dark:text-yellow-600">Uses OpenStreetMap for lat/lon lookup.</p>
                             {(formData.lat && formData.lon) && (
-                                <p className="text-xs text-green-500 text-right">Coordinates mapped ✓</p>
+                                <p className="text-xs text-emerald-600 dark:text-green-500 text-right font-medium">Coordinates mapped ✓</p>
                             )}
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Gender</label>
-                        <div className="flex gap-2 p-1 bg-white/5 border border-white/10 rounded-xl relative">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">Gender</label>
+                        <div className="flex gap-2 p-1 bg-slate-100/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl relative">
                             {["male", "female", "other"].map((g) => {
                                 const isSelected = formData.gender === g;
                                 return (
@@ -379,11 +378,11 @@ export default function BirthDetailsForm() {
                                         {isSelected && (
                                             <motion.div
                                                 layoutId="gender-pill-active"
-                                                className="absolute inset-0 bg-yellow-500/20 border border-yellow-500/50 rounded-lg shadow-[0_0_15px_rgba(234,179,8,0.2)]"
+                                                className="absolute inset-0 bg-amber-500/20 dark:bg-yellow-500/20 border border-amber-500/50 dark:border-yellow-500/50 rounded-xl shadow-sm"
                                                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
                                             />
                                         )}
-                                        <span className={`relative z-10 block py-2.5 text-sm font-medium capitalize transition-colors ${isSelected ? "text-yellow-400" : "text-gray-400 group-hover:text-gray-200"}`}>
+                                        <span className={`relative z-10 block py-2.5 text-sm font-semibold capitalize transition-colors ${isSelected ? "text-amber-800 dark:text-yellow-400" : "text-slate-500 dark:text-gray-400 group-hover:text-slate-800 dark:group-hover:text-gray-200"}`}>
                                             {g}
                                         </span>
                                     </label>
@@ -393,13 +392,14 @@ export default function BirthDetailsForm() {
                     </div>
 
                     <div className="pt-4">
-                        <Button type="submit" className="w-full group py-6 text-lg" disabled={loading}>
+                        <Button type="submit" className="w-full group py-6 text-lg cursor-pointer" disabled={loading}>
                             {loading ? "Calculating Coordinates..." : "Generate Charts"}
                             {!loading && <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />}
                         </Button>
                     </div>
                 </div>
             </motion.form>
+
         </>
     );
 }

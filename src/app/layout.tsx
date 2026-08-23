@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import StarBackground from "@/components/background/StarBackground";
 import ClientAuthProvider from "@/components/auth/ClientAuthProvider";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 export const metadata: Metadata = {
     title: "Astrominee | Premium Vedic Astrology Platform",
@@ -12,22 +13,41 @@ export const metadata: Metadata = {
     },
 };
 
-
-
 export default function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
+            <head>
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `
+              (function() {
+                try {
+                  const saved = localStorage.getItem('astrominee-theme');
+                  if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches) || !saved) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+                    }}
+                />
+            </head>
             <body className="antialiased min-h-screen">
-                <ClientAuthProvider>
-                    <StarBackground />
-                    <Navbar />
-                    {children}
-                </ClientAuthProvider>
+                <ThemeProvider>
+                    <ClientAuthProvider>
+                        <StarBackground />
+                        <Navbar />
+                        {children}
+                    </ClientAuthProvider>
+                </ThemeProvider>
             </body>
         </html>
     );
 }
+

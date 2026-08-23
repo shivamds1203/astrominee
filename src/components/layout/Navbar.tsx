@@ -5,10 +5,11 @@ import Link from "next/link";
 import { motion, AnimatePresence, useScroll, useTransform, useMotionTemplate, useMotionValue, useSpring } from "framer-motion";
 import {
     User, LogOut, ChevronDown, Home, Telescope, Sparkles,
-    Star, Info, X, LayoutDashboard
+    Star, Info, X, LayoutDashboard, Sun, Moon
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { useTheme } from "@/context/ThemeContext";
 
 const NAV_LINKS = [
     { href: "/", label: "Home", icon: Home, color: "#f59e0b" },
@@ -17,6 +18,43 @@ const NAV_LINKS = [
     { href: "/nakshatras", label: "Nakshatras", icon: Star, color: "#14b8a6" },
     { href: "/about", label: "About", icon: Info, color: "#f97316" },
 ];
+
+function ThemeToggle() {
+    const { theme, toggleTheme } = useTheme();
+    return (
+        <motion.button
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={toggleTheme}
+            className="relative p-2.5 rounded-full border border-slate-300/80 dark:border-white/10 bg-slate-100/90 dark:bg-white/5 text-slate-700 dark:text-yellow-400 hover:border-yellow-500/40 transition-colors shadow-sm flex items-center justify-center cursor-pointer"
+            aria-label="Toggle theme"
+        >
+            <AnimatePresence mode="wait" initial={false}>
+                {theme === "dark" ? (
+                    <motion.div
+                        key="moon"
+                        initial={{ rotate: -90, scale: 0, opacity: 0 }}
+                        animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                        exit={{ rotate: 90, scale: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <Moon className="w-4 h-4 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]" />
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key="sun"
+                        initial={{ rotate: -90, scale: 0, opacity: 0 }}
+                        animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                        exit={{ rotate: 90, scale: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <Sun className="w-4 h-4 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]" />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </motion.button>
+    );
+}
 
 // ── Magnetic Link ────────────────────────────────────────────────────────────
 function MagneticLink({ children, href, className }: { children: React.ReactNode; href: string; className: string }) {
@@ -63,17 +101,17 @@ function HamburgerIcon({ open }: { open: boolean }) {
             <motion.span
                 animate={open ? { rotate: 45, y: 5 } : { rotate: 0, y: 0 }}
                 transition={{ type: "spring", stiffness: 260, damping: 22 }}
-                className="block h-[1.5px] w-5 bg-white origin-center"
+                className="block h-[1.5px] w-5 bg-slate-800 dark:bg-white origin-center"
             />
             <motion.span
                 animate={open ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }}
                 transition={{ duration: 0.15 }}
-                className="block h-[1.5px] w-5 bg-white"
+                className="block h-[1.5px] w-5 bg-slate-800 dark:bg-white"
             />
             <motion.span
                 animate={open ? { rotate: -45, y: -5 } : { rotate: 0, y: 0 }}
                 transition={{ type: "spring", stiffness: 260, damping: 22 }}
-                className="block h-[1.5px] w-5 bg-white origin-center"
+                className="block h-[1.5px] w-5 bg-slate-800 dark:bg-white origin-center"
             />
         </div>
     );
@@ -96,7 +134,7 @@ function MobileNavLink({
             <Link
                 href={href}
                 onClick={onClick}
-                className="group flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 active:scale-[0.97]"
+                className="group flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 active:scale-[0.97] hover:bg-slate-100 dark:hover:bg-white/5"
                 style={{ WebkitTapHighlightColor: "transparent" }}
             >
                 {/* Icon pill */}
@@ -114,12 +152,12 @@ function MobileNavLink({
                 </div>
 
                 {/* Label */}
-                <span className="text-[15px] font-semibold text-white/90 tracking-tight group-active:text-white">
+                <span className="text-[15px] font-semibold text-slate-800 dark:text-white/90 tracking-tight group-active:text-white">
                     {label}
                 </span>
 
                 {/* Arrow */}
-                <span className="ml-auto text-white/20 group-hover:text-white/50 transition-colors text-lg leading-none">›</span>
+                <span className="ml-auto text-slate-400 dark:text-white/20 group-hover:text-slate-600 dark:group-hover:text-white/50 transition-colors text-lg leading-none">›</span>
             </Link>
         </motion.div>
     );
@@ -133,12 +171,10 @@ export default function Navbar() {
 
     // Scroll progress for navbar background
     const { scrollY } = useScroll();
-    const bgOpacity = useTransform(scrollY, [0, 80], [0, 0.75]);
-    const borderOpacity = useTransform(scrollY, [0, 80], [0, 0.06]);
-    const backdropBlur = useTransform(scrollY, [0, 80], [0, 20]);
+    const bgOpacity = useTransform(scrollY, [0, 80], [0, 0.85]);
+    const borderOpacity = useTransform(scrollY, [0, 80], [0, 0.1]);
+    const backdropBlur = useTransform(scrollY, [0, 80], [0, 24]);
 
-    const bgColor = useMotionTemplate`rgba(8,10,26,${bgOpacity})`;
-    const borderColor = useMotionTemplate`rgba(255,255,255,${borderOpacity})`;
     const blurObj = useMotionTemplate`blur(${backdropBlur}px)`;
 
     const toggleMenu = () => setIsMenuOpen((v) => !v);
@@ -154,43 +190,43 @@ export default function Navbar() {
         <>
             {/* ── Navbar bar ─────────────────────────────────────────────── */}
             <motion.nav
-                className="fixed top-0 w-full z-50 px-5 py-4 border-b gpu-layer"
+                className="fixed top-0 w-full z-50 px-5 py-4 border-b border-slate-200/60 dark:border-white/10 bg-white/70 dark:bg-[#080a1a]/80 backdrop-blur-xl transition-colors duration-300 gpu-layer"
                 style={{
-                    background: bgColor,
                     backdropFilter: blurObj,
                     WebkitBackdropFilter: blurObj,
-                    borderBottomColor: borderColor
                 }}
             >
                 <div className="flex items-center justify-between max-w-7xl mx-auto">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2" onClick={closeMenu}>
                         <motion.span whileHover={{ scale: 1.1, rotate: 10 }} className="text-2xl origin-center inline-block">🪐</motion.span>
-                        <span className="text-xl font-bold tracking-tight text-white">Astrominee</span>
+                        <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Astrominee</span>
                     </Link>
 
                     {/* Desktop links */}
-                    <div className="hidden md:flex items-center gap-2 text-sm font-medium text-gray-300">
+                    <div className="hidden md:flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-gray-300">
                         {NAV_LINKS.map((link) => (
                             <MagneticLink
                                 key={link.href}
                                 href={link.href}
-                                className="px-3 py-2 rounded-lg hover:text-yellow-500 hover:bg-white/5 transition-colors"
+                                className="px-3 py-2 rounded-lg hover:text-amber-600 dark:hover:text-yellow-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                             >
                                 {link.label}
                             </MagneticLink>
                         ))}
                     </div>
 
-                    {/* Desktop auth */}
-                    <div className="hidden md:flex items-center gap-4 relative">
+                    {/* Desktop auth & Theme switch */}
+                    <div className="hidden md:flex items-center gap-3 relative">
+                        <ThemeToggle />
+
                         {user ? (
                             <div className="relative">
                                 <motion.button
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                    className="flex items-center gap-2 bg-indigo-500/10 hover:bg-indigo-500/20 px-4 py-2 rounded-full border border-indigo-500/30 transition-all font-medium text-sm text-indigo-100"
+                                    className="flex items-center gap-2 bg-indigo-500/10 hover:bg-indigo-500/20 px-4 py-2 rounded-full border border-indigo-500/30 transition-all font-medium text-sm text-indigo-900 dark:text-indigo-100"
                                 >
                                     <User className="w-4 h-4" />
                                     {user.displayName?.split(" ")[0] || "Profile"}
@@ -203,14 +239,14 @@ export default function Navbar() {
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
                                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                                            className="absolute right-0 top-12 w-48 bg-[#0c1222]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden py-1 z-50"
+                                            className="absolute right-0 top-12 w-48 bg-white/95 dark:bg-[#0c1222]/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden py-1 z-50"
                                         >
                                             <Link href="/profile" onClick={() => setIsDropdownOpen(false)}
-                                                className="flex items-center gap-3 px-4 py-3 text-sm text-gray-200 hover:bg-white/5 transition-colors">
-                                                <User className="w-4 h-4 text-gray-400" /> My Dashboard
+                                                className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-gray-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+                                                <User className="w-4 h-4 text-slate-400 dark:text-gray-400" /> My Dashboard
                                             </Link>
                                             <button onClick={() => { setIsDropdownOpen(false); signOut(); }}
-                                                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors border-t border-white/5 mt-1">
+                                                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 dark:text-red-400 hover:bg-red-500/10 transition-colors border-t border-slate-100 dark:border-white/5 mt-1">
                                                 <LogOut className="w-4 h-4" /> Sign Out
                                             </button>
                                         </motion.div>
@@ -222,26 +258,30 @@ export default function Navbar() {
                                 whileHover={{ scale: 1.03 }}
                                 whileTap={{ scale: 0.97 }}
                                 onClick={() => setIsAuthOpen(true)}
-                                className="flex items-center gap-2 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full border border-white/10 transition-all font-medium text-sm text-gray-200"
+                                className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 px-4 py-2 rounded-full border border-slate-300/80 dark:border-white/10 transition-all font-medium text-sm text-slate-800 dark:text-gray-200"
                             >
                                 <User className="w-4 h-4" /> Sign In
                             </motion.button>
                         )}
                     </div>
 
-                    {/* Mobile hamburger */}
-                    <button
-                        type="button"
-                        className="md:hidden p-2 z-[60] relative"
-                        onClick={toggleMenu}
-                        aria-label="Toggle Menu"
-                        aria-expanded={isMenuOpen}
-                        style={{ WebkitTapHighlightColor: "transparent" }}
-                    >
-                        <HamburgerIcon open={isMenuOpen} />
-                    </button>
+                    {/* Mobile menu trigger & theme switch */}
+                    <div className="md:hidden flex items-center gap-2">
+                        <ThemeToggle />
+                        <button
+                            type="button"
+                            className="p-2 z-[60] relative"
+                            onClick={toggleMenu}
+                            aria-label="Toggle Menu"
+                            aria-expanded={isMenuOpen}
+                            style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                            <HamburgerIcon open={isMenuOpen} />
+                        </button>
+                    </div>
                 </div>
             </motion.nav>
+
 
             {/* ── Mobile overlay ──────────────────────────────────────────── */}
             <AnimatePresence>

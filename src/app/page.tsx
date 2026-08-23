@@ -5,72 +5,114 @@ import ZodiacWheel from "@/components/ui/ZodiacWheel";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
+import { ScrollSection3D } from "@/components/ui/ScrollSection3D";
+import { Sparkles, Compass, ShieldCheck, ArrowRight } from "lucide-react";
 
 export default function Home() {
     return (
-        <main className="flex min-h-screen flex-col items-center justify-center p-6 md:p-24 text-center relative pt-24">
-            {/* ── Hero ── */}
-            <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-6xl gap-12">
-                <div className="flex-1 text-left z-10">
-                    <ScrollReveal duration={0.8} yOffset={40}>
-                        <h1 className="text-5xl md:text-[5.5rem] font-bold mb-6 tracking-tighter text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] leading-[1.1]">
-                            Cosmic Intelligence, <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-electric-blue via-indigo-300 to-violet-glow">
-                                Beautifully Mapped.
-                            </span>
-                        </h1>
-                        <p className="text-xl text-indigo-100/80 mb-10 max-w-lg leading-relaxed font-light">
-                            Generate precise Vedic Astrology charts (D1-D60), deep dive into planetary degrees, and explore premium AI-powered cosmic insights.
+        <main className="flex min-h-screen flex-col items-center justify-center p-6 md:p-24 text-center relative pt-28 overflow-x-hidden">
+            {/* ── Hero 3D Section ── */}
+            <ScrollSection3D intensity="subtle" depth={40} className="w-full max-w-6xl">
+                <div className="flex flex-col md:flex-row items-center justify-between w-full gap-12">
+                    <div className="flex-1 text-left z-10">
+                        <ScrollReveal duration={0.8} yOffset={30}>
+                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-semibold uppercase tracking-wider mb-6">
+                                <Sparkles className="w-3.5 h-3.5" /> Next-Gen Vedic Astrology
+                            </div>
+
+                            <h1 className="text-5xl md:text-[5.2rem] font-black mb-6 tracking-tighter text-slate-900 dark:text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] leading-[1.08]">
+                                Cosmic Intelligence, <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 dark:from-electric-blue dark:via-indigo-300 dark:to-violet-glow">
+                                    Beautifully Mapped.
+                                </span>
+                            </h1>
+
+                            <p className="text-lg md:text-xl text-slate-600 dark:text-indigo-100/80 mb-10 max-w-lg leading-relaxed font-light">
+                                Generate precise Vedic Astrology charts (D1-D60), deep dive into planetary degrees with genuine NASA captures, and explore AI-powered cosmic insights.
+                            </p>
+
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <motion.div whileHover={{ scale: 1.04, y: -3 }} whileTap={{ scale: 0.96 }}>
+                                    <Link href="/form" className="relative group inline-flex items-center justify-center bg-transparent w-full sm:w-auto">
+                                        <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-electric-blue to-violet-glow rounded-full blur-[10px] opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
+                                        <span className="relative z-10 bg-slate-900 dark:bg-black/60 backdrop-blur-md border border-white/20 text-white font-semibold py-4 px-9 rounded-full transition-all group-hover:bg-slate-800 dark:group-hover:bg-white/10 w-full text-center text-base shadow-[inset_0_1px_rgba(255,255,255,0.3)] flex items-center justify-center gap-2">
+                                            Generate Free Chart <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                        </span>
+                                    </Link>
+                                </motion.div>
+
+                                <motion.div whileHover={{ scale: 1.04, y: -3 }} whileTap={{ scale: 0.96 }}>
+                                    <Link href="/about" className="glass-panel text-slate-800 dark:text-white font-medium py-4 px-9 rounded-full transition-all hover:bg-slate-200/50 dark:hover:bg-white/5 text-center text-base flex items-center justify-center w-full sm:w-auto border border-slate-300/80 dark:border-white/10">
+                                        How it works
+                                    </Link>
+                                </motion.div>
+                            </div>
+
+                            <div className="mt-12 flex flex-wrap items-center gap-6 text-xs md:text-sm text-slate-500 dark:text-indigo-200/60 font-medium tracking-wide">
+                                <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-electric-blue shadow-[0_0_10px_#00f0ff]" /> Arc-Minute Precision</div>
+                                <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-purple-500 dark:bg-violet-glow shadow-[0_0_10px_#8b5cf6]" /> Navagraha AI</div>
+                                <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-amber-500 dark:bg-gold shadow-[0_0_10px_#d4af37]" /> D1-D60 Divisional Vargas</div>
+                            </div>
+                        </ScrollReveal>
+                    </div>
+
+                    <div className="flex-1 flex justify-center items-center w-full">
+                        <ScrollReveal delay={0.2} duration={1}>
+                            <ZodiacWheel />
+                        </ScrollReveal>
+                    </div>
+                </div>
+            </ScrollSection3D>
+
+            {/* ── Feature Highlights 3D Section ── */}
+            <ScrollSection3D intensity="medium" depth={50} className="w-full max-w-6xl mt-24">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                    <div className="glass-panel p-8 rounded-3xl border border-slate-200/80 dark:border-white/10 relative overflow-hidden group hover:border-indigo-500/40 transition-all shadow-xl">
+                        <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-yellow-400 mb-6">
+                            <Compass className="w-6 h-6" />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">9 Graha NASA Imagery</h3>
+                        <p className="text-sm text-slate-600 dark:text-gray-400 leading-relaxed font-light">
+                            Photographic space agency planet discs placed directly on your Kundli chart positions with real-time degrees.
                         </p>
+                    </div>
 
-                        <div className="flex flex-col sm:flex-row gap-5">
-                            <motion.div whileHover={{ scale: 1.04, y: -3 }} whileTap={{ scale: 0.96 }}>
-                                <Link href="/form" className="relative group inline-flex items-center justify-center bg-transparent w-full sm:w-auto">
-                                    <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-electric-blue to-violet-glow rounded-full blur-[10px] opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
-                                    <span className="relative z-10 bg-black/50 backdrop-blur-md border border-white/20 text-white font-medium py-4 px-10 rounded-full transition-all group-hover:bg-white/10 w-full text-center text-lg shadow-[inset_0_1px_rgba(255,255,255,0.2)]">
-                                        Generate Free Chart
-                                    </span>
-                                </Link>
-                            </motion.div>
-
-                            <motion.div whileHover={{ scale: 1.04, y: -3 }} whileTap={{ scale: 0.96 }}>
-                                <Link href="/about" className="glass-panel text-white font-medium py-4 px-10 rounded-full transition-all hover:bg-white/5 hover:border-white/20 text-center text-lg flex items-center justify-center w-full sm:w-auto">
-                                    How it works
-                                </Link>
-                            </motion.div>
+                    <div className="glass-panel p-8 rounded-3xl border border-slate-200/80 dark:border-white/10 relative overflow-hidden group hover:border-indigo-500/40 transition-all shadow-xl">
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-6">
+                            <Sparkles className="w-6 h-6" />
                         </div>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Comprehensive Vargas</h3>
+                        <p className="text-sm text-slate-600 dark:text-gray-400 leading-relaxed font-light">
+                            Instant calculation of Rashi (D1), Navamsa (D9), Dashamsha (D10) up to Shashtiamsa (D60) with accurate Nakshatra padas.
+                        </p>
+                    </div>
 
-                        <div className="mt-14 flex flex-wrap items-center gap-6 text-sm text-indigo-200/60 font-medium tracking-wide">
-                            <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-electric-blue shadow-[0_0_10px_#00f0ff]" /> Degree Precision</div>
-                            <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-violet-glow shadow-[0_0_10px_#8b5cf6]" /> AI Predictions</div>
-                            <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold shadow-[0_0_10px_#d4af37]" /> D1-D60 Vargas</div>
+                    <div className="glass-panel p-8 rounded-3xl border border-slate-200/80 dark:border-white/10 relative overflow-hidden group hover:border-indigo-500/40 transition-all shadow-xl">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6">
+                            <ShieldCheck className="w-6 h-6" />
                         </div>
-                    </ScrollReveal>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Secure AI Consultation</h3>
+                        <p className="text-sm text-slate-600 dark:text-gray-400 leading-relaxed font-light">
+                            Server-side encrypted calculations and Parashari-principled AI synthesis for personality, career, and karma remedies.
+                        </p>
+                    </div>
                 </div>
+            </ScrollSection3D>
 
-                <div className="flex-1 flex justify-center items-center w-full">
-                    <ScrollReveal delay={0.2} duration={1}>
-                        <ZodiacWheel />
-                    </ScrollReveal>
-                </div>
-            </div>
-
-            {/* ── Creator / Contact Section ── */}
-            <ScrollReveal delay={0.1} yOffset={60} className="w-full max-w-6xl mt-20">
+            {/* ── Creator / Contact 3D Section ── */}
+            <ScrollSection3D intensity="subtle" depth={30} className="w-full max-w-6xl mt-24 mb-12">
                 {/* Decorative divider */}
                 <div className="flex items-center gap-4 mb-10">
                     <div className="flex-1 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
-                    <span className="text-xs font-bold tracking-[4px] uppercase text-indigo-400/60">Built by</span>
+                    <span className="text-xs font-bold tracking-[4px] uppercase text-indigo-500 dark:text-indigo-400/70">Built by</span>
                     <div className="flex-1 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
                 </div>
 
-                <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#080d1a]/80 backdrop-blur-2xl p-8 md:p-10 shadow-[0_0_60px_rgba(79,70,229,0.1)]">
-                    {/* Background glows */}
+                <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-[#080d1a]/80 backdrop-blur-2xl p-8 md:p-10 shadow-[0_0_60px_rgba(79,70,229,0.1)]">
+                    {/* Background ambient glows */}
                     <div className="absolute inset-0 pointer-events-none">
                         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.12)_0%,transparent_70%)]" />
                         <div className="absolute bottom-0 left-0 w-60 h-60 rounded-full bg-[radial-gradient(ellipse_at_bottom_left,rgba(139,92,246,0.1)_0%,transparent_70%)]" />
-                        <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full border border-indigo-500/10" />
-                        <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full border border-purple-500/10" />
                     </div>
 
                     <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
@@ -87,9 +129,9 @@ export default function Home() {
                                 <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-[#080d1a] shadow-[0_0_8px_rgba(52,211,153,0.7)]" />
                             </motion.div>
                             <div>
-                                <p className="text-[11px] font-bold tracking-[3px] uppercase text-indigo-400/70 mb-1">Creator &amp; Developer</p>
-                                <h2 className="text-2xl font-bold text-white tracking-tight">Shivam Suryawanshi</h2>
-                                <p className="text-sm text-gray-400 mt-1">Vedic Astrology · Full Stack · AI</p>
+                                <p className="text-[11px] font-bold tracking-[3px] uppercase text-indigo-600 dark:text-indigo-400/70 mb-1">Creator &amp; Developer</p>
+                                <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Shivam Suryawanshi</h2>
+                                <p className="text-sm text-slate-500 dark:text-gray-400 mt-1">Vedic Astrology · Full Stack · AI</p>
                             </div>
                         </div>
 
@@ -99,7 +141,7 @@ export default function Home() {
                                 href="tel:+919049547814"
                                 whileHover={{ scale: 1.05, y: -2 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="flex items-center gap-2.5 px-5 py-3 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 transition-all text-white font-semibold text-sm"
+                                className="flex items-center gap-2.5 px-5 py-3 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-100/80 dark:bg-white/[0.04] hover:bg-slate-200 dark:hover:bg-white/[0.08] transition-all text-slate-800 dark:text-white font-semibold text-sm shadow-sm"
                             >
                                 <span className="text-base">📞</span>
                                 <span>Call Me</span>
@@ -109,7 +151,7 @@ export default function Home() {
                                 href="mailto:shivamsuryawanshi7682@gmail.com"
                                 whileHover={{ scale: 1.05, y: -2 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="flex items-center gap-2.5 px-5 py-3 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 transition-all text-white font-semibold text-sm"
+                                className="flex items-center gap-2.5 px-5 py-3 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-100/80 dark:bg-white/[0.04] hover:bg-slate-200 dark:hover:bg-white/[0.08] transition-all text-slate-800 dark:text-white font-semibold text-sm shadow-sm"
                             >
                                 <span className="text-base">✉️</span>
                                 <span>Email Me</span>
@@ -121,7 +163,7 @@ export default function Home() {
                                 rel="noopener noreferrer"
                                 whileHover={{ scale: 1.05, y: -2 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="relative group flex items-center gap-2.5 px-5 py-3 rounded-xl text-white font-semibold text-sm overflow-hidden"
+                                className="relative group flex items-center gap-2.5 px-5 py-3 rounded-xl text-white font-semibold text-sm overflow-hidden shadow-sm"
                                 style={{ background: "linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)", border: "1px solid rgba(255,255,255,0.15)" }}
                             >
                                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -134,8 +176,9 @@ export default function Home() {
                         </div>
                     </div>
                 </div>
-            </ScrollReveal>
+            </ScrollSection3D>
         </main>
     );
 }
+
 

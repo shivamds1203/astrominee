@@ -2,6 +2,8 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { ScrollSection3D } from "@/components/ui/ScrollSection3D";
+import { Sparkles } from "lucide-react";
 
 const NAKSHATRAS = [
     { num: 1, name: "Ashwini", ruler: "Ketu", deity: "Ashwini Kumaras", element: "Earth", animal: "Male Horse", traits: "Pioneering, adventurous, swift, healing" },
@@ -35,78 +37,79 @@ const NAKSHATRAS = [
 
 export default function NakshatrasPage() {
     return (
-        <main className="min-h-screen pt-28 pb-12 px-6 max-w-7xl mx-auto relative">
-            {/* Background elements */}
-            <div className="fixed top-0 left-0 w-full h-[50vh] bg-gradient-to-b from-indigo-900/10 to-transparent pointer-events-none -z-10" />
-
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center mb-16"
-            >
-                <h1 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-electric-blue via-indigo-300 to-violet-glow drop-shadow-[0_0_15px_rgba(139,92,246,0.3)] mb-4">
+        <main className="min-h-screen pt-28 pb-16 px-6 max-w-7xl mx-auto relative">
+            {/* Header 3D Section */}
+            <ScrollSection3D intensity="subtle" depth={25} className="text-center mb-16">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-700 dark:text-cyan-300 text-xs font-semibold uppercase tracking-wider mb-4">
+                    <Sparkles className="w-3.5 h-3.5" /> Lunar Mansions
+                </div>
+                <h1 className="text-5xl md:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 dark:from-electric-blue dark:via-indigo-300 dark:to-violet-glow mb-4">
                     The 27 Nakshatras
                 </h1>
-                <p className="text-lg text-indigo-200/70 max-w-2xl mx-auto font-light">
+                <p className="text-lg text-slate-600 dark:text-indigo-200/70 max-w-2xl mx-auto font-light leading-relaxed">
                     Explore the ancient lunar mansions. These 27 cosmic sectors profoundly shape human consciousness, personality traits, and deep psychological drivers.
                 </p>
-            </motion.div>
+            </ScrollSection3D>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {NAKSHATRAS.map((nak, idx) => (
-                    <motion.div
-                        key={nak.num}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: idx * 0.05, duration: 0.5, ease: "easeOut" }}
-                        whileHover={{
-                            y: -10,
-                            scale: 1.02,
-                            boxShadow: "0 20px 40px rgba(139,92,246,0.25), inset 0 1px 0 rgba(255,255,255,0.2)",
-                            borderColor: "rgba(139,92,246,0.5)"
-                        }}
-                        className="glass-panel p-6 rounded-2xl border border-white/5 relative overflow-hidden group cursor-pointer transition-all duration-300"
-                    >
-                        {/* Hover Overlay Glow */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-electric-blue/0 to-violet-glow/0 group-hover:from-electric-blue/10 group-hover:to-violet-glow/10 transition-colors duration-500" />
+            {/* Grid 3D Section */}
+            <ScrollSection3D intensity="subtle" depth={35}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {NAKSHATRAS.map((nak, idx) => (
+                        <motion.div
+                            key={nak.num}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true, amount: 0.1 }}
+                            transition={{ delay: (idx % 4) * 0.08, duration: 0.4 }}
+                            whileHover={{
+                                y: -8,
+                                scale: 1.02,
+                                boxShadow: "0 20px 40px rgba(139,92,246,0.18)",
+                            }}
+                            className="glass-panel p-6 rounded-3xl border border-slate-200/80 dark:border-white/5 relative overflow-hidden group cursor-pointer transition-all duration-300 shadow-md"
+                        >
+                            {/* Hover Overlay Glow */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 to-purple-500/0 group-hover:from-cyan-500/10 group-hover:to-purple-500/10 transition-colors duration-500 pointer-events-none" />
 
-                        <div className="relative z-10">
-                            <div className="flex justify-between items-start mb-4">
-                                <span className="text-5xl font-serif text-white/5 font-bold absolute -top-4 -right-2 transform group-hover:-translate-y-2 transition-transform duration-500">
-                                    {nak.num.toString().padStart(2, '0')}
-                                </span>
-                                <div>
-                                    <h3 className="text-2xl font-bold text-gray-100 group-hover:text-electric-blue transition-colors">
-                                        {nak.name}
-                                    </h3>
-                                    <span className="text-xs font-mono text-gold uppercase tracking-widest">{nak.deity}</span>
+                            <div className="relative z-10">
+                                <div className="flex justify-between items-start mb-4">
+                                    <span className="text-5xl font-serif text-slate-900/5 dark:text-white/5 font-black absolute -top-3 -right-1 transform group-hover:-translate-y-1 transition-transform duration-500 select-none">
+                                        {nak.num.toString().padStart(2, '0')}
+                                    </span>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-slate-900 dark:text-gray-100 group-hover:text-cyan-600 dark:group-hover:text-electric-blue transition-colors">
+                                            {nak.name}
+                                        </h3>
+                                        <span className="text-xs font-mono text-amber-600 dark:text-yellow-400 font-semibold uppercase tracking-widest">{nak.deity}</span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2.5 mb-6">
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-slate-500 dark:text-indigo-200/50">Ruler</span>
+                                        <span className="text-slate-800 dark:text-indigo-100 font-medium">{nak.ruler}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-slate-500 dark:text-indigo-200/50">Element</span>
+                                        <span className="text-slate-800 dark:text-indigo-100 font-medium">{nak.element}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-slate-500 dark:text-indigo-200/50">Symbol</span>
+                                        <span className="text-slate-800 dark:text-indigo-100 font-medium">{nak.animal}</span>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 border-t border-slate-200/60 dark:border-white/10">
+                                    <p className="text-sm text-slate-600 dark:text-gray-400 font-light leading-relaxed group-hover:text-slate-800 dark:group-hover:text-gray-300 transition-colors line-clamp-2">
+                                        {nak.traits}
+                                    </p>
                                 </div>
                             </div>
-
-                            <div className="space-y-3 mb-6">
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-indigo-200/50">Ruler</span>
-                                    <span className="text-indigo-100 font-medium">{nak.ruler}</span>
-                                </div>
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-indigo-200/50">Element</span>
-                                    <span className="text-indigo-100 font-medium">{nak.element}</span>
-                                </div>
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-indigo-200/50">Symbol</span>
-                                    <span className="text-indigo-100 font-medium">{nak.animal}</span>
-                                </div>
-                            </div>
-
-                            <div className="pt-4 border-t border-white/10">
-                                <p className="text-sm text-gray-400 font-light leading-relaxed group-hover:text-gray-300 transition-colors line-clamp-2">
-                                    {nak.traits}
-                                </p>
-                            </div>
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            </ScrollSection3D>
         </main>
-    )
+    );
 }
+

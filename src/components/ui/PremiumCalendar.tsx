@@ -219,26 +219,16 @@ export const PremiumCalendar: React.FC<PremiumCalendarProps> = ({ value, onChang
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="w-full max-w-sm rounded-2xl relative overflow-visible"
-            style={{
-                background: "linear-gradient(135deg, rgba(8,12,24,0.95) 0%, rgba(15,10,30,0.95) 100%)",
-                backdropFilter: "blur(24px)",
-                border: "1px solid rgba(99,102,241,0.2)",
-                boxShadow: "0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
-            }}
+            className="w-full max-w-sm rounded-3xl relative overflow-visible glass-strong border border-slate-200 dark:border-indigo-500/20 shadow-2xl"
         >
             <div className="p-5">
-                {/* Glow ambient */}
-                <div className="absolute inset-0 rounded-2xl pointer-events-none"
-                    style={{ background: "radial-gradient(ellipse at top, rgba(99,102,241,0.08) 0%, transparent 60%)" }} />
-
                 {/* Header */}
                 <div className="flex justify-between items-center mb-5 relative z-10">
                     <motion.button
-                        whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.08)" }}
+                        whileHover={{ scale: 1.1, backgroundColor: "rgba(128,128,128,0.15)" }}
                         whileTap={{ scale: 0.92 }}
                         onClick={handlePrevMonth} type="button"
-                        className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-400 hover:text-white transition-all"
+                        className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
                     >
                         <ChevronLeft className="w-5 h-5" />
                     </motion.button>
@@ -250,11 +240,11 @@ export const PremiumCalendar: React.FC<PremiumCalendarProps> = ({ value, onChang
                             type="button"
                             whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
                             onClick={() => { setShowMonthPicker(v => !v); setShowYearPicker(false); }}
-                            className="px-3 py-1.5 rounded-xl font-bold text-white text-base hover:bg-white/8 transition-all flex items-center gap-1.5 border border-transparent hover:border-white/10"
+                            className="px-3 py-1.5 rounded-xl font-bold text-slate-900 dark:text-white text-base hover:bg-slate-200/60 dark:hover:bg-white/8 transition-all flex items-center gap-1.5 border border-transparent hover:border-slate-300 dark:hover:border-white/10 cursor-pointer"
                             style={showMonthPicker ? { background: "rgba(99,102,241,0.15)", borderColor: "rgba(99,102,241,0.3)" } : {}}
                         >
                             {MONTHS[month]}
-                            <ChevronDown className={`w-3.5 h-3.5 text-indigo-400 transition-transform ${showMonthPicker ? "rotate-180" : ""}`} />
+                            <ChevronDown className={`w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 transition-transform ${showMonthPicker ? "rotate-180" : ""}`} />
                         </motion.button>
 
                         {/* Year button */}
@@ -262,11 +252,11 @@ export const PremiumCalendar: React.FC<PremiumCalendarProps> = ({ value, onChang
                             type="button"
                             whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
                             onClick={() => { setShowYearPicker(v => !v); setShowMonthPicker(false); }}
-                            className="px-3 py-1.5 rounded-xl font-light text-indigo-300 text-base hover:bg-white/8 transition-all flex items-center gap-1.5 border border-transparent hover:border-white/10"
+                            className="px-3 py-1.5 rounded-xl font-medium text-indigo-600 dark:text-indigo-300 text-base hover:bg-slate-200/60 dark:hover:bg-white/8 transition-all flex items-center gap-1.5 border border-transparent hover:border-slate-300 dark:hover:border-white/10 cursor-pointer"
                             style={showYearPicker ? { background: "rgba(139,92,246,0.15)", borderColor: "rgba(139,92,246,0.3)" } : {}}
                         >
                             {year}
-                            <ChevronDown className={`w-3.5 h-3.5 text-purple-400 transition-transform ${showYearPicker ? "rotate-180" : ""}`} />
+                            <ChevronDown className={`w-3.5 h-3.5 text-purple-500 dark:text-purple-400 transition-transform ${showYearPicker ? "rotate-180" : ""}`} />
                         </motion.button>
 
                         {/* Year picker overlay */}

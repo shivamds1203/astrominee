@@ -7,18 +7,18 @@ interface ChartProps {
     planetsData: any[];
 }
 
-// Real NASA / Wikimedia planet image URLs
+// Local high-definition NASA photographic planet assets
 const PLANET_IMAGES: Record<string, string> = {
-    Sun: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg/240px-The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg",
-    Moon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/240px-FullMoon2010.jpg",
-    Mars: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/240px-OSIRIS_Mars_true_color.jpg",
-    Mercury: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Mercury_in_true_color.jpg/240px-Mercury_in_true_color.jpg",
-    Jupiter: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Jupiter.jpg/240px-Jupiter.jpg",
-    Venus: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Venus-real_color.jpg/240px-Venus-real_color.jpg",
-    Saturn: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Saturn_during_Equinox.jpg/240px-Saturn_during_Equinox.jpg",
-    Rahu: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Lunar_eclipse_April_15_2014_California_short.jpg/320px-Lunar_eclipse_April_15_2014_California_short.jpg",
-    Ketu: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Comet_Holmes_2007-11-04.jpg/320px-Comet_Holmes_2007-11-04.jpg",
-    Ascendant: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/240px-The_Earth_seen_from_Apollo_17.jpg",
+    Sun: "/assets/planets/sun.png",
+    Moon: "/assets/planets/moon.png",
+    Mars: "/assets/planets/mars.png",
+    Mercury: "/assets/planets/mercury.png",
+    Jupiter: "/assets/planets/jupiter.png",
+    Venus: "/assets/planets/venus.png",
+    Saturn: "/assets/planets/saturn.png",
+    Rahu: "/assets/planets/rahu.png",
+    Ketu: "/assets/planets/ketu.png",
+    Ascendant: "/assets/planets/ascendant.png",
 };
 
 // Per-planet glow color for the ring effect
@@ -90,7 +90,7 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
                     className="absolute -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none"
                     style={{ left: pos.signX, top: pos.signY }}
                 >
-                    <span className="text-yellow-400/70 text-[10px] md:text-[11px] font-bold font-mono leading-none">
+                    <span className="text-yellow-600 dark:text-yellow-400/80 text-[10px] md:text-[11px] font-bold font-mono leading-none">
                         {getSignNumForHouse(houseNum)}
                     </span>
                 </div>
@@ -101,11 +101,11 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
                     style={{ left: pos.cx, top: pos.cy, width: "44%", height: "44%" }}
                 >
                     {isAscendant && (
-                        <span className="text-[9px] font-extrabold tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600 drop-shadow-[0_0_4px_rgba(212,175,55,0.8)] mb-1 leading-none">
+                        <span className="text-[9px] font-extrabold tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-yellow-600 dark:from-yellow-300 dark:to-yellow-600 drop-shadow-[0_0_4px_rgba(212,175,55,0.8)] mb-1 leading-none">
                             LAGNA
                         </span>
                     )}
-                    <div className="flex flex-wrap items-center justify-center gap-1.5">
+                    <div className="flex flex-wrap items-center justify-center gap-1.5 max-w-full">
                         {housePlanets.map((p, i) => {
                             const img = PLANET_IMAGES[p.name] ?? PLANET_IMAGES.Moon;
                             const glow = PLANET_GLOW[p.name] ?? "";
@@ -125,11 +125,11 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
                                 >
                                     {/* Planet orb */}
                                     <div
-                                        className={`w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden relative border border-white/20 ${glow} group-hover:scale-[1.5] transition-transform duration-300 bg-black`}
+                                        className={`w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden relative border border-white/30 dark:border-white/20 ${glow} group-hover:scale-[1.5] transition-transform duration-300 bg-black`}
                                     >
                                         <img
                                             src={img}
-                                            alt={p.name}
+                                            alt={`${p.name} planet`}
                                             className="w-full h-full object-cover"
                                             loading="lazy"
                                         />
@@ -143,13 +143,13 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
 
                                     {/* Retrograde badge */}
                                     {p.isRetro && (
-                                        <span className="absolute -bottom-1 -right-1 z-30 text-[7px] font-bold text-rose-400 bg-black/80 rounded-full w-3 h-3 flex items-center justify-center border border-rose-500/60">
+                                        <span className="absolute -bottom-1 -right-1 z-30 text-[7px] font-bold text-rose-300 bg-rose-950/90 rounded-full w-3 h-3 flex items-center justify-center border border-rose-500/80 shadow-sm">
                                             R
                                         </span>
                                     )}
 
                                     {/* Hover tooltip */}
-                                    <div className="absolute bottom-[calc(100%+6px)] left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#0a0f1c]/95 border border-white/10 rounded-lg px-2.5 py-1.5 flex flex-col items-center shadow-2xl z-50 min-w-max">
+                                    <div className="absolute bottom-[calc(100%+6px)] left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900/95 dark:bg-[#0a0f1c]/95 border border-white/10 rounded-lg px-2.5 py-1.5 flex flex-col items-center shadow-2xl z-50 min-w-max">
                                         <span className="text-[11px] text-white font-bold">{p.name}</span>
                                         {p.name !== "Ascendant" && (
                                             <span className="text-[10px] text-yellow-400 font-mono">{p.degree}</span>
@@ -169,10 +169,10 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, type: "spring" }}
-            className="relative w-full max-w-[460px] aspect-square mx-auto bg-[#060b18]/90 backdrop-blur-2xl border border-indigo-500/20 rounded-2xl overflow-hidden shadow-[0_0_60px_rgba(79,70,229,0.18)]"
+            className="relative w-full max-w-[460px] aspect-square mx-auto bg-slate-900/90 dark:bg-[#060b18]/90 backdrop-blur-2xl border border-indigo-500/30 dark:border-indigo-500/20 rounded-2xl overflow-hidden shadow-[0_0_60px_rgba(79,70,229,0.18)]"
         >
             {/* Cosmic ambient glow */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.08)_0%,transparent_70%)] pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.12)_0%,transparent_70%)] pointer-events-none" />
 
             {/* Glowing gold SVG grid */}
             <svg
@@ -182,9 +182,9 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
             >
                 <defs>
                     <linearGradient id="gold-line" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#d4af37" stopOpacity="0.9" />
-                        <stop offset="50%" stopColor="#fde68a" stopOpacity="0.5" />
-                        <stop offset="100%" stopColor="#d4af37" stopOpacity="0.9" />
+                        <stop offset="0%" stopColor="#d4af37" stopOpacity="0.95" />
+                        <stop offset="50%" stopColor="#fde68a" stopOpacity="0.7" />
+                        <stop offset="100%" stopColor="#d4af37" stopOpacity="0.95" />
                     </linearGradient>
                     <filter id="line-glow">
                         <feGaussianBlur stdDeviation="0.8" result="blur" />
@@ -194,7 +194,7 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
 
                 {/* Outer square */}
                 <rect x="1.5" y="1.5" width="97" height="97" fill="none"
-                    stroke="url(#gold-line)" strokeWidth="0.6" filter="url(#line-glow)" />
+                    stroke="url(#gold-line)" strokeWidth="0.7" filter="url(#line-glow)" />
 
                 {/* Diagonals */}
                 <line x1="1.5" y1="1.5" x2="98.5" y2="98.5"
@@ -204,7 +204,7 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
 
                 {/* Inner diamond */}
                 <polygon points="50,1.5 98.5,50 50,98.5 1.5,50" fill="none"
-                    stroke="url(#gold-line)" strokeWidth="0.6" filter="url(#line-glow)" />
+                    stroke="url(#gold-line)" strokeWidth="0.7" filter="url(#line-glow)" />
             </svg>
 
             {/* Render all 12 houses */}
@@ -212,3 +212,4 @@ export const NorthIndianChart = ({ planetsData }: ChartProps) => {
         </motion.div>
     );
 };
+

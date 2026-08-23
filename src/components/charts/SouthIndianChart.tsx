@@ -8,18 +8,18 @@ interface ChartProps {
     userData?: any;
 }
 
-// Real NASA / Wikimedia planet images
+// Local high-definition NASA photographic planet assets
 const PLANET_IMAGES: Record<string, string> = {
-    Sun: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg/240px-The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg",
-    Moon: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/240px-FullMoon2010.jpg",
-    Mars: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/240px-OSIRIS_Mars_true_color.jpg",
-    Mercury: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Mercury_in_true_color.jpg/240px-Mercury_in_true_color.jpg",
-    Jupiter: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Jupiter.jpg/240px-Jupiter.jpg",
-    Venus: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Venus-real_color.jpg/240px-Venus-real_color.jpg",
-    Saturn: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Saturn_during_Equinox.jpg/240px-Saturn_during_Equinox.jpg",
-    Rahu: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Lunar_eclipse_April_15_2014_California_short.jpg/320px-Lunar_eclipse_April_15_2014_California_short.jpg",
-    Ketu: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Comet_Holmes_2007-11-04.jpg/320px-Comet_Holmes_2007-11-04.jpg",
-    Ascendant: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/240px-The_Earth_seen_from_Apollo_17.jpg",
+    Sun: "/assets/planets/sun.png",
+    Moon: "/assets/planets/moon.png",
+    Mars: "/assets/planets/mars.png",
+    Mercury: "/assets/planets/mercury.png",
+    Jupiter: "/assets/planets/jupiter.png",
+    Venus: "/assets/planets/venus.png",
+    Saturn: "/assets/planets/saturn.png",
+    Rahu: "/assets/planets/rahu.png",
+    Ketu: "/assets/planets/ketu.png",
+    Ascendant: "/assets/planets/ascendant.png",
 };
 
 const PLANET_GLOW: Record<string, string> = {
@@ -84,19 +84,19 @@ export const SouthIndianChart = ({ planetsData, userData }: ChartProps) => {
                 className="relative group cursor-pointer"
             >
                 {/* Orb */}
-                <div className={`w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden relative border border-white/20 ${glow} group-hover:scale-[1.5] transition-transform duration-300 bg-black`}>
-                    <img src={img} alt={p.fullName} className="w-full h-full object-cover" loading="lazy" />
+                <div className={`w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden relative border border-white/30 dark:border-white/20 ${glow} group-hover:scale-[1.5] transition-transform duration-300 bg-black`}>
+                    <img src={img} alt={`${p.fullName} planet`} className="w-full h-full object-cover" loading="lazy" />
                     <div className="absolute inset-0 rounded-full shadow-[inset_-2px_-2px_5px_rgba(0,0,0,0.7),inset_1px_1px_4px_rgba(255,255,255,0.45)]" />
                     <span className="absolute inset-0 flex items-center justify-center text-[7px] font-bold text-white drop-shadow-[0_0_2px_rgba(0,0,0,1)]">{p.name}</span>
                 </div>
 
                 {/* Retrograde badge */}
                 {p.isRetro && (
-                    <span className="absolute -bottom-1 -right-1 z-30 text-[7px] font-bold text-rose-400 bg-black/80 rounded-full w-3 h-3 flex items-center justify-center border border-rose-500/60">R</span>
+                    <span className="absolute -bottom-1 -right-1 z-30 text-[7px] font-bold text-rose-300 bg-rose-950/90 rounded-full w-3 h-3 flex items-center justify-center border border-rose-500/80 shadow-sm">R</span>
                 )}
 
                 {/* Hover tooltip */}
-                <div className="absolute bottom-[calc(100%+6px)] left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#0a0f1c]/95 border border-white/10 rounded-lg px-2.5 py-1.5 flex flex-col items-center shadow-2xl z-50 min-w-max">
+                <div className="absolute bottom-[calc(100%+6px)] left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900/95 dark:bg-[#0a0f1c]/95 border border-white/10 rounded-lg px-2.5 py-1.5 flex flex-col items-center shadow-2xl z-50 min-w-max">
                     <span className="text-[11px] text-white font-bold">{p.fullName}</span>
                     {p.degree && <span className="text-[10px] text-yellow-400 font-mono">{p.degree}</span>}
                 </div>
@@ -111,31 +111,31 @@ export const SouthIndianChart = ({ planetsData, userData }: ChartProps) => {
         return (
             <div
                 key={signNum}
-                className={`relative min-h-[80px] md:min-h-[96px] flex flex-col items-center justify-between p-1.5 overflow-hidden transition-all ${isAsc ? "ring-1 ring-yellow-400/30" : ""}`}
+                className={`relative min-h-[80px] md:min-h-[96px] flex flex-col items-center justify-between p-1.5 overflow-hidden transition-all ${isAsc ? "ring-1 ring-yellow-400/40 bg-yellow-500/5" : ""}`}
             >
                 {/* Cell ambient glow when ascendant */}
                 {isAsc && (
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.08)_0%,transparent_70%)] pointer-events-none" />
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.1)_0%,transparent_70%)] pointer-events-none" />
                 )}
 
                 {/* Sign label */}
                 <div className="w-full flex items-center justify-between z-10">
-                    <span className={`text-[9px] md:text-[10px] font-bold uppercase tracking-widest ${isAsc ? "text-yellow-400" : "text-indigo-300/60"}`}>
+                    <span className={`text-[9px] md:text-[10px] font-bold uppercase tracking-widest ${isAsc ? "text-yellow-500 dark:text-yellow-400" : "text-indigo-400/70 dark:text-indigo-300/60"}`}>
                         {SIGN_ABBR[signNum]}
                     </span>
                     {isAsc && (
-                        <span className="text-[8px] font-extrabold text-yellow-400/80 tracking-widest uppercase">Lag</span>
+                        <span className="text-[8px] font-extrabold text-yellow-500 dark:text-yellow-400/90 tracking-widest uppercase">Lag</span>
                     )}
                 </div>
 
                 {/* Planets */}
-                <div className="flex flex-wrap items-center justify-center gap-1 z-10 my-1">
+                <div className="flex flex-wrap items-center justify-center gap-1 z-10 my-1 max-w-full">
                     {planetsInSign.map((p, i) => renderPlanetOrb(p, i, delay))}
                 </div>
 
                 {/* Sign number (bottom-right accent) */}
                 <div className="w-full flex justify-end z-10">
-                    <span className="text-[8px] text-white/15 font-mono">{signNum}</span>
+                    <span className="text-[8px] text-slate-500/40 dark:text-white/20 font-mono">{signNum}</span>
                 </div>
             </div>
         );
@@ -146,9 +146,9 @@ export const SouthIndianChart = ({ planetsData, userData }: ChartProps) => {
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-20" preserveAspectRatio="none" viewBox="0 0 400 400">
             <defs>
                 <linearGradient id="si-gold" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#d4af37" stopOpacity="0.9" />
-                    <stop offset="50%" stopColor="#fde68a" stopOpacity="0.5" />
-                    <stop offset="100%" stopColor="#d4af37" stopOpacity="0.9" />
+                    <stop offset="0%" stopColor="#d4af37" stopOpacity="0.95" />
+                    <stop offset="50%" stopColor="#fde68a" stopOpacity="0.7" />
+                    <stop offset="100%" stopColor="#d4af37" stopOpacity="0.95" />
                 </linearGradient>
                 <filter id="si-glow">
                     <feGaussianBlur stdDeviation="0.8" result="blur" />
@@ -160,14 +160,14 @@ export const SouthIndianChart = ({ planetsData, userData }: ChartProps) => {
             <rect x="1" y="1" width="398" height="398" fill="none" stroke="url(#si-gold)" strokeWidth="1" filter="url(#si-glow)" />
 
             {/* Vertical dividers at 25%, 50%, 75% */}
-            <line x1="100" y1="1" x2="100" y2="399" stroke="url(#si-gold)" strokeWidth="0.6" filter="url(#si-glow)" />
-            <line x1="200" y1="1" x2="200" y2="399" stroke="url(#si-gold)" strokeWidth="0.6" filter="url(#si-glow)" />
-            <line x1="300" y1="1" x2="300" y2="399" stroke="url(#si-gold)" strokeWidth="0.6" filter="url(#si-glow)" />
+            <line x1="100" y1="1" x2="100" y2="399" stroke="url(#si-gold)" strokeWidth="0.7" filter="url(#si-glow)" />
+            <line x1="200" y1="1" x2="200" y2="399" stroke="url(#si-gold)" strokeWidth="0.7" filter="url(#si-glow)" />
+            <line x1="300" y1="1" x2="300" y2="399" stroke="url(#si-gold)" strokeWidth="0.7" filter="url(#si-glow)" />
 
             {/* Horizontal dividers at 25%, 50%, 75% */}
-            <line x1="1" y1="100" x2="399" y2="100" stroke="url(#si-gold)" strokeWidth="0.6" filter="url(#si-glow)" />
-            <line x1="1" y1="200" x2="399" y2="200" stroke="url(#si-gold)" strokeWidth="0.6" filter="url(#si-glow)" />
-            <line x1="1" y1="300" x2="399" y2="300" stroke="url(#si-gold)" strokeWidth="0.6" filter="url(#si-glow)" />
+            <line x1="1" y1="100" x2="399" y2="100" stroke="url(#si-gold)" strokeWidth="0.7" filter="url(#si-glow)" />
+            <line x1="1" y1="200" x2="399" y2="200" stroke="url(#si-gold)" strokeWidth="0.7" filter="url(#si-glow)" />
+            <line x1="1" y1="300" x2="399" y2="300" stroke="url(#si-gold)" strokeWidth="0.7" filter="url(#si-glow)" />
         </svg>
     );
 
@@ -176,7 +176,7 @@ export const SouthIndianChart = ({ planetsData, userData }: ChartProps) => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, type: "spring" }}
-            className="relative w-full max-w-[460px] aspect-square mx-auto bg-[#060b18]/90 backdrop-blur-2xl border border-indigo-500/20 rounded-2xl overflow-hidden shadow-[0_0_60px_rgba(79,70,229,0.18)]"
+            className="relative w-full max-w-[460px] aspect-square mx-auto bg-slate-900/90 dark:bg-[#060b18]/90 backdrop-blur-2xl border border-indigo-500/30 dark:border-indigo-500/20 rounded-2xl overflow-hidden shadow-[0_0_60px_rgba(79,70,229,0.18)]"
         >
             {/* Deep space ambient glow */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.08)_0%,transparent_70%)] pointer-events-none" />

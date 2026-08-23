@@ -17,6 +17,7 @@ const PLANETS = [
         sanskrit: "Surya ☀",
         symbol: "☉",
         zodiac: "♌",
+        image: "/assets/planets/sun.png",
         color: "#f97316",
         glow: "#fb923c",
         secondGlow: "#fde68a",
@@ -36,6 +37,7 @@ const PLANETS = [
         sanskrit: "Chandra 🌙",
         symbol: "☽",
         zodiac: "♋",
+        image: "/assets/planets/moon.png",
         color: "#e2e8f0",
         glow: "#cbd5e1",
         secondGlow: "#f8fafc",
@@ -55,6 +57,7 @@ const PLANETS = [
         sanskrit: "Mangal ♂",
         symbol: "♂",
         zodiac: "♈",
+        image: "/assets/planets/mars.png",
         color: "#ef4444",
         glow: "#dc2626",
         secondGlow: "#fca5a5",
@@ -74,6 +77,7 @@ const PLANETS = [
         sanskrit: "Budh ☿",
         symbol: "☿",
         zodiac: "♊",
+        image: "/assets/planets/mercury.png",
         color: "#10b981",
         glow: "#059669",
         secondGlow: "#6ee7b7",
@@ -93,6 +97,7 @@ const PLANETS = [
         sanskrit: "Guru ♃",
         symbol: "♃",
         zodiac: "♐",
+        image: "/assets/planets/jupiter.png",
         color: "#f59e0b",
         glow: "#d97706",
         secondGlow: "#fde68a",
@@ -112,6 +117,7 @@ const PLANETS = [
         sanskrit: "Shukra ♀",
         symbol: "♀",
         zodiac: "♉",
+        image: "/assets/planets/venus.png",
         color: "#ec4899",
         glow: "#db2777",
         secondGlow: "#fbcfe8",
@@ -131,6 +137,7 @@ const PLANETS = [
         sanskrit: "Shani ♄",
         symbol: "♄",
         zodiac: "♑",
+        image: "/assets/planets/saturn.png",
         color: "#6366f1",
         glow: "#4f46e5",
         secondGlow: "#c7d2fe",
@@ -151,6 +158,7 @@ const PLANETS = [
         sanskrit: "Rahu ☊",
         symbol: "☊",
         zodiac: "♏",
+        image: "/assets/planets/rahu.png",
         color: "#7c3aed",
         glow: "#6d28d9",
         secondGlow: "#ddd6fe",
@@ -170,6 +178,7 @@ const PLANETS = [
         sanskrit: "Ketu ☋",
         symbol: "☋",
         zodiac: "♓",
+        image: "/assets/planets/ketu.png",
         color: "#14b8a6",
         glow: "#0d9488",
         secondGlow: "#99f6e4",
@@ -223,40 +232,35 @@ const PlanetSection = ({ planet, index, scrollYProgress, total }: any) => {
                 {planet.zodiac}
             </div>
 
-            {/* Planet sphere */}
+            {/* Planet sphere with Real Photographic Asset */}
             <motion.div
                 style={{ rotateY }}
                 className="relative w-[280px] h-[280px] md:w-[400px] md:h-[400px] flex-shrink-0 z-10"
             >
                 <div
-                    className="w-full h-full rounded-full relative overflow-hidden ring-1 ring-white/10"
+                    className="w-full h-full rounded-full relative overflow-hidden ring-2 ring-white/20 shadow-2xl bg-black"
                     style={{
-                        background: planet.bgGradient,
-                        boxShadow: `0 0 100px ${planet.glow}60, inset -20px -20px 60px rgba(0,0,0,0.7)`
+                        boxShadow: `0 0 100px ${planet.glow}80, 0 0 40px ${planet.color}40, inset -20px -20px 60px rgba(0,0,0,0.8)`
                     }}
                 >
-                    {/* Surface shine */}
-                    <div className="absolute top-[10%] left-[15%] w-[30%] h-[20%] bg-white/20 rounded-full blur-2xl" />
+                    <img
+                        src={planet.image}
+                        alt={`${planet.name} planet photographic capture`}
+                        className="w-full h-full object-cover select-none"
+                    />
 
-                    {/* Saturn Rings */}
-                    {planet.hasRings && (
-                        <div className="absolute inset-0 flex items-center justify-center scale-[1.35] rotate-[75deg] pointer-events-none">
-                            <div
-                                className="w-full h-[15px] rounded-full border-2 border-white/30"
-                                style={{ background: `linear-gradient(to right, transparent, ${planet.color}40, transparent)` }}
-                            />
-                        </div>
-                    )}
+                    {/* 3D Sphere Specular Sheen */}
+                    <div className="absolute inset-0 rounded-full shadow-[inset_-25px_-25px_60px_rgba(0,0,0,0.85),inset_10px_10px_30px_rgba(255,255,255,0.4)] pointer-events-none" />
 
-                    {/* Animated Symbol */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                        <span className="text-[120px] md:text-[200px] font-bold">{planet.symbol}</span>
+                    {/* Animated Glyph Symbol Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
+                        <span className="text-[120px] md:text-[200px] font-bold text-white drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]">{planet.symbol}</span>
                     </div>
                 </div>
 
                 {/* Aura Floor */}
                 <div
-                    className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-[140%] h-[60px] rounded-[100%] blur-[100px] opacity-40"
+                    className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-[140%] h-[60px] rounded-[100%] blur-[100px] opacity-40 pointer-events-none"
                     style={{ background: planet.color }}
                 />
             </motion.div>
