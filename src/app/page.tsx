@@ -17,18 +17,21 @@ export default function Home() {
                     <div className="flex-1 text-left z-10">
                         <ScrollReveal duration={0.8} yOffset={30}>
                             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-semibold uppercase tracking-wider mb-6">
-                                <Sparkles className="w-3.5 h-3.5" /> Next-Gen Vedic Astrology
+                                <Sparkles className="w-3.5 h-3.5" /> Vedic Astrology Readings • by Shivam Suryawanshi
                             </div>
 
-                            <h1 className="text-5xl md:text-[5.2rem] font-black mb-6 tracking-tighter text-slate-900 dark:text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] leading-[1.08]">
-                                Cosmic Intelligence, <br />
+                            <h1 className="text-5xl md:text-[5rem] font-black mb-6 tracking-tighter text-slate-900 dark:text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] leading-[1.08]">
+                                Astrology &amp; <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 dark:from-electric-blue dark:via-indigo-300 dark:to-violet-glow">
-                                    Beautifully Mapped.
+                                    Kundli Readings
+                                </span>
+                                <span className="block text-2xl md:text-3xl font-bold mt-2 text-amber-600 dark:text-yellow-400">
+                                    by Shivam Suryawanshi
                                 </span>
                             </h1>
 
                             <p className="text-lg md:text-xl text-slate-600 dark:text-indigo-100/80 mb-10 max-w-lg leading-relaxed font-light">
-                                Generate precise Vedic Astrology charts (D1-D60), deep dive into planetary degrees with genuine NASA captures, and explore AI-powered cosmic insights.
+                                Get comprehensive, individualized Vedic Astrology readings, full birth charts (D1-D60), accurate Vimshottari Dasha timelines, and personalized cosmic guidance directly from Shivam Suryawanshi.
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4">
@@ -36,17 +39,18 @@ export default function Home() {
                                     <Link href="/form" className="relative group inline-flex items-center justify-center bg-transparent w-full sm:w-auto">
                                         <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-electric-blue to-violet-glow rounded-full blur-[10px] opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
                                         <span className="relative z-10 bg-slate-900 dark:bg-black/60 backdrop-blur-md border border-white/20 text-white font-semibold py-4 px-9 rounded-full transition-all group-hover:bg-slate-800 dark:group-hover:bg-white/10 w-full text-center text-base shadow-[inset_0_1px_rgba(255,255,255,0.3)] flex items-center justify-center gap-2">
-                                            Generate Free Chart <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                            Get Your Free Reading <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                         </span>
                                     </Link>
                                 </motion.div>
 
                                 <motion.div whileHover={{ scale: 1.04, y: -3 }} whileTap={{ scale: 0.96 }}>
-                                    <Link href="/about" className="glass-panel text-slate-800 dark:text-white font-medium py-4 px-9 rounded-full transition-all hover:bg-slate-200/50 dark:hover:bg-white/5 text-center text-base flex items-center justify-center w-full sm:w-auto border border-slate-300/80 dark:border-white/10">
-                                        How it works
+                                    <Link href="/predictions" className="glass-panel text-slate-800 dark:text-white font-medium py-4 px-9 rounded-full transition-all hover:bg-slate-200/50 dark:hover:bg-white/5 text-center text-base flex items-center justify-center w-full sm:w-auto border border-slate-300/80 dark:border-white/10">
+                                        Ask AI Astrologer
                                     </Link>
                                 </motion.div>
                             </div>
+
 
                             <div className="mt-12 flex flex-wrap items-center gap-6 text-xs md:text-sm text-slate-500 dark:text-indigo-200/60 font-medium tracking-wide">
                                 <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-electric-blue shadow-[0_0_10px_#00f0ff]" /> Arc-Minute Precision</div>

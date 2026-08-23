@@ -98,24 +98,61 @@ export default function AboutPage() {
             {/* ── Navagraha 3D Scroll Journey ── */}
             <NavagrahaScroll />
 
+            {/* ── Astrologer & Readings Section ── */}
+            <ScrollSection3D intensity="subtle" depth={35} className="max-w-4xl mx-auto py-16 px-6 relative z-10">
+                <div className="glass-panel rounded-3xl p-8 md:p-12 border border-amber-300/80 dark:border-white/10 shadow-2xl bg-white/80 dark:bg-[#080d1a]/80 backdrop-blur-2xl">
+                    <div className="flex flex-col md:flex-row items-center gap-8">
+                        <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-amber-500 via-orange-600 to-indigo-700 flex items-center justify-center text-4xl text-white shadow-[0_0_30px_rgba(245,158,11,0.4)] flex-shrink-0">
+                            🕉️
+                        </div>
+                        <div className="text-center md:text-left">
+                            <span className="text-xs font-bold uppercase tracking-[3px] text-amber-600 dark:text-yellow-400 block mb-1">
+                                Astrologer &amp; Founder
+                            </span>
+                            <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-3">
+                                Shivam Suryawanshi
+                            </h2>
+                            <p className="text-slate-600 dark:text-gray-300 text-sm md:text-base leading-relaxed font-light mb-6">
+                                Dedicated to reviving authentic Vedic Jyotish with mathematical precision and compassionate personal consultation. Every reading explores your Lagna, Moon sign, planetary dignity, divisional charts (D1 to D60), and Vimshottari Mahadashas to illuminate your soul&apos;s karmic path and practical remedies.
+                            </p>
+                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                                <Link
+                                    href="/form"
+                                    className="px-6 py-3 rounded-full bg-gradient-to-r from-amber-600 to-yellow-500 text-slate-950 font-bold text-sm hover:scale-105 transition-all shadow-md"
+                                >
+                                    Get Personal Reading
+                                </Link>
+                                <a
+                                    href="tel:+919049547814"
+                                    className="px-6 py-3 rounded-full border border-slate-300 dark:border-white/10 text-slate-800 dark:text-white font-medium text-sm hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
+                                >
+                                    📞 Consult Directly
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </ScrollSection3D>
+
             {/* ── Bottom CTA 3D Section ── */}
-            <ScrollSection3D intensity="medium" depth={40} className="text-center py-24 px-6 relative z-10">
+            <ScrollSection3D intensity="medium" depth={40} className="text-center py-20 px-6 relative z-10">
                 <ScrollReveal yOffset={30}>
                     <h3 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-4">
-                        Ready to read your cosmic map?
+                        Ready to explore your cosmic map?
                     </h3>
-                    <p className="text-slate-600 dark:text-gray-400 mb-8 font-light">Generate your free Vedic birth chart in seconds.</p>
+                    <p className="text-slate-600 dark:text-gray-400 mb-8 font-light">Generate your Vedic birth chart and personal reading now.</p>
                     <motion.div whileHover={{ scale: 1.05, y: -4 }} whileTap={{ scale: 0.95 }} className="inline-block">
                         <Link
                             href="/form"
                             className="inline-flex items-center gap-3 px-10 py-4 rounded-full font-bold text-white text-lg transition-shadow shadow-xl"
                             style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa)", boxShadow: "0 0 40px rgba(99,102,241,0.4)" }}
                         >
-                            🪐 Generate Free Chart <ArrowRight className="w-5 h-5" />
+                            🪐 Get Free Reading <ArrowRight className="w-5 h-5" />
                         </Link>
                     </motion.div>
                 </ScrollReveal>
             </ScrollSection3D>
+
         </main>
     );
 }
