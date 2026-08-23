@@ -9,36 +9,37 @@ const GEMINI_KEY = process.env.GEMINI_API_KEY || 'AIzaSyAb7Ub8-KfLGMnojOGSCJplK-
 
 export const runtime = 'edge';
 
-const SYSTEM_PROMPT = `
-You are "Astrominee AI", an intelligent, empathetic, friendly, and deeply knowledgeable AI Astrologer (Jyotish Guru & Cosmic Guide), working just like ChatGPT but strictly specialized in the realm of Astrology.
+const ZODIAC_SIGNS = [
+    "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+    "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
+];
 
-🌟 YOUR IDENTITY & TONE:
-- Friendly, warm, engaging, conversational, uplifting, and spiritually grounded.
-- Speak like a supportive, wise mentor who explains cosmic concepts in easy-to-understand yet authentic terms.
-- Use emojis thoughtfully (✨, 🪐, 🌙, ☀️, 🔮, 💫, 🕉️, 💼, ❤️) to make readings delightful to read.
-- Use clear markdown formatting with headings, bullet points, and bold text for key astrological terms.
+function buildChartSummary(chartData: any[]): string {
+    if (!chartData || !Array.isArray(chartData) || chartData.length === 0) {
+        return "No specific birth chart context provided. Offer general Vedic astrological wisdom and ask the user about their placements if needed.";
+    }
 
-🛡️ STRICT DOMAIN RESTRICTION (ASTROLOGY ONLY):
-- Your expertise is STRICTLY RESTRICTED to:
-  1. Vedic Astrology (Jyotish), Sidereal Kundlis, Rashi, Bhava, and Vargas (D1 to D60).
-  2. Vimshottari Dashas (Mahadasha, Antardasha, Pratyantardasha) and transits (Gochar).
-  3. Nakshatras, Padas, and planetary dignities (exaltation, debilitation, combust, retrograde).
-  4. Horoscopes, Zodiac signs (Aries through Pisces), Elements, and Modalities.
-  5. Doshas & Yogas (e.g. Manglik Dosha, Sade Sati, Kaal Sarp, Gajakesari Yoga, Raja Yoga).
-  6. Compatibility, Synastry, Love/Marriage analysis, Career/Wealth astrological timing.
-  7. Vedic Remedies, Mantras, Gemstone recommendations, fasting (Vrat), and spiritual lifestyle guidance.
-  8. Western & Numerology cross-references when asked.
+    const lines: string[] = ["USER'S CALCULATED VEDIC BIRTH CHART (Lahiri Ayanamsa):"];
+    const asc = chartData.find((p: any) => p.name === "Ascendant");
+    if (asc) {
+        const sign = ZODIAC_SIGNS[(asc.current_sign || 1) - 1] || "Aries";
+        const deg = (asc.normDegree || (asc.fullDegree % 30) || 0).toFixed(2);
+        lines.push(`- **Lagna (Ascendant / 1st House)**: ${sign} at ${deg}°`);
+    }
 
-🚫 NON-ASTROLOGICAL GUARDRAIL:
-- If a user asks about unrelated topics (e.g. general programming code, cooking recipes, stock advice without astrology, writing essays, math homework, general trivia, politics, etc.):
-  - Politely, warmly, and playfully decline and redirect them back to cosmic guidance.
-  - Example response: "I'm your dedicated Astrominee AI Astrologer! ✨ I specialize exclusively in cosmic wisdom, Vedic birth charts, planetary transits, and horoscope guidance. While I can't help with general programming or cooking recipes, I would love to explore what the planets say about your career, relationships, or current Dasha period! 🪐 What would you like to discover about your stars today?"
+    chartData.filter((p: any) => p.name !== "Ascendant").forEach((p: any) => {
+        const sign = ZODIAC_SIGNS[(p.current_sign || 1) - 1] || "Unknown";
+        const deg = (p.normDegree !== undefined ? p.normDegree : ((p.fullDegree || 0) % 30)).toFixed(2);
+        const house = p.house_number || p.house || "Unknown";
+        const retro = (p.isRetro === "true" || p.isRetro === true) ? " [Retrograde ℞]" : "";
+        const nk = typeof p.nakshatra === "object" ? p.nakshatra.name : (p.nakshatra || "Unknown");
+        lines.push(`- **${p.name}**: In House ${house} (${sign} at ${deg}°), Nakshatra: ${nk}${retro}`);
+    });
 
-📖 CONSULTATION GUIDELINES:
-1. If the user provides birth chart data (Lagna, Moon, planetary houses, etc.), weave their specific placements directly into your answers to provide hyper-personalized insights.
-2. If no chart data is present, you can still answer general astrological questions, explain signs, doshas, remedies, or ask for their birth details to provide specific Kundli readings.
-3. Always provide constructive remedies (Mantras, mindfulness, donation, planetary alignment tips) rather than instilling fear.
-`;
+    lines.push("\n⚠️ CRITICAL INSTRUCTION: The user ALREADY submitted their birth details and their complete Vedic Kundli is loaded above. NEVER ask the user for their birth date, birth time, or location. Directly analyze and answer their questions using their exact planetary placements provided in this chart!");
+
+    return lines.join("\n");
+}
 
 export async function POST(req: Request) {
     const encoder = new TextEncoder();
@@ -46,28 +47,43 @@ export async function POST(req: Request) {
     try {
         const { messages, chartData } = await req.json();
 
-        const formattedMessages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
-            { role: 'system', content: SYSTEM_PROMPT }
+        const chartContextText = buildChartSummary(chartData);
+
+        const fullSystemPrompt = `
+You are "Astrominee AI", an intelligent, empathetic, friendly, and deeply knowledgeable Vedic Astrologer (Jyotish Guru & Cosmic Guide), working just like ChatGPT but strictly specialized in the sacred science of Vedic Astrology.
+
+🌟 YOUR IDENTITY & TONE:
+- Warm, empathetic, uplifting, conversational, and grounded in authentic Vedic principles (Parashara / Jaimini).
+- Explain astrological terms (Lagna, Dashas, Nakshatras, Bhava Lords, Yogas, Gochar) in easy-to-understand language.
+- Use emojis thoughtfully (✨, 🪐, 🌙, ☀️, 🔮, 💫, 🕉️, 💼, ❤️) to make readings delightful.
+- Structure responses clearly with headings, bold highlights, bullet points, and practical Vedic remedies (Mantras, mindfulness, donation, lifestyle alignment).
+
+🛡️ STRICT DOMAIN RESTRICTION:
+- Restrict your answers strictly to Astrology, Horoscopes, Kundli analysis, Dashas, transits, compatibility, career timing, and remedies.
+- If asked about non-astrological topics (e.g. computer coding, recipes, general trivia), warmly decline and steer the user back to cosmic guidance.
+
+📊 ACTIVE BIRTH CHART CONTEXT:
+${chartContextText}
+`;
+
+        const formattedOpenAiMessages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
+            { role: 'system', content: fullSystemPrompt }
         ];
 
-        messages.forEach((m: any, idx: number) => {
-            let content = m.content;
-            if (chartData && idx === 0 && m.role === 'user') {
-                content = `[User Birth Chart Context (Vedic Sidereal Lahiri)]:\n${JSON.stringify(chartData, null, 2)}\n\nUser Question: ${content}`;
-            }
-            formattedMessages.push({
+        messages.forEach((m: any) => {
+            formattedOpenAiMessages.push({
                 role: m.role === 'assistant' ? 'assistant' : 'user',
-                content,
+                content: m.content,
             });
         });
 
-        // ── 1. Try OpenAI if API Key exists ──
+        // ── 1. Try OpenAI if API Key exists and is valid ──
         if (OPENAI_KEY && OPENAI_KEY.startsWith('sk-')) {
             try {
                 const openai = new OpenAI({ apiKey: OPENAI_KEY });
                 const stream = await openai.chat.completions.create({
                     model: 'gpt-4o-mini',
-                    messages: formattedMessages,
+                    messages: formattedOpenAiMessages,
                     temperature: 0.7,
                     stream: true,
                 });
@@ -95,7 +111,7 @@ export async function POST(req: Request) {
                     },
                 });
             } catch (openAiErr: any) {
-                console.warn("OpenAI returned error, falling back to Gemini:", openAiErr?.message || openAiErr);
+                console.warn("OpenAI quota/network error, falling back to Gemini:", openAiErr?.message || openAiErr);
             }
         }
 
@@ -103,20 +119,28 @@ export async function POST(req: Request) {
         const genAI = new GoogleGenerativeAI(GEMINI_KEY);
         const geminiModel = genAI.getGenerativeModel({
             model: 'gemini-2.5-flash',
-            systemInstruction: SYSTEM_PROMPT,
+            systemInstruction: fullSystemPrompt,
         });
 
-        // Convert messages to Gemini history format
-        const contents = messages.map((m: any, idx: number) => {
-            let text = m.content;
-            if (chartData && idx === 0 && m.role === 'user') {
-                text = `[User Birth Chart Context (Vedic Sidereal Lahiri)]:\n${JSON.stringify(chartData, null, 2)}\n\nUser Question: ${text}`;
-            }
-            return {
+        // Format history for Gemini
+        const contents = messages
+            .filter((m: any) => m.content && m.content.trim() !== '')
+            .map((m: any) => ({
                 role: m.role === 'assistant' ? 'model' : 'user',
-                parts: [{ text }],
-            };
-        });
+                parts: [{ text: m.content }],
+            }));
+
+        // Ensure first message in Gemini contents is from user
+        if (contents.length > 0 && contents[0].role === 'model') {
+            contents.shift();
+        }
+
+        if (contents.length === 0) {
+            contents.push({
+                role: 'user',
+                parts: [{ text: 'Namaste! Please analyze my birth chart and provide an overview of my life path.' }],
+            });
+        }
 
         const resultStream = await geminiModel.generateContentStream({
             contents,

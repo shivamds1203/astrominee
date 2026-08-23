@@ -14,10 +14,13 @@ export default function PredictionsPage() {
     // Automatically hydrate chartData from sessionStorage if user already submitted birth details
     useEffect(() => {
         try {
-            const savedChart = sessionStorage.getItem("astrologyChartData");
+            const savedChart = sessionStorage.getItem("chartData") || sessionStorage.getItem("astrologyChartData");
             if (savedChart) {
                 const parsed = JSON.parse(savedChart);
-                setChartData(parsed);
+                const arrayData = Array.isArray(parsed) ? parsed : (parsed.data || parsed.output || []);
+                if (arrayData.length > 0) {
+                    setChartData(arrayData);
+                }
             }
         } catch (e) {
             console.error("Failed to load saved birth chart from session:", e);

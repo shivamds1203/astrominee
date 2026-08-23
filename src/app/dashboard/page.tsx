@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Share2, ChevronDown, Sparkles, BookmarkPlus, Check } from "lucide-react";
+import { Download, Share2, ChevronDown, Sparkles, BookmarkPlus, Check, Briefcase, Heart, Activity, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { NorthIndianChart } from "@/components/charts/NorthIndianChart";
 import { SouthIndianChart } from "@/components/charts/SouthIndianChart";
@@ -31,6 +31,11 @@ const VARGAS = [
     { num: 60, name: "D60 - Shashtiamsa (All areas)" }
 ];
 
+const ZODIAC_SIGNS = [
+    "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+    "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
+];
+
 const DEFAULT_SAMPLE_PLANETS = [
     { id: 0, name: "Sun", fullDegree: 327.51, normDegree: 27.51, current_sign: 11, house_number: 1, isRetro: "false", nakshatra: "Purva Bhadrapada" },
     { id: 1, name: "Moon", fullDegree: 306.68, normDegree: 6.68, current_sign: 11, house_number: 1, isRetro: "false", nakshatra: "Shatabhisha" },
@@ -51,7 +56,7 @@ export default function DashboardPage() {
     const [isMounted, setIsMounted] = useState(false);
     const [selectedVarga, setSelectedVarga] = useState<number>(1);
     const [isVargaDropdownOpen, setIsVargaDropdownOpen] = useState(false);
-    const [expandedInsight, setExpandedInsight] = useState<string | null>("personality");
+    const [expandedInsight, setExpandedInsight] = useState<string | null>("career");
     const { user } = useAuth();
     const [isSaved, setIsSaved] = useState(false);
 
@@ -63,18 +68,10 @@ export default function DashboardPage() {
         setIsSaved(true);
     };
 
-    const insights = [
-        { id: "personality", title: "Personality Overview", content: "Based on your Sun in Sagittarius and Moon in Pisces, you possess a unique blend of fiery optimism and deep emotional sensitivity. You are a philosopher at heart, constantly seeking meaning, yet profoundly connected to the unspoken feelings of others." },
-        { id: "career", title: "Career & Finance", content: "With your 10th House lord well-placed, leadership roles in creative or healing professions are highly favored. Expect a significant upward shift in career trajectory during your upcoming Jupiter planetary period." },
-        { id: "relationships", title: "Marriage & Relationships", content: "Your 7th house dynamics suggest a partner who brings grounding structure to your life. The placement of Venus indicates that intellectual connection must precede emotional intimacy for long-term harmony." },
-        { id: "health", title: "Health Insights", content: "Pay attention to your lower back and digestive system, as indicated by the 6th house placements. Regular grounding exercises and a structured routine will beautifully counter your naturally airy constitution." }
-    ];
-
     useEffect(() => {
         setIsMounted(true);
-        // Read data from sessionStorage (saved by BirthDetailsForm)
         try {
-            const storedChart = sessionStorage.getItem("chartData");
+            const storedChart = sessionStorage.getItem("chartData") || sessionStorage.getItem("astrologyChartData");
             const storedUser = sessionStorage.getItem("userData");
 
             if (storedChart) {
@@ -109,9 +106,73 @@ export default function DashboardPage() {
     }, []);
 
     // Dynamically calculate divisional chart data whenever selectedVarga or planetsData changes
-    const activeChartPlanets = React.useMemo(() => {
+    const activeChartPlanets = useMemo(() => {
         return generateDivisionalChart(planetsData || [], selectedVarga);
     }, [planetsData, selectedVarga]);
+
+    // Dynamic Astrological Insights calculated directly from the user's birth chart
+    const dynamicInsights = useMemo(() => {
+        const asc = planetsData?.find(p => p.name === "Ascendant");
+        const sun = planetsData?.find(p => p.name === "Sun");
+        const moon = planetsData?.find(p => p.name === "Moon");
+        const jupiter = planetsData?.find(p => p.name === "Jupiter");
+        const saturn = planetsData?.find(p => p.name === "Saturn");
+        const venus = planetsData?.find(p => p.name === "Venus");
+
+        const ascSign = ZODIAC_SIGNS[(asc?.current_sign || 1) - 1] || "Aries";
+        const sunSign = ZODIAC_SIGNS[(sun?.current_sign || 9) - 1] || "Sagittarius";
+        const moonSign = ZODIAC_SIGNS[(moon?.current_sign || 12) - 1] || "Pisces";
+
+        const h10Planets = planetsData?.filter(p => p.name !== "Ascendant" && Number(p.house_number || p.house) === 10);
+        const h2Planets = planetsData?.filter(p => p.name !== "Ascendant" && Number(p.house_number || p.house) === 2);
+        const h11Planets = planetsData?.filter(p => p.name !== "Ascendant" && Number(p.house_number || p.house) === 11);
+        const h7Planets = planetsData?.filter(p => p.name !== "Ascendant" && Number(p.house_number || p.house) === 7);
+
+        return [
+            {
+                id: "career",
+                title: "Career & Professional Trajectory (10th Bhava)",
+                icon: Briefcase,
+                tag: "Karma Bhava",
+                color: "text-amber-600 dark:text-yellow-400 bg-amber-500/10",
+                content: h10Planets.length > 0
+                    ? `With ${h10Planets.map(p => p.name).join(" and ")} activating your 10th House of Career (Karma Sthana), your professional path is characterized by authority, strategic thinking, and leadership. Your career flourishes when you take initiative rather than passive roles. D10 Dashamsa alignments suggest strong breakthroughs during major planetary sub-periods.`
+                    : `Your 10th House of Career operates under the governance of ${saturn ? 'Saturnian discipline' : 'structured planetary energy'}. You achieve steady elevation through perseverance, domain mastery, and principled management. Favorable career shifts occur during auspicious planetary transits across your Kendra houses.`
+            },
+            {
+                id: "finance",
+                title: "Wealth, Assets & Financial Growth (2nd & 11th Bhava)",
+                icon: Sparkles,
+                tag: "Dhana & Labha",
+                color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10",
+                content: `Your wealth architecture is governed by the 2nd House (Dhana - accumulated reserves) and 11th House (Labha - recurring income & high-value gains). ${h2Planets.length > 0 ? `${h2Planets.map(p => p.name).join(", ")} directly energizes your wealth generation.` : ''} ${h11Planets.length > 0 ? `${h11Planets.map(p => p.name).join(", ")} provides expansive inflow through professional networks.` : ''} Long-term investments in tangible assets and strategic diversification yield strong prosperity.`
+            },
+            {
+                id: "personality",
+                title: "Personality & Core Alignment (Lagna & Moon)",
+                icon: UserIcon,
+                tag: "Tanu Bhava",
+                color: "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10",
+                content: `With ${ascSign} Ascendant (Lagna) and Moon in ${moonSign}, you embody a harmonious synthesis of purpose and intuitive depth. Sun in ${sunSign} illuminates your core vitality with optimism and visionary drive, while your Moon placement gives you exceptional emotional intelligence and resilience under pressure.`
+            },
+            {
+                id: "relationships",
+                title: "Love, Partnerships & Harmony (7th Bhava)",
+                icon: Heart,
+                tag: "Kalatra Bhava",
+                color: "text-pink-600 dark:text-pink-400 bg-pink-500/10",
+                content: `Your 7th House of Partnerships (Kalatra Bhava) and Venusian placement signify relationships rooted in mutual respect, intellectual rapport, and shared growth. ${h7Planets.length > 0 ? `${h7Planets.map(p => p.name).join(" and ")} occupies your 7th house, emphasizing devotion and balanced partnership dynamics.` : 'Your partnership thrive through clear communication and honoring emotional boundaries.'}`
+            },
+            {
+                id: "health",
+                title: "Health, Vitality & Wellness (6th Bhava & Lagna)",
+                icon: Activity,
+                tag: "Ayur Bhava",
+                color: "text-cyan-600 dark:text-cyan-400 bg-cyan-500/10",
+                content: `Your vital constitution benefits from regular daily routines that align with your elemental balance. Grounding practices, mindful nutrition, and consistent physical movement protect your immune resilience and maintain high cellular energy across changing planetary seasons.`
+            }
+        ];
+    }, [planetsData]);
 
     if (!isMounted) return null;
 
@@ -179,8 +240,6 @@ export default function DashboardPage() {
                 {/* Quick Varga Chips */}
                 <div className="flex items-center gap-2">
                     {[1, 9, 10].map(num => {
-                        const v = VARGAS.find(item => item.num === num);
-                        if (!v) return null;
                         const isSelected = selectedVarga === num;
                         return (
                             <button
@@ -316,9 +375,7 @@ export default function DashboardPage() {
                                     </thead>
                                     <tbody>
                                         {activeChartPlanets && activeChartPlanets.length > 0 ? activeChartPlanets.map((planet: any, idx: number) => {
-                                            const ZODIAC = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
-                                            const signName = planet.current_sign ? ZODIAC[planet.current_sign - 1] : "Unknown";
-
+                                            const signName = planet.current_sign ? ZODIAC_SIGNS[planet.current_sign - 1] : "Unknown";
                                             const deg = planet.normDegree || 0;
                                             const d = Math.floor(deg);
                                             const m = Math.floor((deg - d) * 60);
@@ -367,7 +424,7 @@ export default function DashboardPage() {
                 })()}
             </ScrollSection3D>
 
-            {/* ── Deep Astrological Insights Section ── */}
+            {/* ── Deep Astrological Insights Section (Dynamic Vedic Interpretations) ── */}
             <ScrollSection3D intensity="subtle" depth={25} className="mt-12">
                 <div className="glass-panel p-6 md:p-8 rounded-3xl border border-slate-200/80 dark:border-white/10 shadow-xl">
                     <div className="flex items-center gap-3 mb-6">
@@ -375,26 +432,37 @@ export default function DashboardPage() {
                             <Sparkles className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Cosmic Synthesis & Planetary Guidance</h2>
-                            <p className="text-sm text-slate-500 dark:text-gray-400">Core life dimensions calculated from your planetary geometry.</p>
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Cosmic Synthesis &amp; Life Guidance</h2>
+                            <p className="text-sm text-slate-500 dark:text-gray-400">Personalized Vedic readings calculated from your active planetary geometry.</p>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {insights.map((insight) => {
+                        {dynamicInsights.map((insight) => {
                             const isOpen = expandedInsight === insight.id;
+                            const IconComponent = insight.icon;
                             return (
                                 <motion.div
                                     key={insight.id}
                                     className={`p-6 rounded-2xl border transition-all cursor-pointer ${isOpen
-                                        ? "bg-slate-100/90 dark:bg-white/[0.04] border-indigo-500/40 shadow-md"
-                                        : "bg-slate-50 dark:bg-white/[0.01] border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10"
+                                        ? "bg-white/95 dark:bg-white/[0.04] border-indigo-500/50 shadow-md"
+                                        : "bg-slate-50/80 dark:bg-white/[0.01] border-slate-200/80 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10 shadow-xs"
                                         }`}
                                     onClick={() => setExpandedInsight(isOpen ? null : insight.id)}
                                 >
-                                    <div className="flex justify-between items-center">
-                                        <h3 className="font-semibold text-slate-900 dark:text-white text-base">{insight.title}</h3>
-                                        <ChevronDown className={`w-4 h-4 text-slate-400 dark:text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                                    <div className="flex justify-between items-start gap-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`p-2.5 rounded-xl ${insight.color}`}>
+                                                <IconComponent className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 dark:text-gray-400 block">{insight.tag}</span>
+                                                <h3 className="font-bold text-slate-900 dark:text-white text-base">{insight.title}</h3>
+                                            </div>
+                                        </div>
+                                        <motion.div animate={{ rotate: isOpen ? 180 : 0 }}>
+                                            <ChevronDown className="w-4 h-4 text-slate-400 dark:text-gray-400 mt-1" />
+                                        </motion.div>
                                     </div>
                                     <AnimatePresence>
                                         {isOpen && (
@@ -402,8 +470,8 @@ export default function DashboardPage() {
                                                 initial={{ height: 0, opacity: 0 }}
                                                 animate={{ height: "auto", opacity: 1 }}
                                                 exit={{ height: 0, opacity: 0 }}
-                                                transition={{ duration: 0.3 }}
-                                                className="text-sm text-slate-600 dark:text-gray-300 mt-4 leading-relaxed font-light"
+                                                transition={{ duration: 0.25 }}
+                                                className="text-sm text-slate-700 dark:text-gray-200 mt-4 leading-relaxed font-light border-t border-slate-200/60 dark:border-white/5 pt-3"
                                             >
                                                 {insight.content}
                                             </motion.p>
