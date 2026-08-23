@@ -1,11 +1,11 @@
 import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+// OpenAI Configuration
+const OPENAI_KEY = process.env.OPENAI_API_KEY || '';
 
-const openai = new OpenAI({
-    apiKey: OPENAI_API_KEY,
-});
-
+// Google Gemini Configuration (High-reliability fallback)
+const GEMINI_KEY = process.env.GEMINI_API_KEY || 'AIzaSyAb7Ub8-KfLGMnojOGSCJplK-zJfl9568Y';
 
 export const runtime = 'edge';
 
@@ -41,6 +41,8 @@ You are "Astrominee AI", an intelligent, empathetic, friendly, and deeply knowle
 `;
 
 export async function POST(req: Request) {
+    const encoder = new TextEncoder();
+
     try {
         const { messages, chartData } = await req.json();
 
@@ -48,7 +50,6 @@ export async function POST(req: Request) {
             { role: 'system', content: SYSTEM_PROMPT }
         ];
 
-        // Format user messages
         messages.forEach((m: any, idx: number) => {
             let content = m.content;
             if (chartData && idx === 0 && m.role === 'user') {
@@ -60,23 +61,76 @@ export async function POST(req: Request) {
             });
         });
 
-        // Request streaming completion from OpenAI
-        const stream = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
-            messages: formattedMessages,
-            temperature: 0.7,
-            stream: true,
+        // ── 1. Try OpenAI if API Key exists ──
+        if (OPENAI_KEY && OPENAI_KEY.startsWith('sk-')) {
+            try {
+                const openai = new OpenAI({ apiKey: OPENAI_KEY });
+                const stream = await openai.chat.completions.create({
+                    model: 'gpt-4o-mini',
+                    messages: formattedMessages,
+                    temperature: 0.7,
+                    stream: true,
+                });
+
+                const readable = new ReadableStream({
+                    async start(controller) {
+                        try {
+                            for await (const chunk of stream) {
+                                const text = chunk.choices[0]?.delta?.content || '';
+                                if (text) {
+                                    controller.enqueue(encoder.encode(`0:${JSON.stringify(text)}\n`));
+                                }
+                            }
+                            controller.close();
+                        } catch (err) {
+                            controller.error(err);
+                        }
+                    },
+                });
+
+                return new Response(readable, {
+                    headers: {
+                        'Content-Type': 'text/plain; charset=utf-8',
+                        'X-Vercel-AI-Data-Stream': 'v1',
+                    },
+                });
+            } catch (openAiErr: any) {
+                console.warn("OpenAI returned error, falling back to Gemini:", openAiErr?.message || openAiErr);
+            }
+        }
+
+        // ── 2. Automatic High-Reliability Gemini Engine Fallback ──
+        const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+        const geminiModel = genAI.getGenerativeModel({
+            model: 'gemini-2.5-flash',
+            systemInstruction: SYSTEM_PROMPT,
         });
 
-        // Convert OpenAI stream to AI SDK text stream format: 0:"<chunk>"\n
-        const encoder = new TextEncoder();
+        // Convert messages to Gemini history format
+        const contents = messages.map((m: any, idx: number) => {
+            let text = m.content;
+            if (chartData && idx === 0 && m.role === 'user') {
+                text = `[User Birth Chart Context (Vedic Sidereal Lahiri)]:\n${JSON.stringify(chartData, null, 2)}\n\nUser Question: ${text}`;
+            }
+            return {
+                role: m.role === 'assistant' ? 'model' : 'user',
+                parts: [{ text }],
+            };
+        });
+
+        const resultStream = await geminiModel.generateContentStream({
+            contents,
+            generationConfig: {
+                temperature: 0.7,
+            },
+        });
+
         const readable = new ReadableStream({
             async start(controller) {
                 try {
-                    for await (const chunk of stream) {
-                        const text = chunk.choices[0]?.delta?.content || '';
+                    for await (const chunk of resultStream.stream) {
+                        const text = chunk.text();
                         if (text) {
-                            // AI SDK 3.x wire format
                             controller.enqueue(encoder.encode(`0:${JSON.stringify(text)}\n`));
                         }
                     }
@@ -93,11 +147,12 @@ export async function POST(req: Request) {
                 'X-Vercel-AI-Data-Stream': 'v1',
             },
         });
+
     } catch (error: any) {
-        console.error("OpenAI Chat Error:", error);
+        console.error("AI Chat Engine Error:", error);
         return new Response(
             JSON.stringify({
-                error: error?.message || "Failed to generate astrological guidance. Please verify your connection."
+                error: error?.message || "Failed to generate astrological reading. Please try again."
             }),
             {
                 status: 500,
